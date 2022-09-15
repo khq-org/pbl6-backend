@@ -1,0 +1,16 @@
+server:
+  8080
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pbl6schoolsystem
+    username: postgres
+    password: 5071
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    hibernate:
+      ddl-auto: update
