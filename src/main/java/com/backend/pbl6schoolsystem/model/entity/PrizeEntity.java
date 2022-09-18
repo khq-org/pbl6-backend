@@ -13,11 +13,14 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "profile")
-public class ProfileEntity implements Serializable {
+@Table(name = "prize")
+public class PrizeEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "profileid")
-    private Long profileId;
-
+    @Column(name = "prizeid")
+    private Long prizeId;
+    @Column(name = "prize")
+    private String prize;
+    @Column(name = "description")
+    private String description;
 }

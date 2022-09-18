@@ -30,9 +30,8 @@ public class SchoolEntity implements Serializable {
     private String website;
     @Column(name = "description")
     private String description;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "schooltypeid", referencedColumnName = "schooltypeid")
-    private SchoolTypeEntity schoolType;
+    @Column(name = "schooltype")
+    private String schoolType;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "districtid", referencedColumnName = "districtid")
     private DistrictEntity district;

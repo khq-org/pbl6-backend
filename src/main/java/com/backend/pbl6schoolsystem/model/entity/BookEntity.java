@@ -14,14 +14,23 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "score")
-public class ScoreEntity implements Serializable {
+@Table(name = "book")
+public class BookEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "scoreid")
-    private Long scoreId;
-    @Column(name = "score")
-    private Double score;
+    @Column(name = "bookid")
+    private Long bookId;
+    @Column(name = "book")
+    private String book;
+    @Column(name = "description")
+    private String description;
+    @Column(name = "bookType")
+    private String bookType;
+    @Column(name = "quantity")
+    private Integer quantity;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "libraryid", referencedColumnName = "libraryid")
+    private LibraryEntity library;
     @Column(name = "createddate")
     private Timestamp createdDate;
     @Column(name = "modifieddate")

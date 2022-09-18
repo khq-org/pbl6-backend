@@ -14,16 +14,21 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "schooltype")
-public class SchoolTypeEntity implements Serializable {
+@Table(name = "library")
+public class LibraryEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "schooltypeid")
-    private Long schoolTypeId;
-    @Column(name = "schooltype")
-    private String schoolType;
+    @Column(name = "libraryid")
+    private Long libraryId;
+    @Column(name = "library")
+    private String library;
+    @Column(name = "description")
+    private String description;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schoolid", referencedColumnName = "schoolid")
+    private SchoolEntity school;
     @Column(name = "createddate")
     private Timestamp createdDate;
     @Column(name = "modifieddate")
-    private Timestamp mofifiedDate;
+    private Timestamp modifiedDate;
 }
