@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 public class UserEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,11 +44,26 @@ public class UserEntity implements Serializable {
     private LocalDate dateOfBirth;
     @Column(name = "placeofbirth")
     private String placeOfBirth;
+    @Column(name = "nationality")
+    private String nationality;
     @Column(name = "job")
     private String job;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "positionid", referencedColumnName = "positionid")
-    private PositionEntity position;
+    // ==================== for teacher ============================
+    @Column(name = "recruitmentDay")
+    private LocalDate recruitmentDay;
+    @Column(name = "numOfPeriodsInWeek")
+    private Integer numOfPeriodsInWeek;
+    @Column(name = "rank")
+    private Integer rank;
+    @Column(name = "factorsalary")
+    private Float factorSalary;
+    @Column(name = "level")
+    private Integer level;
+    @Column(name = "workingposition")
+    private String workingPosition;
+    @Column(name = "positiongroup")
+    private String positionGroup;
+    // =============================================================
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "statusid", referencedColumnName = "statusid")
     private StatusEntity status;
@@ -70,8 +85,8 @@ public class UserEntity implements Serializable {
             , inverseJoinColumns = @JoinColumn(name = "studentid", referencedColumnName = "userid"))
     private List<UserEntity> childrens;
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "profileid", referencedColumnName = "profileid")
-    private ProfileEntity profile;
+    @JoinColumn(name = "profilestudentid", referencedColumnName = "profilestudentid")
+    private ProfileStudentEntity profileStudent;
     @Column(name = "createddate")
     private Timestamp createdDate;
     @Column(name = "modifieddate")

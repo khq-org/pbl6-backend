@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -25,4 +26,12 @@ public class TeacherClassEntity implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "classid", referencedColumnName = "classid")
     private ClassEntity clazz;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schoolyearid", referencedColumnName = "schoolyearid")
+    private SchoolYearEntity schoolYear;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "semesterid", referencedColumnName = "semesterid")
+    private SemesterEntity semester;
+    @Column(name = "isclassleader")
+    private Boolean isClassLeader;
 }
