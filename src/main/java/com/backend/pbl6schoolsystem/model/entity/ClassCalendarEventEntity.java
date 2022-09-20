@@ -21,7 +21,7 @@ public class ClassCalendarEventEntity implements Serializable {
     private Long classCalendarEventId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "classid", referencedColumnName = "classid")
-    private ClassEntity class;
+    private ClassEntity clazz;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "calendareventid", referencedColumnName = "calendareventid")
     private CalendarEventEntity calendarEvent;
