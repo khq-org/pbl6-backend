@@ -22,6 +22,8 @@ public class CalendarEventEntity implements Serializable {
     private Long calendarEventId;
     @Column(name = "calendarevent")
     private String calendarEvent;
+    @Column(name = "calendareventtype")
+    private String calendarEventType;
     @Column(name = "starttime")
     private Timestamp startTime;
     @Column(name = "endtime")
@@ -30,13 +32,8 @@ public class CalendarEventEntity implements Serializable {
     @JoinColumn(name = "subjectid", referencedColumnName = "subjectid")
     private SubjectEntity subject;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "teacherid", referencedColumnName = "userid")
-    private UserEntity teacher;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "classid", referencedColumnName = "classid")
-    private ClassEntity clazz;
-    @Column(name = "calendareventtype")
-    private String calendarEventType;
+    @JoinColumn(name = "roomid", referencedColumnName = "roomid")
+    private RoomEntity room;
     @Column(name = "createddate")
     private Timestamp createdDate;
     @Column(name = "modifieddate")
