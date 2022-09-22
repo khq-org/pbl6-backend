@@ -13,15 +13,15 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "studentprize")
-public class StudentPrizeEntity implements Serializable {
+@Table(name = "userprize")
+public class UserPrizeEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "studentprizeid")
-    private Long studentPrizeId;
+    @Column(name = "userprizeid")
+    private Long userPrizeId;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "studentid", referencedColumnName = "userid")
-    private UserEntity student;
+    @JoinColumn(name = "userid", referencedColumnName = "userid")
+    private UserEntity user;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prizeid", referencedColumnName = "prizeid")
     private PrizeEntity prize;
