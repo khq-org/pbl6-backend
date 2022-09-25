@@ -2,10 +2,17 @@ server:
   8080
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/pbl6schoolsystem
-    username: postgres
-    password: 5071
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASS}
     driver-class-name: org.postgresql.Driver
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+  cache:
+    type: redis
+    redis:
+      cache-null-values: false
   jpa:
     show-sql: true
     properties:
