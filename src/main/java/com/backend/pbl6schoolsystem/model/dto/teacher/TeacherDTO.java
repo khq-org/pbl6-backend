@@ -8,7 +8,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @JsonIgnoreProperties({"password"})
 public class TeacherDTO extends UserDTO {
     private Integer numOfPeriodInWeek;

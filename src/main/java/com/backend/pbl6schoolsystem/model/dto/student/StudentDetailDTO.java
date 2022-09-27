@@ -11,17 +11,11 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @JsonIgnoreProperties({"password", "workingPosition", "positionGroup", "recruitmentDay", "factorSalary", "rank", "level"})
 public class StudentDetailDTO extends UserDTO {
     private Clazz clazz;
     private List<Parent> parents;
 
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
     @JsonIgnoreProperties({"teacher"})
     public static class Clazz extends ClazzDTO {
     }
@@ -30,7 +24,6 @@ public class StudentDetailDTO extends UserDTO {
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
-    @Builder
     @JsonIgnoreProperties({"username", "password", "email", "avatar", "districtId", "districtName", "schoolId", "schoolName"})
     public static class Parent extends UserDTO {
         private String job;

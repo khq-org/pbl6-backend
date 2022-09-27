@@ -12,7 +12,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @JsonIgnoreProperties({"password", "workingPosition", "positionGroup", "recruitmentDay", "factorSalary", "rank", "level"})
 public class StudentDTO extends UserDTO {
     private Clazz clazz;
