@@ -8,6 +8,8 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Getter
 @Setter
@@ -24,10 +26,18 @@ public class CalendarEventEntity implements Serializable {
     private String calendarEvent;
     @Column(name = "calendareventtype")
     private String calendarEventType;
-    @Column(name = "starttime")
-    private Timestamp startTime;
-    @Column(name = "endtime")
-    private Timestamp endTime;
+    @Column(name = "lessonstart")
+    private Integer lessonStart;
+    @Column(name = "lessonfinish")
+    private Integer lessonFinish;
+    @Column(name = "timestart")
+    private LocalTime timeStart;
+    @Column(name = "timefinish")
+    private LocalTime timeFinish;
+    @Column(name = "calendardate")
+    private LocalDate calendarDate;
+    @Column(name = "dayofweek")
+    private String dayOfWeek;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subjectid", referencedColumnName = "subjectid")
     private SubjectEntity subject;
