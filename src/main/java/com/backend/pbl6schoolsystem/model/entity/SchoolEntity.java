@@ -24,6 +24,10 @@ public class SchoolEntity implements Serializable {
     private String school;
     @Column(name = "street")
     private String street;
+    @Column(name = "district")
+    private String district;
+    @Column(name = "city")
+    private String city;
     @Column(name = "phone")
     private String phone;
     @Column(name = "website")
@@ -32,9 +36,6 @@ public class SchoolEntity implements Serializable {
     private String description;
     @Column(name = "schooltype")
     private String schoolType;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "districtid", referencedColumnName = "districtid")
-    private DistrictEntity district;
     @Column(name = "createddate")
     private Timestamp createdDate;
     @Column(name = "modifieddate")

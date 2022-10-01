@@ -46,6 +46,12 @@ public class UserEntity implements Serializable {
     private String placeOfBirth;
     @Column(name = "nationality")
     private String nationality;
+    @Column(name = "street")
+    private String street;
+    @Column(name = "district")
+    private String district;
+    @Column(name = "city")
+    private String city;
     @Column(name = "job")
     private String job;
     // ==================== for teacher ============================
@@ -70,9 +76,6 @@ public class UserEntity implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roleid", referencedColumnName = "roleid")
     private RoleEntity role;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "districtid", referencedColumnName = "districtid")
-    private DistrictEntity district;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "schoolid", referencedColumnName = "schoolid")
     private SchoolEntity school;

@@ -25,6 +25,9 @@ public class UserDTO implements Serializable {
     private LocalDate dateOfBirth;
     private String placeOfBirth;
     private String nationality;
+    private String street;
+    private String district;
+    private String city;
     private LocalDate recruitmentDay;
     private String workingPosition;
     private String positionGroup;
