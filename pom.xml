@@ -14,7 +14,7 @@
     <name>pbl6-schoolsystem</name>
     <description>pbl6-schoolsystem</description>
     <properties>
-        <java.version>18</java.version>
+        <java.version>11</java.version>
     </properties>
     <dependencies>
         <dependency>
@@ -140,6 +140,7 @@
                 </configuration>
             </plugin>
         </plugins>
+        <finalName>pbl6-schoolsystem-backend</finalName>
     </build>
 
 </project>

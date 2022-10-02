@@ -5,7 +5,6 @@ import com.backend.pbl6schoolsystem.model.dto.common.ListDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.MessageDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.OnlyIdDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.SchoolDTO;
-import com.backend.pbl6schoolsystem.model.entity.SchoolEntity;
 import com.backend.pbl6schoolsystem.request.school.CreateSchoolRequest;
 import com.backend.pbl6schoolsystem.request.school.ListSchoolRequest;
 import com.backend.pbl6schoolsystem.request.school.UpdateSchoolRequest;
