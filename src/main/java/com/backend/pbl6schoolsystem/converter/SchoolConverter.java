@@ -8,9 +8,11 @@ import com.backend.pbl6schoolsystem.model.entity.SchoolEntity;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.Response;
+import com.backend.pbl6schoolsystem.response.school.GetSchoolResponse;
 import com.backend.pbl6schoolsystem.response.school.ListSchoolResponse;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.stream.Collectors;
 
 @Component
@@ -34,6 +36,7 @@ public class SchoolConverter extends CommonConverter {
                                         .build())
                                 .collect(Collectors.toList()))
                         .build())
+                .setTimestamp(new Timestamp(System.currentTimeMillis()))
                 .build();
 
     }
@@ -50,6 +53,7 @@ public class SchoolConverter extends CommonConverter {
                         .setPhone(schoolEntity.getPhone())
                         .setWebsite(schoolEntity.getWebsite())
                         .build())
+                .setTimestamp(new Timestamp(System.currentTimeMillis()))
                 .build();
     }
 
@@ -60,6 +64,7 @@ public class SchoolConverter extends CommonConverter {
                         .setId(response.getId())
                         .setName(response.getName())
                         .build())
+                .setTimestamp(new Timestamp(System.currentTimeMillis()))
                 .build();
     }
 
@@ -67,8 +72,15 @@ public class SchoolConverter extends CommonConverter {
         return Response.<MessageDTO>builder()
                 .setSuccess(true)
                 .setMessage("Deleted")
+                .setTimestamp(new Timestamp(System.currentTimeMillis()))
                 .build();
     }
 
-
+    public Response<SchoolDTO> getResponse(GetSchoolResponse response) {
+        return Response.<SchoolDTO>builder()
+                .setSuccess(true)
+                .setData(response.getSchoolDTO())
+                .setTimestamp(new Timestamp(System.currentTimeMillis()))
+                .build();
+    }
 }

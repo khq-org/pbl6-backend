@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Getter
@@ -16,4 +17,5 @@ public class Response<T> implements Serializable {
     private String message;
     private List<ErrorDTO> errorDTOs;
     private T data;
+    private Timestamp timestamp;
 }

@@ -4,7 +4,7 @@ import com.backend.pbl6schoolsystem.model.dto.common.SchoolDTO;
 import com.backend.pbl6schoolsystem.model.entity.SchoolEntity;
 
 public class SchoolMapper {
-    public static SchoolDTO dto2entity(SchoolEntity entity) {
+    public static SchoolDTO entity2dto(SchoolEntity entity) {
         SchoolDTO dto = new SchoolDTO();
         dto.setSchoolId(entity.getSchoolId());
         dto.setSchool(entity.getSchool());

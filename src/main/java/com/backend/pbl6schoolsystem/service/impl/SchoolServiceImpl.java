@@ -1,10 +1,8 @@
 package com.backend.pbl6schoolsystem.service.impl;
 
 import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
-import com.backend.pbl6schoolsystem.common.exception.BadRequestException;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
 import com.backend.pbl6schoolsystem.mapper.SchoolMapper;
-import com.backend.pbl6schoolsystem.model.dto.common.SchoolDTO;
 import com.backend.pbl6schoolsystem.model.entity.SchoolEntity;
 import com.backend.pbl6schoolsystem.repository.dsl.SchoolDslRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.SchoolRepository;
@@ -12,6 +10,7 @@ import com.backend.pbl6schoolsystem.request.school.UpdateSchoolRequest;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.PageResponse;
+import com.backend.pbl6schoolsystem.response.school.GetSchoolResponse;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
 import com.backend.pbl6schoolsystem.request.school.CreateSchoolRequest;
 import com.backend.pbl6schoolsystem.request.school.ListSchoolRequest;
@@ -90,9 +89,12 @@ public class SchoolServiceImpl implements SchoolService {
     }
 
     @Override
-    public SchoolEntity getSchool(Long schoolId) {
-        SchoolEntity school = schoolRepository.findById(schoolId).orElseThrow(() -> new NotFoundException("Not found school " + schoolId));
-        return school;
+    public GetSchoolResponse getSchool(Long schoolId) {
+        SchoolEntity school = schoolRepository.findById(schoolId).orElseThrow(() -> new NotFoundException("Not found school with id " + schoolId));
+        return GetSchoolResponse.builder()
+                .setSuccess(true)
+                .setSchoolDTO(SchoolMapper.entity2dto(school))
+                .build();
     }
 
     @Override
@@ -106,7 +108,7 @@ public class SchoolServiceImpl implements SchoolService {
                         .setTotalPages(request.getAll() ? 1 : RequestUtil.getTotalPages((long) schoolEntities.size(), request.getSize()))
                         .build())
                 .setItems(schoolEntities.stream()
-                        .map(se -> SchoolMapper.dto2entity(se))
+                        .map(se -> SchoolMapper.entity2dto(se))
                         .collect(Collectors.toList()))
                 .build();
     }
