@@ -4,12 +4,12 @@ import com.backend.pbl6schoolsystem.request.PageRequest;
 import org.springframework.util.StringUtils;
 
 public class RequestUtil {
-    public static int getPage(PageRequest pageRequest) {
-        return pageRequest.getPage() < 1 ? 0 : pageRequest.getPage() - 1;
+    public static int getPage(Integer page) {
+        return page < 1 ? 0 : page - 1;
     }
 
-    public static int getSize(PageRequest pageRequest) {
-        return pageRequest.getSize() < 1 ? 20 : pageRequest.getSize();
+    public static int getSize(Integer size) {
+        return size < 1 ? 20 : size;
     }
 
     public static int getTotalPages(Long totalItems, Integer size) {

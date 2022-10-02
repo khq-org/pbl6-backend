@@ -20,7 +20,6 @@ public class SchoolDslRepository {
     private final QSchoolEntity school = QSchoolEntity.schoolEntity;
     private final JPAQueryFactory queryFactory;
 
-
     public List<SchoolEntity> getListSchool(ListSchoolRequest request) {
         JPAQuery<SchoolEntity> query = queryFactory.select(school)
                 .from(school);
@@ -36,11 +35,11 @@ public class SchoolDslRepository {
         if (StringUtils.hasText(request.getSchoolType())) {
             query.where(school.schoolType.containsIgnoreCase(request.getSchoolType()));
         }
-        int page = RequestUtil.getPage(request.getPageRequest());
-        int size = RequestUtil.getSize(request.getPageRequest());
+        int page = RequestUtil.getPage(request.getPage());
+        int size = RequestUtil.getSize(request.getSize());
         int offset = page * size;
-        String sort = request.getPageRequest().getSort();
-        Order order = Order.DESC.name().equalsIgnoreCase(request.getPageRequest().getDirection()) ? Order.DESC : Order.ASC;
+        String sort = request.getSort();
+        Order order = Order.DESC.name().equalsIgnoreCase(request.getDirection()) ? Order.DESC : Order.ASC;
         if ("name".equalsIgnoreCase(sort)) {
             query.orderBy(new OrderSpecifier<>(order, school.school));
         } else if ("city".equalsIgnoreCase(sort)) {
@@ -48,7 +47,7 @@ public class SchoolDslRepository {
         } else if ("district".equalsIgnoreCase(sort)) {
             query.orderBy(new OrderSpecifier<>(order, school.district));
         }
-        if (!request.getPageRequest().getAll()) {
+        if (!request.getAll()) {
             query.limit(size);
         }
         query.offset(offset);

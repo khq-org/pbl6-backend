@@ -7,9 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder(setterPrefix = "set")
-public class OnlyIdResponse {
-    private Long id;
-    private String name;
+public class NoContentResponse {
     private Boolean success;
     private ErrorResponse errorResponse;
 }

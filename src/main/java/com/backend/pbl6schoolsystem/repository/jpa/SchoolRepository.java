@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface SchoolRepository extends JpaRepository<SchoolEntity, Long> {
     @Query("SELECT s FROM SchoolEntity s" +
-            " WHERE s.city = :city")
-    Optional<SchoolEntity> findSchoolByCity(@Param("city") String city);
+            " WHERE s.school = :name" +
+            " AND s.city = :city")
+    Optional<SchoolEntity> findSchoolByNameAndCity(@Param("name") String name, @Param("city") String city);
 }

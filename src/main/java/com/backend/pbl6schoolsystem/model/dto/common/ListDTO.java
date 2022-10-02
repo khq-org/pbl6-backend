@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@Builder
+@Builder(setterPrefix = "set")
 public class ListDTO<T> implements Serializable {
     private Long totalItems;
     private List<T> items;

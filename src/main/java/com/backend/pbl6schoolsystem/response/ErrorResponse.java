@@ -4,12 +4,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @Builder(setterPrefix = "set")
-public class OnlyIdResponse {
-    private Long id;
-    private String name;
-    private Boolean success;
-    private ErrorResponse errorResponse;
+public class ErrorResponse {
+    private String message;
+    private Map<String, String> errors;
 }

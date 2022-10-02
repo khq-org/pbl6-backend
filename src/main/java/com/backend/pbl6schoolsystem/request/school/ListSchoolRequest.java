@@ -6,10 +6,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ListSchoolRequest {
+public class ListSchoolRequest extends PageRequest {
     private String schoolName;
     private String district;
     private String city;
     private String schoolType;
-    private PageRequest pageRequest;
 }

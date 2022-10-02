@@ -9,11 +9,11 @@ import java.sql.Timestamp;
 
 @ControllerAdvice
 public class BadRequestExceptionHandler {
-    @ExceptionHandler(value = NotFoundException.class)
-    public ResponseEntity<Object> handler(NotFoundException notFoundException) {
-        HttpStatus status = HttpStatus.NOT_FOUND;
+    @ExceptionHandler(value = BadRequestException.class)
+    public ResponseEntity<Object> handler(BadRequestException badRequestException) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
         ApiException apiException = new ApiException(
-                notFoundException.getMessage(),
+                badRequestException.getMessage(),
                 status,
                 new Timestamp(System.currentTimeMillis())
         );

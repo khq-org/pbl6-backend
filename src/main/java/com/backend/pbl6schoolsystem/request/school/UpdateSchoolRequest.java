@@ -1,16 +1,13 @@
-package com.backend.pbl6schoolsystem.model.dto.common;
+package com.backend.pbl6schoolsystem.request.school;
 
 import lombok.*;
-
-import java.io.Serializable;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(setterPrefix = "set")
-public class SchoolDTO implements Serializable {
-    private Long schoolId;
+@Builder
+public class UpdateSchoolRequest {
     private String school;
     private String phone;
     private String schoolType;

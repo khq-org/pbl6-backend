@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import java.sql.Timestamp;
 
 @RequiredArgsConstructor
+@Getter
+@Setter
 public class ApiException {
     private final String message;
     private final HttpStatus status;

@@ -1,11 +1,16 @@
 package com.backend.pbl6schoolsystem.service.impl;
 
+import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
 import com.backend.pbl6schoolsystem.common.exception.BadRequestException;
+import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
 import com.backend.pbl6schoolsystem.mapper.SchoolMapper;
 import com.backend.pbl6schoolsystem.model.dto.common.SchoolDTO;
 import com.backend.pbl6schoolsystem.model.entity.SchoolEntity;
 import com.backend.pbl6schoolsystem.repository.dsl.SchoolDslRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.SchoolRepository;
+import com.backend.pbl6schoolsystem.request.school.UpdateSchoolRequest;
+import com.backend.pbl6schoolsystem.response.ErrorResponse;
+import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.PageResponse;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
 import com.backend.pbl6schoolsystem.request.school.CreateSchoolRequest;
@@ -17,7 +22,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,16 +34,65 @@ public class SchoolServiceImpl implements SchoolService {
     private final SchoolRepository schoolRepository;
 
     @Override
-    public OnlyIdResponse createSchool(CreateSchoolRequest schoolRequest) {
-        boolean isExistSchoolInCity = schoolRepository.findSchoolByCity(schoolRequest.getCity()).isPresent();
+    public OnlyIdResponse createSchool(CreateSchoolRequest request) {
+        boolean isExistSchoolInCity = schoolRepository.findSchoolByNameAndCity(request.getSchool(),
+                request.getCity()).isPresent();
         if (isExistSchoolInCity) {
-            throw new BadRequestException("School is already exist in city!");
+            Map<String, String> errors = new HashMap<>();
+            errors.put("School name", ErrorCode.ALREADY_EXIST.name() + " in city");
+            return OnlyIdResponse.builder()
+                    .setSuccess(false)
+                    .setErrorResponse(ErrorResponse.builder()
+                            .setErrors(errors)
+                            .build())
+                    .build();
         }
-        SchoolEntity schoolEntity = schoolRepository.save(school2entity(schoolRequest));
+        SchoolEntity schoolEntity = schoolRepository.save(school2entity(request));
         return OnlyIdResponse.builder()
+                .setSuccess(true)
                 .setId(schoolEntity.getSchoolId())
                 .setName(schoolEntity.getSchool())
                 .build();
+    }
+
+    @Override
+    public OnlyIdResponse updateSchool(Long schoolId, UpdateSchoolRequest request) {
+        boolean isExistSchoolInCity = schoolRepository.findSchoolByNameAndCity(request.getSchool(),
+                request.getCity()).isPresent();
+        if (isExistSchoolInCity) {
+            Map<String, String> errors = new HashMap<>();
+            errors.put("School name", ErrorCode.ALREADY_EXIST.name() + " in city");
+            return OnlyIdResponse.builder()
+                    .setSuccess(false)
+                    .setErrorResponse(ErrorResponse.builder()
+                            .setErrors(errors)
+                            .build())
+                    .build();
+        } else {
+            SchoolEntity school = schoolRepository.findById(schoolId).orElseThrow(() -> new NotFoundException("Not found school " + schoolId));
+            school = updateEntity(school, request);
+            schoolRepository.save(school);
+            return OnlyIdResponse.builder()
+                    .setSuccess(true)
+                    .setId(school.getSchoolId())
+                    .setName(school.getSchool())
+                    .build();
+        }
+    }
+
+    @Override
+    public NoContentResponse deleteSchool(Long schoolId) {
+        SchoolEntity school = schoolRepository.findById(schoolId).orElseThrow(() -> new NotFoundException("Not found school with id " + schoolId));
+        schoolRepository.delete(school);
+        return NoContentResponse.builder()
+                .setSuccess(true)
+                .build();
+    }
+
+    @Override
+    public SchoolEntity getSchool(Long schoolId) {
+        SchoolEntity school = schoolRepository.findById(schoolId).orElseThrow(() -> new NotFoundException("Not found school " + schoolId));
+        return school;
     }
 
     @Override
@@ -45,9 +101,9 @@ public class SchoolServiceImpl implements SchoolService {
         return ListSchoolResponse.builder()
                 .setPageResponse(PageResponse.builder()
                         .setTotalItems((long) schoolEntities.size())
-                        .setPage(request.getPageRequest().getPage())
-                        .setSize(request.getPageRequest().getAll() ? Integer.MAX_VALUE : request.getPageRequest().getSize())
-                        .setTotalPages(request.getPageRequest().getAll() ? 1 : RequestUtil.getTotalPages((long) schoolEntities.size(), request.getPageRequest().getSize()))
+                        .setPage(request.getPage())
+                        .setSize(request.getAll() ? Integer.MAX_VALUE : request.getSize())
+                        .setTotalPages(request.getAll() ? 1 : RequestUtil.getTotalPages((long) schoolEntities.size(), request.getSize()))
                         .build())
                 .setItems(schoolEntities.stream()
                         .map(se -> SchoolMapper.dto2entity(se))
@@ -66,5 +122,16 @@ public class SchoolServiceImpl implements SchoolService {
         schoolEntity.setWebsite(RequestUtil.blankIfNull(schoolRequest.getWebsite()));
         schoolEntity.setModifiedDate(new Timestamp(System.currentTimeMillis()));
         return schoolEntity;
+    }
+
+    public SchoolEntity updateEntity(SchoolEntity entity, UpdateSchoolRequest request) {
+        entity.setSchool(RequestUtil.blankIfNull(request.getSchool()));
+        entity.setSchoolType(RequestUtil.blankIfNull(request.getSchoolType()));
+        entity.setStreet(RequestUtil.blankIfNull(request.getStreet()));
+        entity.setDistrict(RequestUtil.blankIfNull(request.getDistrict()));
+        entity.setCity(RequestUtil.blankIfNull(request.getCity()));
+        entity.setWebsite(RequestUtil.blankIfNull(request.getWebsite()));
+        entity.setModifiedDate(new Timestamp(System.currentTimeMillis()));
+        return entity;
     }
 }
