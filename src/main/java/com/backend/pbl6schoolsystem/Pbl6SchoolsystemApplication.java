@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class })
-@ComponentScan({"com.querydsl.jpa.impl"})
 public class Pbl6SchoolsystemApplication {
 
 	public static void main(String[] args) {
