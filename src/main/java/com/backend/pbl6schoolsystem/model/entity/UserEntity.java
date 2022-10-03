@@ -54,6 +54,9 @@ public class UserEntity implements Serializable {
     private String city;
     @Column(name = "job")
     private String job;
+    // ==================== for student ============================
+    @Column(name = "studentid")
+    private Integer studentId;
     // ==================== for teacher ============================
     @Column(name = "recruitmentDay")
     private LocalDate recruitmentDay;

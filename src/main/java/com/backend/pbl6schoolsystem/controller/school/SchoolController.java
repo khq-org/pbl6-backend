@@ -1,4 +1,4 @@
-package com.backend.pbl6schoolsystem.controller;
+package com.backend.pbl6schoolsystem.controller.school;
 
 import com.backend.pbl6schoolsystem.converter.SchoolConverter;
 import com.backend.pbl6schoolsystem.model.dto.common.ListDTO;

@@ -12,15 +12,16 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties({"password", "workingPosition", "positionGroup", "recruitmentDay", "factorSalary", "rank", "level"})
-public class StudentDTO extends UserDTO {
+public class StudentDTO implements Serializable {
+    private UserDTO userDTO;
+    private Integer studentId;
     private Clazz clazz;
 
     @Getter
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
-    @Builder
+    @Builder(setterPrefix = "set")
     public static class Clazz implements Serializable {
         private Long clazzId;
         private String clazz;

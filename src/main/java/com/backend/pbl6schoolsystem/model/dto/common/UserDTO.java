@@ -38,6 +38,4 @@ public class UserDTO implements Serializable {
     private String status;
     private Long schoolId;
     private String schoolName;
-    private Long districtId;
-    private String districtName;
 }
