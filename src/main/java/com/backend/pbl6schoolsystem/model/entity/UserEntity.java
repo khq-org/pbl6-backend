@@ -56,7 +56,7 @@ public class UserEntity implements Serializable {
     private String job;
     // ==================== for student ============================
     @Column(name = "studentid")
-    private Integer studentId;
+    private String studentId;
     // ==================== for teacher ============================
     @Column(name = "recruitmentDay")
     private LocalDate recruitmentDay;
@@ -73,9 +73,6 @@ public class UserEntity implements Serializable {
     @Column(name = "positiongroup")
     private String positionGroup;
     // =============================================================
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "statusid", referencedColumnName = "statusid")
-    private StatusEntity status;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roleid", referencedColumnName = "roleid")
     private RoleEntity role;

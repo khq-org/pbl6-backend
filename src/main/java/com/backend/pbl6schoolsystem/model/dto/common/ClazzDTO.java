@@ -9,12 +9,21 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(setterPrefix = "set")
 public class ClazzDTO implements Serializable {
     private Long classId;
     private String clazz;
     private GradeDTO grade;
-    @JsonIgnoreProperties({"password", "schoolId", "districtId"})
-    private UserDTO teacher;
+    private Teacher teacher;
     private Boolean specializedClass;
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder(setterPrefix = "set")
+    public static class Teacher {
+        private Long teacherId;
+        private String teacher;
+    }
 }

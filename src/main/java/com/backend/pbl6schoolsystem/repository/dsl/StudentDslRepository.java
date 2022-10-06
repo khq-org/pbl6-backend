@@ -67,7 +67,6 @@ public class StudentDslRepository {
         query.offset(offset);
         query.leftJoin(user.school).fetch();
         query.leftJoin(user.clazz).fetch();
-        query.leftJoin(user.status).fetch();
         return query.fetch();
     }
 }

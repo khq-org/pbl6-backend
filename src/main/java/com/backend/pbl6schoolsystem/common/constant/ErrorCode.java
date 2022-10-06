@@ -2,5 +2,6 @@ package com.backend.pbl6schoolsystem.common.constant;
 
 public enum ErrorCode {
     ALREADY_EXIST,
-    MISSING_VALUE;
+    MISSING_VALUE,
+    NOT_FOUND;
 }

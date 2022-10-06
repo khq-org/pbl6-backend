@@ -5,28 +5,29 @@ import com.backend.pbl6schoolsystem.model.dto.common.UserDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties({"password", "workingPosition", "positionGroup", "recruitmentDay", "factorSalary", "rank", "level"})
-public class StudentDetailDTO extends UserDTO {
-    private Clazz clazz;
+@Builder(setterPrefix = "set")
+public class StudentDetailDTO implements Serializable {
+    @JsonIgnoreProperties({"password", "job", "workingPosition", "positionGroup", "recruitmentDay", "factorSalary", "rank", "level"})
+    private UserDTO userDTO;
+    private ClazzDTO clazz;
     private List<Parent> parents;
-
-    @JsonIgnoreProperties({"teacher"})
-    public static class Clazz extends ClazzDTO {
-    }
 
     @Getter
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
-    @JsonIgnoreProperties({"username", "password", "email", "avatar", "districtId", "districtName", "schoolId", "schoolName"})
-    public static class Parent extends UserDTO {
-        private String job;
+    @Builder(setterPrefix = "set")
+    public static class Parent {
+        @JsonIgnoreProperties({"username", "password", "email", "avatar", "schoolId", "schoolName",
+                "workingPosition", "positionGroup", "recruitmentDay", "factorSalary", "rank", "level"})
+        private UserDTO userDTO;
     }
 
 }

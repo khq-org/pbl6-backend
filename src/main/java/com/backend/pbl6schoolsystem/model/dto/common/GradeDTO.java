@@ -8,7 +8,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(setterPrefix = "set")
 public class GradeDTO implements Serializable {
     private Long gradeId;
     private String grade;

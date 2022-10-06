@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(setterPrefix = "set")
 public class UserDTO implements Serializable {
     private Long userId;
     private String username;
@@ -28,6 +28,7 @@ public class UserDTO implements Serializable {
     private String street;
     private String district;
     private String city;
+    private String job;
     private LocalDate recruitmentDay;
     private String workingPosition;
     private String positionGroup;
@@ -35,7 +36,6 @@ public class UserDTO implements Serializable {
     private Integer rank; // rank 1,2,3,4
     private Integer level; // level 1,2,3,4
     private String role;
-    private String status;
     private Long schoolId;
     private String schoolName;
 }

@@ -8,7 +8,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(setterPrefix = "set")
 public class CreateStudentRequest {
     private String firstName;
     private String lastName;
@@ -26,7 +26,7 @@ public class CreateStudentRequest {
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
-    @Builder
+    @Builder(setterPrefix = "set")
     public static class Parent {
         private String firstName;
         private String lastName;
