@@ -1,5 +1,6 @@
 package com.backend.pbl6schoolsystem.response.student;
 
+import com.backend.pbl6schoolsystem.model.dto.common.UserDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.StudentDTO;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
 import com.backend.pbl6schoolsystem.response.PageResponse;
@@ -16,5 +17,5 @@ public class ListStudentResponse {
     private Boolean success;
     private ErrorResponse errorResponse;
     private PageResponse pageResponse;
-    private List<StudentDTO> items;
+    private List<UserDTO> items;
 }

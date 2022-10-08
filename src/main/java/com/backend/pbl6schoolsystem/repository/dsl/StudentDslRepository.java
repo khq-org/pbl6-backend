@@ -45,12 +45,6 @@ public class StudentDslRepository {
         if (request.getSchoolId() > 0) {
             query.where(user.school.schoolId.eq(request.getSchoolId()));
         }
-        if (request.getGradeId() > 0) {
-            query.where(user.clazz.grade.gradeId.eq(request.getGradeId()));
-        }
-        if (request.getClassId() > 0) {
-            query.where(user.clazz.classId.eq(request.getClassId()));
-        }
         int page = RequestUtil.getPage(request.getPage());
         int size = RequestUtil.getSize(request.getSize());
         int offset = page * size;
@@ -66,7 +60,6 @@ public class StudentDslRepository {
         }
         query.offset(offset);
         query.leftJoin(user.school).fetch();
-        query.leftJoin(user.clazz).fetch();
         return query.fetch();
     }
 }

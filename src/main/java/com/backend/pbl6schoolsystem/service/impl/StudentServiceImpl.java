@@ -4,18 +4,20 @@ import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
 import com.backend.pbl6schoolsystem.common.enums.UserRole;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
 import com.backend.pbl6schoolsystem.mapper.StudentMapper;
+import com.backend.pbl6schoolsystem.mapper.UserMapper;
+import com.backend.pbl6schoolsystem.model.dto.common.UserDTO;
+import com.backend.pbl6schoolsystem.model.dto.student.StudentDTO;
+import com.backend.pbl6schoolsystem.model.entity.ClassEntity;
 import com.backend.pbl6schoolsystem.model.entity.ParentStudentEntity;
 import com.backend.pbl6schoolsystem.model.entity.SchoolEntity;
 import com.backend.pbl6schoolsystem.model.entity.UserEntity;
 import com.backend.pbl6schoolsystem.repository.dsl.SchoolDslRepository;
 import com.backend.pbl6schoolsystem.repository.dsl.StudentDslRepository;
-import com.backend.pbl6schoolsystem.repository.jpa.ParentStudentRepository;
-import com.backend.pbl6schoolsystem.repository.jpa.RoleRepository;
-import com.backend.pbl6schoolsystem.repository.jpa.SchoolRepository;
-import com.backend.pbl6schoolsystem.repository.jpa.UserRepository;
+import com.backend.pbl6schoolsystem.repository.jpa.*;
 import com.backend.pbl6schoolsystem.request.student.CreateStudentRequest;
 import com.backend.pbl6schoolsystem.request.student.ListStudentRequest;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
+import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.PageResponse;
 import com.backend.pbl6schoolsystem.response.student.GetStudentResponse;
@@ -23,6 +25,7 @@ import com.backend.pbl6schoolsystem.response.student.ListStudentResponse;
 import com.backend.pbl6schoolsystem.service.StudentService;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -37,6 +40,7 @@ public class StudentServiceImpl implements StudentService {
     private final UserRepository userRepository;
     private final SchoolRepository schoolRepository;
     private final RoleRepository roleRepository;
+    private final ClassRepository classRepository;
     private final ParentStudentRepository parentStudentRepository;
     private final SchoolDslRepository schoolDslRepository;
     private final PasswordEncoder passwordEncoder;
@@ -108,6 +112,7 @@ public class StudentServiceImpl implements StudentService {
                     parentEntity.setStreet(RequestUtil.blankIfNull(parent.getStreet()));
                     parentEntity.setDistrict(RequestUtil.blankIfNull(parent.getDistrict()));
                     parentEntity.setCity(RequestUtil.blankIfNull(parent.getCity()));
+                    parentEntity.setSchool(school);
                     listParent.add(parentEntity);
                 }
 
@@ -130,6 +135,47 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    public OnlyIdResponse updateStudent(Long studentId, StudentDTO request) {
+        UserEntity student = userRepository.findById(studentId).orElseThrow(() -> new NotFoundException("Student not found with id " + studentId));
+        updateUser(student, request); // update student info
+        userRepository.save(student);
+        if (!request.getParents().isEmpty()) {
+            UserEntity parent;
+            for (UserDTO user : request.getParents()) {
+                parent = userRepository.findById(user.getUserId()).get();
+                parent.setFirstName(RequestUtil.blankIfNull(user.getFirstName()));
+                parent.setLastName(RequestUtil.blankIfNull(user.getLastName()));
+                parent.setMiddleName(RequestUtil.blankIfNull(user.getMiddleName()));
+                parent.setPhone(RequestUtil.blankIfNull(user.getPhone()));
+                parent.setStreet(RequestUtil.blankIfNull(user.getStreet()));
+                parent.setDistrict(RequestUtil.blankIfNull(user.getDistrict()));
+                parent.setCity(RequestUtil.blankIfNull(user.getCity()));
+                parent.setJob(RequestUtil.blankIfNull(user.getJob()));
+                userRepository.save(parent);
+            }
+        }
+
+        return OnlyIdResponse.builder()
+                .setSuccess(true)
+                .setId(student.getUserId())
+                .setName(student.getFirstName() + " " + student.getLastName())
+                .build();
+    }
+
+    public void updateUser(UserEntity userEntity, StudentDTO request) {
+        userEntity.setFirstName(request.getStudent().getFirstName());
+        userEntity.setLastName(request.getStudent().getLastName());
+        userEntity.setMiddleName(RequestUtil.blankIfNull(request.getStudent().getMiddleName()));
+        userEntity.setPhone(RequestUtil.blankIfNull(request.getStudent().getLastName()));
+        userEntity.setEmail(RequestUtil.blankIfNull(request.getStudent().getEmail()));
+        userEntity.setStreet(RequestUtil.blankIfNull(request.getStudent().getStreet()));
+        userEntity.setDistrict(RequestUtil.blankIfNull(request.getStudent().getDistrict()));
+        userEntity.setCity(RequestUtil.blankIfNull(request.getStudent().getCity()));
+        userEntity.setDateOfBirth(request.getStudent().getDateOfBirth());
+        userEntity.setPlaceOfBirth(RequestUtil.blankIfNull(request.getStudent().getPlaceOfBirth()));
+    }
+
+    @Override
     public ListStudentResponse getListStudent(ListStudentRequest request) {
         request.setSchoolId(RequestUtil.defaultIfNull(request.getSchoolId(), (long) -1));
         request.setGradeId(RequestUtil.defaultIfNull(request.getGradeId(), (long) -1));
@@ -143,7 +189,7 @@ public class StudentServiceImpl implements StudentService {
                         .setTotalPages(request.getAll() ? 1 : RequestUtil.getTotalPages((long) userEntities.size(), request.getSize()))
                         .build())
                 .setItems(userEntities.stream()
-                        .map(ue -> StudentMapper.entity2dto(ue))
+                        .map(UserMapper::entity2dto)
                         .collect(Collectors.toList()))
                 .build();
     }
@@ -151,16 +197,35 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public GetStudentResponse getStudent(Long studentId) {
         UserEntity student = userRepository.findOneById(studentId, UserRole.STUDENT_ROLE.getRoleId()).orElseThrow(() -> new NotFoundException("Not found student with id " + studentId));
-        List<ParentStudentEntity> parentStudentEntities = parentStudentRepository.findParentStudentEntityByStudent(student.getUserId());
-        List<UserEntity> parents = parentStudentEntities != null ? parentStudentEntities.stream()
-                .map(ps -> userRepository.findById(ps.getParent().getUserId()).get())
-                .collect(Collectors.toList()) : Collections.emptyList();
-
+        List<UserEntity> parents = userRepository.findParentsByStudent(student.getUserId());
+        List<ClassEntity> classes = classRepository.findClassesByStudent(student.getUserId());
         return GetStudentResponse.builder()
                 .setSuccess(true)
-                .setStudentDetailDTO(StudentMapper.entity2DetailDto(student, parents))
+                .setStudent(StudentDTO.builder()
+                        .setStudent(UserMapper.entity2dto(student))
+                        .setParents(parents != null ? parents.stream()
+                                .map(UserMapper::entity2dto)
+                                .collect(Collectors.toList()) : Collections.emptyList())
+                        .setClasses(classes != null ? classes.stream()
+                                .map(c -> StudentDTO.Clazz.builder()
+                                        .setClazzId(c.getClassId())
+                                        .setClazz(c.getClazz())
+                                        .build())
+                                .collect(Collectors.toList()) : Collections.emptyList())
+                        .build())
                 .build();
     }
 
-
+    @Override
+    public NoContentResponse deleteStudent(Long studentId) {
+        UserEntity student = userRepository.findById(studentId).orElseThrow(() -> new NotFoundException("Not found student with id " + studentId));
+        List<UserEntity> parents = userRepository.findParentsByStudent(studentId);
+        if (!parents.isEmpty()) {
+            userRepository.deleteAll(parents);
+        }
+        userRepository.delete(student);
+        return NoContentResponse.builder()
+                .setSuccess(true)
+                .build();
+    }
 }

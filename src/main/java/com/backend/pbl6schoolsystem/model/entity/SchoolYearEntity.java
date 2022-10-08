@@ -21,6 +21,8 @@ public class SchoolYearEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "schoolyearid")
     private Long schoolYearId;
+    @Column(name = "schoolyear")
+    private String schoolYear;
     @Column(name = "startdate")
     private LocalDate startDate;
     @Column(name = "enddate")

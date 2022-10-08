@@ -14,10 +14,10 @@ import java.util.List;
 @AllArgsConstructor
 @Builder(setterPrefix = "set")
 public class StudentDTO implements Serializable {
-    @JsonIgnoreProperties({"password", "role", "workingPosition", "positionGroup", "recruitmentDay", "factorSalary", "rank", "level"})
-    private UserDTO userDTO;
-    private String studentId;
-    private Clazz clazz;
+    @JsonIgnoreProperties({"password", "workingPosition", "recruitmentDay"})
+    private UserDTO student;
+    private List<Clazz> classes;
+    private List<UserDTO> parents;
 
     @Getter
     @Setter
@@ -29,4 +29,9 @@ public class StudentDTO implements Serializable {
         private String clazz;
     }
 
+    @Getter
+    @Setter
+    @JsonIgnoreProperties({"username", "password", "workingPosition", "studentId", "role", "recruitmentDay", "email"})
+    public static class Parent extends UserDTO {
+    }
 }

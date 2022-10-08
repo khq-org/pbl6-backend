@@ -4,6 +4,7 @@ import com.backend.pbl6schoolsystem.common.exception.ErrorResponseRuntimeExcepti
 import com.backend.pbl6schoolsystem.model.dto.common.ErrorDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.MessageDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.OnlyIdDTO;
+import com.backend.pbl6schoolsystem.model.dto.common.UserDTO;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;

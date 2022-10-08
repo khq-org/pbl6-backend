@@ -15,6 +15,9 @@ public class UserMapper {
         dto.setDisplayName(entity.getLastName() + " " + entity.getMiddleName() + " " + entity.getFirstName());
         dto.setEmail(RequestUtil.blankIfNull(entity.getEmail()));
         dto.setPhone(RequestUtil.blankIfNull(entity.getPhone()));
+        if (entity.getRole() != null) {
+            dto.setRole(entity.getRole().getRole());
+        }
         dto.setJob(RequestUtil.blankIfNull(entity.getJob()));
         if (entity.getSchool() != null) {
             dto.setSchoolId(entity.getSchool().getSchoolId());
@@ -27,6 +30,7 @@ public class UserMapper {
         if (entity.getDateOfBirth() != null) {
             dto.setDateOfBirth(entity.getDateOfBirth());
         }
+        dto.setStudentId(RequestUtil.blankIfNull(entity.getStudentId()));
         return dto;
     }
 

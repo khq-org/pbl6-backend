@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -15,4 +16,12 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             " WHERE s.role.roleId = :roleId" +
             " AND s.userId = :studentId")
     Optional<UserEntity> findOneById(@Param("studentId") Long studentId, @Param("roleId") Long roleId);
+
+    @Query("SELECT ps.parent FROM ParentStudentEntity ps" +
+            " WHERE ps.student.userId = :studentId")
+    List<UserEntity> findParentsByStudent(Long studentId);
+
+    @Query("SELECT u FROM UserEntity u" +
+            " WHERE u.school.schoolId = :schoolId")
+    List<UserEntity> findBySchool(Long schoolId);
 }

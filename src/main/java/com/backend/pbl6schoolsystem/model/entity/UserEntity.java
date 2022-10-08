@@ -62,16 +62,8 @@ public class UserEntity implements Serializable {
     private LocalDate recruitmentDay;
     @Column(name = "numOfPeriodsInWeek")
     private Integer numOfPeriodsInWeek;
-    @Column(name = "rank")
-    private Integer rank;
-    @Column(name = "factorsalary")
-    private Float factorSalary;
-    @Column(name = "level")
-    private Integer level;
     @Column(name = "workingposition")
     private String workingPosition;
-    @Column(name = "positiongroup")
-    private String positionGroup;
     // =============================================================
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roleid", referencedColumnName = "roleid")
@@ -79,9 +71,6 @@ public class UserEntity implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "schoolid", referencedColumnName = "schoolid")
     private SchoolEntity school;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "classid", referencedColumnName = "classid")
-    private ClassEntity clazz;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "parentstudent"
             , joinColumns = @JoinColumn(name = "parentid", referencedColumnName = "userid")

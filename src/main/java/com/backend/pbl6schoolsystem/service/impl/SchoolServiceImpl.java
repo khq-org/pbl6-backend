@@ -4,8 +4,10 @@ import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
 import com.backend.pbl6schoolsystem.mapper.SchoolMapper;
 import com.backend.pbl6schoolsystem.model.entity.SchoolEntity;
+import com.backend.pbl6schoolsystem.model.entity.UserEntity;
 import com.backend.pbl6schoolsystem.repository.dsl.SchoolDslRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.SchoolRepository;
+import com.backend.pbl6schoolsystem.repository.jpa.UserRepository;
 import com.backend.pbl6schoolsystem.request.school.UpdateSchoolRequest;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 public class SchoolServiceImpl implements SchoolService {
     private final SchoolDslRepository schoolDslRepository;
     private final SchoolRepository schoolRepository;
+    private final UserRepository userRepository;
 
     @Override
     public OnlyIdResponse createSchool(CreateSchoolRequest request) {
@@ -82,6 +85,10 @@ public class SchoolServiceImpl implements SchoolService {
     @Override
     public NoContentResponse deleteSchool(Long schoolId) {
         SchoolEntity school = schoolRepository.findById(schoolId).orElseThrow(() -> new NotFoundException("Not found school with id " + schoolId));
+        List<UserEntity> users = userRepository.findBySchool(schoolId);
+        if (!users.isEmpty()) {
+            userRepository.deleteAll(users);
+        }
         schoolRepository.delete(school);
         return NoContentResponse.builder()
                 .setSuccess(true)

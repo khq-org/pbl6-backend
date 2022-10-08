@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties({"clazz"})
-public class ProfileStudentDTO extends StudentDetailDTO {
+public class ProfileStudentDTO extends StudentDTO {
     private Long profileStudentId;
     private List<LearningResultDTO> learningResults;
 }
