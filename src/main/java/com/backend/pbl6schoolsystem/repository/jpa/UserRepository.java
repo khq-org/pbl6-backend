@@ -11,6 +11,11 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
+    @Query("SELECT u FROM UserEntity u" +
+            " LEFT JOIN FETCH u.role r" +
+            " WHERE u.username = :username")
+    UserEntity findByUsername(String username);
+
     @Query("SELECT s FROM UserEntity s" +
             " LEFT JOIN FETCH s.school sch" +
             " WHERE s.role.roleId = :roleId" +
@@ -24,4 +29,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query("SELECT u FROM UserEntity u" +
             " WHERE u.school.schoolId = :schoolId")
     List<UserEntity> findBySchool(Long schoolId);
+
+    @Query("SELECT u FROM UserEntity u" +
+            " WHERE u.email = :email")
+    Optional<UserEntity> findOneByEmail(String email);
 }
