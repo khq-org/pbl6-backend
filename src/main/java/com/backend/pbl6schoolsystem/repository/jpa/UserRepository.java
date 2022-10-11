@@ -33,4 +33,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query("SELECT u FROM UserEntity u" +
             " WHERE u.email = :email")
     Optional<UserEntity> findOneByEmail(String email);
+    @Query("SELECT u FROM UserEntity u" +
+            " LEFT JOIN FETCH u.school s" +
+            " WHERE u.userId = :schoolAdminId" +
+            " AND u.role.roleId = :roleId")
+    Optional<UserEntity> findSchoolAdminById(Long schoolAdminId, Long roleId);
 }
