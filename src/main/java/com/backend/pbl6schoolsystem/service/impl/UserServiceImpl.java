@@ -14,6 +14,7 @@ import com.backend.pbl6schoolsystem.repository.jpa.UserRepository;
 import com.backend.pbl6schoolsystem.request.school.CreateSchoolAdminRequest;
 import com.backend.pbl6schoolsystem.request.user.ListSchoolAdminRequest;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
+import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.user.GetSchoolAdminResponse;
 import com.backend.pbl6schoolsystem.response.user.ListUserResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
@@ -46,6 +47,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public OnlyIdResponse createSchoolAdmin(CreateSchoolAdminRequest request) {
         Map<String, String> errors = new HashMap<>();
         checkInputCreateUpdateSchoolAdmin(request, errors);
+        if (StringUtils.hasText(request.getEmail())) {
+            boolean isExistEmail = userRepository.findOneByEmail(request.getEmail()).isPresent();
+            if (isExistEmail) {
+                errors.put("Email", ErrorCode.ALREADY_EXIST.name());
+            }
+        }
         if (!errors.isEmpty()) {
             return OnlyIdResponse.builder()
                     .setSuccess(false)
@@ -79,7 +86,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         UserEntity schoolAdmin = userRepository.findById(schoolAdminId).orElseThrow(() -> new NotFoundException("Not found User"));
         Map<String, String> errors = new HashMap<>();
         checkInputCreateUpdateSchoolAdmin(request, errors);
-
+        if (StringUtils.hasText(request.getEmail())) {
+            boolean isExistEmail = userRepository.findOneByEmail(request.getEmail()).isPresent()
+                    && !request.getEmail().equals(schoolAdmin.getEmail());
+            if (isExistEmail) {
+                errors.put("Email", ErrorCode.ALREADY_EXIST.name());
+            }
+        }
         if (!errors.isEmpty()) {
             return OnlyIdResponse.builder()
                     .setSuccess(false)
@@ -142,6 +155,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .build();
     }
 
+    @Override
+    public NoContentResponse deleteSchoolAdmin(Long schoolAdminId) {
+        UserEntity schoolAdmin = userRepository.findSchoolAdminById(schoolAdminId, UserRole.SCHOOL_ROLE.getRoleId())
+                .orElseThrow(() -> new NotFoundException("Not found school admin with id " + schoolAdminId));
+        userRepository.delete(schoolAdmin);
+        return NoContentResponse.builder()
+                .setSuccess(true)
+                .build();
+    }
+
     public void checkInputCreateUpdateSchoolAdmin(CreateSchoolAdminRequest request, Map<String, String> errors) {
         if (!StringUtils.hasText(request.getFirstName())) {
             errors.put("FirstName", ErrorCode.MISSING_VALUE.name());
@@ -160,13 +183,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
         if (request.getSchoolId() < 0) {
             errors.put("SchoolId", ErrorCode.MISSING_VALUE.name());
-        }
-
-        if (StringUtils.hasText(request.getEmail())) {
-            boolean isExistEmail = userRepository.findOneByEmail(request.getEmail()).isPresent();
-            if (isExistEmail) {
-                errors.put("Email", ErrorCode.ALREADY_EXIST.name());
-            }
         }
 
     }
