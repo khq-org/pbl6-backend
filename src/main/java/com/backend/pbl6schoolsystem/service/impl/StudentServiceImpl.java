@@ -1,9 +1,9 @@
 package com.backend.pbl6schoolsystem.service.impl;
 
+import com.backend.pbl6schoolsystem.common.constant.Constants;
 import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
 import com.backend.pbl6schoolsystem.common.enums.UserRole;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
-import com.backend.pbl6schoolsystem.mapper.StudentMapper;
 import com.backend.pbl6schoolsystem.mapper.UserMapper;
 import com.backend.pbl6schoolsystem.model.dto.common.UserDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.StudentDTO;
@@ -13,6 +13,7 @@ import com.backend.pbl6schoolsystem.model.entity.SchoolEntity;
 import com.backend.pbl6schoolsystem.model.entity.UserEntity;
 import com.backend.pbl6schoolsystem.repository.dsl.SchoolDslRepository;
 import com.backend.pbl6schoolsystem.repository.dsl.StudentDslRepository;
+import com.backend.pbl6schoolsystem.repository.dsl.UserDslRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.*;
 import com.backend.pbl6schoolsystem.request.student.CreateStudentRequest;
 import com.backend.pbl6schoolsystem.request.student.ListStudentRequest;
@@ -21,11 +22,12 @@ import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.PageResponse;
 import com.backend.pbl6schoolsystem.response.student.GetStudentResponse;
-import com.backend.pbl6schoolsystem.response.student.ListStudentResponse;
+import com.backend.pbl6schoolsystem.response.user.ListUserResponse;
+import com.backend.pbl6schoolsystem.security.UserPrincipal;
 import com.backend.pbl6schoolsystem.service.StudentService;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
+import com.backend.pbl6schoolsystem.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
 public class StudentServiceImpl implements StudentService {
     private final StudentDslRepository studentDslRepository;
     private final UserRepository userRepository;
+    private final UserDslRepository userDslRepository;
     private final SchoolRepository schoolRepository;
     private final RoleRepository roleRepository;
     private final ClassRepository classRepository;
@@ -55,9 +58,6 @@ public class StudentServiceImpl implements StudentService {
         if (!StringUtils.hasText(request.getFirstName())) {
             errors.put("firstName", ErrorCode.MISSING_VALUE.name());
         }
-        if (request.getSchoolId() < 0) {
-            errors.put("school", ErrorCode.MISSING_VALUE.name());
-        }
         if (!errors.isEmpty()) {
             return OnlyIdResponse.builder()
                     .setSuccess(false)
@@ -67,9 +67,11 @@ public class StudentServiceImpl implements StudentService {
                     .build();
         } else {
             List<UserEntity> listParent = new ArrayList<>();
-            SchoolEntity school = schoolRepository.findById(request.getSchoolId())
+            UserPrincipal principal = SecurityUtils.getPrincipal();
+            SchoolEntity school = schoolRepository.findById(principal.getSchoolId())
                     .orElseThrow(() -> new NotFoundException("Not found school with id " + request.getSchoolId()));
-            String studentId = "std".concat(String.valueOf(schoolDslRepository.countStudentInSchool(school.getSchoolId()) + 1));
+            String studentId = Constants.USERNAME_STUDENT.concat(String.valueOf(userDslRepository.countStudentTeacherInSchool(school.getSchoolId(),
+                    UserRole.STUDENT_ROLE.getRoleId()) + 1));
             String username = studentId.concat("@").concat(school.getSchool().replace(" ", "").toLowerCase());
             student.setStudentId(studentId);
             student.setRole(roleRepository.findById(UserRole.STUDENT_ROLE.getRoleId()).get());
@@ -77,7 +79,6 @@ public class StudentServiceImpl implements StudentService {
             student.setPassword(passwordEncoder.encode(username));
             student.setFirstName(request.getFirstName());
             student.setLastName(request.getLastName());
-            student.setMiddleName(RequestUtil.blankIfNull(request.getMiddleName()));
             student.setPhone(RequestUtil.blankIfNull(request.getPhone()));
             student.setEmail(RequestUtil.blankIfNull(request.getEmail()));
             student.setStreet(RequestUtil.blankIfNull(request.getStreet()));
@@ -106,7 +107,6 @@ public class StudentServiceImpl implements StudentService {
                     parentEntity = new UserEntity();
                     parentEntity.setFirstName(parent.getFirstName());
                     parentEntity.setLastName(parent.getLastName());
-                    parentEntity.setMiddleName(RequestUtil.blankIfNull(parent.getMiddleName()));
                     parentEntity.setPhone(RequestUtil.blankIfNull(parent.getPhone()));
                     parentEntity.setJob(RequestUtil.blankIfNull(parent.getJob()));
                     parentEntity.setStreet(RequestUtil.blankIfNull(parent.getStreet()));
@@ -145,7 +145,6 @@ public class StudentServiceImpl implements StudentService {
                 parent = userRepository.findById(user.getUserId()).get();
                 parent.setFirstName(RequestUtil.blankIfNull(user.getFirstName()));
                 parent.setLastName(RequestUtil.blankIfNull(user.getLastName()));
-                parent.setMiddleName(RequestUtil.blankIfNull(user.getMiddleName()));
                 parent.setPhone(RequestUtil.blankIfNull(user.getPhone()));
                 parent.setStreet(RequestUtil.blankIfNull(user.getStreet()));
                 parent.setDistrict(RequestUtil.blankIfNull(user.getDistrict()));
@@ -165,7 +164,6 @@ public class StudentServiceImpl implements StudentService {
     public void updateUser(UserEntity userEntity, StudentDTO request) {
         userEntity.setFirstName(request.getStudent().getFirstName());
         userEntity.setLastName(request.getStudent().getLastName());
-        userEntity.setMiddleName(RequestUtil.blankIfNull(request.getStudent().getMiddleName()));
         userEntity.setPhone(RequestUtil.blankIfNull(request.getStudent().getLastName()));
         userEntity.setEmail(RequestUtil.blankIfNull(request.getStudent().getEmail()));
         userEntity.setStreet(RequestUtil.blankIfNull(request.getStudent().getStreet()));
@@ -176,12 +174,12 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public ListStudentResponse getListStudent(ListStudentRequest request) {
+    public ListUserResponse getListStudent(ListStudentRequest request) {
         request.setSchoolId(RequestUtil.defaultIfNull(request.getSchoolId(), (long) -1));
         request.setGradeId(RequestUtil.defaultIfNull(request.getGradeId(), (long) -1));
         request.setClassId(RequestUtil.defaultIfNull(request.getClassId(), (long) -1));
         List<UserEntity> userEntities = studentDslRepository.getListStudent(request);
-        return ListStudentResponse.builder()
+        return ListUserResponse.builder()
                 .setPageResponse(PageResponse.builder()
                         .setTotalItems((long) userEntities.size())
                         .setPage(request.getPage())

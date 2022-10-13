@@ -12,7 +12,7 @@ import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.Response;
 import com.backend.pbl6schoolsystem.response.student.GetStudentResponse;
-import com.backend.pbl6schoolsystem.response.student.ListStudentResponse;
+import com.backend.pbl6schoolsystem.response.user.ListUserResponse;
 import com.backend.pbl6schoolsystem.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class StudentController {
     @Operation(summary = "List student")
     @GetMapping
     public Response<ListDTO<UserDTO>> getListStudent(@ModelAttribute ListStudentRequest request) {
-        ListStudentResponse response = studentService.getListStudent(request);
+        ListUserResponse response = studentService.getListStudent(request);
         return userConverter.getResponse(response);
     }
 

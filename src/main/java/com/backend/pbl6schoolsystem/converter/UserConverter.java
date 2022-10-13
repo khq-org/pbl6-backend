@@ -8,7 +8,6 @@ import com.backend.pbl6schoolsystem.response.user.GetSchoolAdminResponse;
 import com.backend.pbl6schoolsystem.response.user.ListUserResponse;
 import com.backend.pbl6schoolsystem.response.Response;
 import com.backend.pbl6schoolsystem.response.student.GetStudentResponse;
-import com.backend.pbl6schoolsystem.response.student.ListStudentResponse;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -16,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class UserConverter extends CommonConverter {
-    public Response<ListDTO<UserDTO>> getResponse(ListStudentResponse response) {
+    public Response<ListDTO<UserDTO>> getResponse(ListUserResponse response) {
         return Response.<ListDTO<UserDTO>>builder()
                 .setSuccess(true)
                 .setData(ListDTO.<UserDTO>builder()
@@ -35,7 +34,7 @@ public class UserConverter extends CommonConverter {
                 .build();
     }
 
-    public Response<ListDTO<SchoolAdminDTO>> getResponse(ListUserResponse response) {
+    public Response<ListDTO<SchoolAdminDTO>> getSchoolAdminResponse(ListUserResponse response) {
         return Response.<ListDTO<SchoolAdminDTO>>builder()
                 .setSuccess(true)
                 .setData(ListDTO.<SchoolAdminDTO>builder()

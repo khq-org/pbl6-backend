@@ -24,11 +24,11 @@ public class StudentDslRepository {
     public List<UserEntity> getListStudent(ListStudentRequest request) {
         JPAQuery<UserEntity> query = queryFactory.select(user)
                 .from(user)
+                .where(user.school.schoolId.eq(request.getSchoolId()))
                 .where(user.role.roleId.eq(UserRole.STUDENT_ROLE.getRoleId()));
         if (StringUtils.hasText(request.getSearch())) {
             query.where(user.firstName.containsIgnoreCase(request.getSearch())
-                    .or(user.lastName.containsIgnoreCase(request.getSearch()))
-                    .or(user.middleName.containsIgnoreCase(request.getSearch())));
+                    .or(user.lastName.containsIgnoreCase(request.getSearch())));
         }
         if (StringUtils.hasText(request.getLastName())) {
             query.where(user.lastName.containsIgnoreCase(request.getLastName()));
@@ -42,8 +42,8 @@ public class StudentDslRepository {
         if (StringUtils.hasText(request.getCity())) {
             query.where(user.city.equalsIgnoreCase(request.getCity()));
         }
-        if (request.getSchoolId() > 0) {
-            query.where(user.school.schoolId.eq(request.getSchoolId()));
+        if (request.getClassId() > 0) {
+
         }
         int page = RequestUtil.getPage(request.getPage());
         int size = RequestUtil.getSize(request.getSize());

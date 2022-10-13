@@ -10,9 +10,8 @@ public class UserMapper {
         dto.setUserId(entity.getUserId());
         dto.setUsername(RequestUtil.blankIfNull(entity.getUsername()));
         dto.setLastName(entity.getLastName());
-        dto.setMiddleName(RequestUtil.blankIfNull(entity.getMiddleName()));
         dto.setFirstName(entity.getFirstName());
-        dto.setDisplayName(entity.getLastName() + " " + entity.getMiddleName() + " " + entity.getFirstName());
+        dto.setDisplayName(entity.getLastName() + " " + entity.getFirstName());
         dto.setEmail(RequestUtil.blankIfNull(entity.getEmail()));
         dto.setPhone(RequestUtil.blankIfNull(entity.getPhone()));
         if (entity.getRole() != null) {

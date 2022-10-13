@@ -15,7 +15,6 @@ public class UserDTO implements Serializable {
     private String password;
     private String lastName;
     private String firstName;
-    private String middleName;
     private String displayName;
     private String phone;
     private String email;
@@ -34,4 +33,5 @@ public class UserDTO implements Serializable {
     private Long schoolId;
     private String schoolName;
     private String studentId; // only student
+    private String teacherId; // only teacher
 }

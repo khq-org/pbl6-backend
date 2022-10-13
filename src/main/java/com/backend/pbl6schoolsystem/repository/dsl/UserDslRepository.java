@@ -63,4 +63,21 @@ public class UserDslRepository {
         query.leftJoin(user.school).fetch();
         return query.fetch();
     }
+
+    public Long countSchoolAdmin() {
+        JPAQuery<UserEntity> query = queryFactory.select(user)
+                .from(user)
+                .where(user.role.roleId.eq(UserRole.SCHOOL_ROLE.getRoleId()));
+        JPAQuery<Long> count = query.clone().select(user.userId.count());
+        return count.fetchFirst();
+    }
+
+    public Long countStudentTeacherInSchool(Long schoolId, Long roleId) {
+        JPAQuery<UserEntity> query = queryFactory.select(user)
+                .from(user)
+                .where(user.school.schoolId.eq(schoolId))
+                .where(user.role.roleId.eq(roleId));
+        JPAQuery<Long> countQuery = query.clone().select(user.userId.count());
+        return countQuery.fetchFirst();
+    }
 }

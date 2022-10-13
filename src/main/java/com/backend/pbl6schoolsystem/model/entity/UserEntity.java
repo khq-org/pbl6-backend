@@ -30,8 +30,6 @@ public class UserEntity implements Serializable {
     private String firstName;
     @Column(name = "lastname")
     private String lastName;
-    @Column(name = "middlename")
-    private String middleName;
     @Column(name = "email", unique = true)
     private String email;
     @Column(name = "phone")
@@ -58,6 +56,8 @@ public class UserEntity implements Serializable {
     @Column(name = "studentid")
     private String studentId;
     // ==================== for teacher ============================
+    @Column(name = "teacherId")
+    private String teacherId;
     @Column(name = "recruitmentDay")
     private LocalDate recruitmentDay;
     @Column(name = "numOfPeriodsInWeek")

@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SchoolDslRepository {
     private final QSchoolEntity school = QSchoolEntity.schoolEntity;
-    private final QUserEntity student = QUserEntity.userEntity;
+    private final QUserEntity user = QUserEntity.userEntity;
     private final JPAQueryFactory queryFactory;
 
     public List<SchoolEntity> getListSchool(ListSchoolRequest request) {
@@ -55,14 +55,6 @@ public class SchoolDslRepository {
         }
         query.offset(offset);
         return query.fetch();
-    }
-
-    public Long countStudentInSchool(Long schoolId) {
-        JPAQuery<UserEntity> query = queryFactory.select(student)
-                .from(student)
-                .where(student.school.schoolId.eq(schoolId));
-        JPAQuery<Long> countQuery = query.clone().select(student.userId.count());
-        return countQuery.fetchFirst();
     }
 
 }

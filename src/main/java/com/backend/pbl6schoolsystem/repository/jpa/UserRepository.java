@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query("SELECT u FROM UserEntity u" +
             " LEFT JOIN FETCH u.role r" +
+            " LEFT JOIN FETCH u.school s" +
             " WHERE u.username = :username")
     UserEntity findByUsername(String username);
 
@@ -33,9 +34,15 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query("SELECT u FROM UserEntity u" +
             " WHERE u.email = :email")
     Optional<UserEntity> findOneByEmail(String email);
+
     @Query("SELECT u FROM UserEntity u" +
             " LEFT JOIN FETCH u.school s" +
             " WHERE u.userId = :schoolAdminId" +
             " AND u.role.roleId = :roleId")
     Optional<UserEntity> findSchoolAdminById(Long schoolAdminId, Long roleId);
+
+    @Query("SELECT u FROM UserEntity u" +
+            " WHERE u.school.schoolId = :schoolId" +
+            " AND u.email = :email")
+    Optional<UserEntity> findByEmailInSchool(String email, Long schoolId);
 }

@@ -1,5 +1,6 @@
 package com.backend.pbl6schoolsystem.service.impl;
 
+import com.backend.pbl6schoolsystem.common.constant.Constants;
 import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
 import com.backend.pbl6schoolsystem.common.enums.UserRole;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
@@ -19,6 +20,7 @@ import com.backend.pbl6schoolsystem.response.user.GetSchoolAdminResponse;
 import com.backend.pbl6schoolsystem.response.user.ListUserResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.PageResponse;
+import com.backend.pbl6schoolsystem.security.CustomUser;
 import com.backend.pbl6schoolsystem.service.UserService;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +48,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public OnlyIdResponse createSchoolAdmin(CreateSchoolAdminRequest request) {
         Map<String, String> errors = new HashMap<>();
-        checkInputCreateUpdateSchoolAdmin(request, errors);
+        checkInputCreateUpdateSchoolAdmin(true, request, errors);
         if (StringUtils.hasText(request.getEmail())) {
             boolean isExistEmail = userRepository.findOneByEmail(request.getEmail()).isPresent();
             if (isExistEmail) {
@@ -64,13 +66,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         SchoolEntity school = schoolRepository.findById(request.getSchoolId())
                 .orElseThrow(() -> new NotFoundException("Not found school with id " + request.getSchoolId()));
-
+        String username = Constants.USERNAME_SCHOOL_ADMIN.concat(String.valueOf(userDslRepository.countSchoolAdmin() + 1));
         UserEntity schoolAdmin = new UserEntity();
         schoolAdmin.setFirstName(request.getFirstName());
         schoolAdmin.setLastName(request.getLastName());
         schoolAdmin.setEmail(request.getEmail());
-        schoolAdmin.setUsername(request.getUsername());
-        schoolAdmin.setPassword(passwordEncoder.encode(request.getPassword()));
+        schoolAdmin.setUsername(username);
+        schoolAdmin.setPassword(passwordEncoder.encode(username));
         schoolAdmin.setSchool(school);
         schoolAdmin.setRole(roleRepository.findById(UserRole.SCHOOL_ROLE.getRoleId()).get());
         userRepository.save(schoolAdmin);
@@ -85,7 +87,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public OnlyIdResponse updateSchoolAdmin(Long schoolAdminId, CreateSchoolAdminRequest request) {
         UserEntity schoolAdmin = userRepository.findById(schoolAdminId).orElseThrow(() -> new NotFoundException("Not found User"));
         Map<String, String> errors = new HashMap<>();
-        checkInputCreateUpdateSchoolAdmin(request, errors);
+        checkInputCreateUpdateSchoolAdmin(false, request, errors);
         if (StringUtils.hasText(request.getEmail())) {
             boolean isExistEmail = userRepository.findOneByEmail(request.getEmail()).isPresent()
                     && !request.getEmail().equals(schoolAdmin.getEmail());
@@ -165,18 +167,17 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .build();
     }
 
-    public void checkInputCreateUpdateSchoolAdmin(CreateSchoolAdminRequest request, Map<String, String> errors) {
+    public void checkInputCreateUpdateSchoolAdmin(Boolean isCreate, CreateSchoolAdminRequest request, Map<String, String> errors) {
         if (!StringUtils.hasText(request.getFirstName())) {
             errors.put("FirstName", ErrorCode.MISSING_VALUE.name());
         }
         if (!StringUtils.hasText(request.getLastName())) {
             errors.put("LastName", ErrorCode.MISSING_VALUE.name());
         }
-        if (!StringUtils.hasText(request.getUsername())) {
-            errors.put("UserName", ErrorCode.MISSING_VALUE.name());
-        }
-        if (!StringUtils.hasText(request.getPassword())) {
-            errors.put("Password", ErrorCode.MISSING_VALUE.name());
+        if (!isCreate) {
+            if (!StringUtils.hasText(request.getPassword())) {
+                errors.put("Password", ErrorCode.MISSING_VALUE.name());
+            }
         }
         if (!StringUtils.hasText(request.getEmail())) {
             errors.put("Email", ErrorCode.MISSING_VALUE.name());
@@ -190,6 +191,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserEntity user = userRepository.findByUsername(username);
+        CustomUser customUser = null;
         if (user == null) {
             throw new NotFoundException("Not found username " + username);
         } else {
@@ -197,7 +199,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             List.of(user.getRole()).forEach(role -> {
                 simpleGrantedAuthorities.add(new SimpleGrantedAuthority(role.getRole()));
             });
-            return new User(user.getUsername(), user.getPassword(), simpleGrantedAuthorities);
+            return new CustomUser(user.getUsername(), user.getPassword(), simpleGrantedAuthorities, user.getUserId(), user.getRole().getRole()
+                    , user.getFirstName(), user.getLastName(), user.getSchool().getSchoolId(), RequestUtil.blankIfNull(user.getStreet()), RequestUtil.blankIfNull(user.getDistrict()),
+                    RequestUtil.blankIfNull(user.getCity()), user.getCreatedDate());
         }
     }
 }

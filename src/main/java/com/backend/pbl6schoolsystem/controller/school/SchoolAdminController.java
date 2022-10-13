@@ -30,7 +30,7 @@ public class SchoolAdminController {
     @GetMapping
     private Response<ListDTO<SchoolAdminDTO>> getListSchoolAdmin(@ModelAttribute @Valid ListSchoolAdminRequest request) {
         ListUserResponse response = userService.getListSchoolAdmin(request);
-        return userConverter.getResponse(response);
+        return userConverter.getSchoolAdminResponse(response);
     }
 
     @Operation(summary = "Get school admin")

@@ -12,7 +12,6 @@ import java.util.List;
 public class CreateStudentRequest {
     private String firstName;
     private String lastName;
-    private String middleName;
     private String phone;
     private String email;
     private String street;
@@ -30,7 +29,6 @@ public class CreateStudentRequest {
     public static class Parent {
         private String firstName;
         private String lastName;
-        private String middleName;
         private String phone;
         private String job;
         private String street;

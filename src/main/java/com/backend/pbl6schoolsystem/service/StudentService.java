@@ -6,12 +6,12 @@ import com.backend.pbl6schoolsystem.request.student.ListStudentRequest;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.student.GetStudentResponse;
-import com.backend.pbl6schoolsystem.response.student.ListStudentResponse;
+import com.backend.pbl6schoolsystem.response.user.ListUserResponse;
 
 public interface StudentService {
     OnlyIdResponse createStudent(CreateStudentRequest request);
 
-    ListStudentResponse getListStudent(ListStudentRequest request);
+    ListUserResponse getListStudent(ListStudentRequest request);
 
     GetStudentResponse getStudent(Long studentId);
 
