@@ -25,7 +25,6 @@ import com.backend.pbl6schoolsystem.service.UserService;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -33,6 +32,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -191,7 +191,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserEntity user = userRepository.findByUsername(username);
-        CustomUser customUser = null;
         if (user == null) {
             throw new NotFoundException("Not found username " + username);
         } else {
@@ -201,7 +200,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             });
             return new CustomUser(user.getUsername(), user.getPassword(), simpleGrantedAuthorities, user.getUserId(), user.getRole().getRole()
                     , user.getFirstName(), user.getLastName(), user.getSchool().getSchoolId(), RequestUtil.blankIfNull(user.getStreet()), RequestUtil.blankIfNull(user.getDistrict()),
-                    RequestUtil.blankIfNull(user.getCity()), user.getCreatedDate());
+                    RequestUtil.blankIfNull(user.getCity()), user.getCreatedDate() != null ? user.getCreatedDate() : new Timestamp(System.currentTimeMillis()));
         }
     }
 }

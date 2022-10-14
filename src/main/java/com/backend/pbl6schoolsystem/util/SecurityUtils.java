@@ -19,6 +19,7 @@ public class SecurityUtils {
             userPrincipal.setDistrict(principal.getDistrict());
             userPrincipal.setCity(principal.getCity());
             userPrincipal.setRole(principal.getRole());
+            userPrincipal.setSchoolId(principal.getSchoolId());
             userPrincipal.setCreatedDate(principal.getCreatedDate());
             return userPrincipal;
         }

@@ -1,9 +1,11 @@
 package com.backend.pbl6schoolsystem.repository.dsl;
 
 import com.backend.pbl6schoolsystem.common.enums.UserRole;
+import com.backend.pbl6schoolsystem.model.entity.QTeacherClassEntity;
 import com.backend.pbl6schoolsystem.model.entity.QUserEntity;
 import com.backend.pbl6schoolsystem.model.entity.UserEntity;
 import com.backend.pbl6schoolsystem.request.teacher.ListTeacherRequest;
+import com.backend.pbl6schoolsystem.security.UserPrincipal;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -19,12 +21,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TeacherDslRepository {
     private final QUserEntity user = QUserEntity.userEntity;
+    private final QTeacherClassEntity teacherClass = QTeacherClassEntity.teacherClassEntity;
     private final JPAQueryFactory queryFactory;
 
-    public List<UserEntity> getListTeacherInSchool(ListTeacherRequest request) {
+    public List<UserEntity> getListTeacherInSchool(ListTeacherRequest request, UserPrincipal principal) {
         JPAQuery<UserEntity> query = queryFactory.select(user)
                 .from(user)
-                .where(user.school.schoolId.eq(request.getSchoolId()))
+                .where(user.school.schoolId.eq(principal.getSchoolId()))
                 .where(user.role.roleId.eq(UserRole.TEACHER_ROLE.getRoleId()));
         if (StringUtils.hasText(request.getSearch())) {
             query.where(user.lastName.containsIgnoreCase(request.getSearch())

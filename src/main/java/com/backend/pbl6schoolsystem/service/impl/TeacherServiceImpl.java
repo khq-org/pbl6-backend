@@ -45,7 +45,8 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     public ListUserResponse getListTeacher(ListTeacherRequest request) {
         request.setClassId(RequestUtil.defaultIfNull(request.getClassId(), (long) -1));
-        List<UserEntity> teachers = teacherDslRepository.getListTeacherInSchool(request);
+        UserPrincipal principal = SecurityUtils.getPrincipal();
+        List<UserEntity> teachers = teacherDslRepository.getListTeacherInSchool(request, principal);
         return ListUserResponse.builder()
                 .setPageResponse(PageResponse.builder()
                         .setTotalItems((long) teachers.size())
