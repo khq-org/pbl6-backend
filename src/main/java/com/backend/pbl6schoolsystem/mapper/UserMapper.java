@@ -30,6 +30,8 @@ public class UserMapper {
             dto.setDateOfBirth(entity.getDateOfBirth());
         }
         dto.setStudentId(RequestUtil.blankIfNull(entity.getStudentId()));
+        dto.setTeacherId(RequestUtil.blankIfNull(entity.getTeacherId()));
+        dto.setWorkingPosition(RequestUtil.blankIfNull(entity.getWorkingPosition()));
         return dto;
     }
 

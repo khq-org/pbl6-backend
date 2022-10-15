@@ -3,7 +3,9 @@ package com.backend.pbl6schoolsystem.converter;
 import com.backend.pbl6schoolsystem.model.dto.common.ListDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.UserDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.StudentDTO;
+import com.backend.pbl6schoolsystem.model.dto.teacher.TeacherDTO;
 import com.backend.pbl6schoolsystem.model.dto.user.SchoolAdminDTO;
+import com.backend.pbl6schoolsystem.response.teacher.GetTeacherResponse;
 import com.backend.pbl6schoolsystem.response.user.GetSchoolAdminResponse;
 import com.backend.pbl6schoolsystem.response.user.ListUserResponse;
 import com.backend.pbl6schoolsystem.response.Response;
@@ -61,6 +63,13 @@ public class UserConverter extends CommonConverter {
                 .setSuccess(true)
                 .setData(response.getSchoolAdminDTO())
                 .setTimestamp(new Timestamp(System.currentTimeMillis()))
+                .build();
+    }
+
+    public Response<TeacherDTO> getResponse(GetTeacherResponse response) {
+        return Response.<TeacherDTO>builder()
+                .setSuccess(true)
+                .setData(response.getTeacher())
                 .build();
     }
 }

@@ -1,9 +1,9 @@
 package com.backend.pbl6schoolsystem.common.enums;
 
 public enum Grade {
-    GRADE_10(1L, "GRADE 10"),
-    GRADE_11(2L, "GRADE 11"),
-    GRADE_12(3L, "GRADE 12");
+    GRADE_10(1L, "Grade 10"),
+    GRADE_11(2L, "Grade 11"),
+    GRADE_12(3L, "Grade 12");
 
     private Long gradeId;
     private String grade;

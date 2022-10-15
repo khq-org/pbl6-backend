@@ -194,7 +194,9 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public GetStudentResponse getStudent(Long studentId) {
-        UserEntity student = userRepository.findOneById(studentId, UserRole.STUDENT_ROLE.getRoleId()).orElseThrow(() -> new NotFoundException("Not found student with id " + studentId));
+        UserPrincipal principal = SecurityUtils.getPrincipal();
+        UserEntity student = userRepository.findOneById(studentId, UserRole.STUDENT_ROLE.getRoleId(), principal.getSchoolId())
+                .orElseThrow(() -> new NotFoundException("Not found student with id " + studentId));
         List<UserEntity> parents = userRepository.findParentsByStudent(student.getUserId());
         List<ClassEntity> classes = classRepository.findClassesByStudent(student.getUserId());
         return GetStudentResponse.builder()

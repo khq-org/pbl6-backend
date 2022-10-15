@@ -20,8 +20,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query("SELECT s FROM UserEntity s" +
             " LEFT JOIN FETCH s.school sch" +
             " WHERE s.role.roleId = :roleId" +
-            " AND s.userId = :studentId")
-    Optional<UserEntity> findOneById(@Param("studentId") Long studentId, @Param("roleId") Long roleId);
+            " AND s.userId = :userId" +
+            " AND sch.schoolId = :schoolId")
+    Optional<UserEntity> findOneById(@Param("userId") Long userId, @Param("roleId") Long roleId, @Param("schoolId") Long schoolId);
 
     @Query("SELECT ps.parent FROM ParentStudentEntity ps" +
             " WHERE ps.student.userId = :studentId")
