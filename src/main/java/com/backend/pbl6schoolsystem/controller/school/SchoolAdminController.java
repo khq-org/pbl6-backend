@@ -12,6 +12,7 @@ import com.backend.pbl6schoolsystem.response.user.GetSchoolAdminResponse;
 import com.backend.pbl6schoolsystem.response.user.ListUserResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.Response;
+import com.backend.pbl6schoolsystem.service.SchoolAdminService;
 import com.backend.pbl6schoolsystem.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -23,20 +24,20 @@ import javax.validation.Valid;
 @RequestMapping("/api/schooladmins")
 @RequiredArgsConstructor
 public class SchoolAdminController {
-    private final UserService userService;
+    private final SchoolAdminService schoolAdminService;
     private final UserConverter userConverter;
 
     @Operation(summary = "List school admin")
     @GetMapping
     private Response<ListDTO<SchoolAdminDTO>> getListSchoolAdmin(@ModelAttribute @Valid ListSchoolAdminRequest request) {
-        ListUserResponse response = userService.getListSchoolAdmin(request);
+        ListUserResponse response = schoolAdminService.getListSchoolAdmin(request);
         return userConverter.getSchoolAdminResponse(response);
     }
 
     @Operation(summary = "Get school admin")
     @GetMapping("/{id}")
     private Response<SchoolAdminDTO> getSchoolAdmin(@PathVariable("id") Long schoolAdminId) {
-        GetSchoolAdminResponse response = userService.getSchoolAdmin(schoolAdminId);
+        GetSchoolAdminResponse response = schoolAdminService.getSchoolAdmin(schoolAdminId);
         return userConverter.getResponse(response);
     }
 
@@ -44,7 +45,7 @@ public class SchoolAdminController {
     @Operation(summary = "Create school admin")
     @PostMapping
     private Response<OnlyIdDTO> createSchoolAdmin(@RequestBody CreateSchoolAdminRequest request) {
-        OnlyIdResponse response = userService.createSchoolAdmin(request);
+        OnlyIdResponse response = schoolAdminService.createSchoolAdmin(request);
         if (response.getSuccess()) {
             return userConverter.getResponse(response);
         } else {
@@ -55,7 +56,7 @@ public class SchoolAdminController {
     @Operation(summary = "Update school admin")
     @PutMapping("/{id}")
     private Response<OnlyIdDTO> updateSchoolAdmin(@PathVariable("id") Long schoolAdminId, @RequestBody CreateSchoolAdminRequest request) {
-        OnlyIdResponse response = userService.updateSchoolAdmin(schoolAdminId, request);
+        OnlyIdResponse response = schoolAdminService.updateSchoolAdmin(schoolAdminId, request);
         if (response.getSuccess()) {
             return userConverter.getResponse(response);
         } else {
@@ -66,7 +67,7 @@ public class SchoolAdminController {
     @Operation(summary = "Delete school admin")
     @DeleteMapping("/{id}")
     private Response<MessageDTO> deleteSchoolAdmin(@PathVariable("id") Long schoolAdminId) {
-        NoContentResponse response = userService.deleteSchoolAdmin(schoolAdminId);
+        NoContentResponse response = schoolAdminService.deleteSchoolAdmin(schoolAdminId);
         if (response.getSuccess()) {
             return userConverter.getResponse(response);
         } else {
