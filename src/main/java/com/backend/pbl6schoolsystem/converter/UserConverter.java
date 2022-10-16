@@ -72,6 +72,7 @@ public class UserConverter extends CommonConverter {
         return Response.<TeacherDTO>builder()
                 .setSuccess(true)
                 .setData(response.getTeacher())
+                .setTimestamp(new Timestamp(System.currentTimeMillis()))
                 .build();
     }
 
@@ -82,6 +83,7 @@ public class UserConverter extends CommonConverter {
                         .setUser(response.getUser())
                         .setAuthorities(response.getAuthorities())
                         .build())
+                .setTimestamp(new Timestamp(System.currentTimeMillis()))
                 .build();
     }
 }

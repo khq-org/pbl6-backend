@@ -1,14 +1,17 @@
 package com.backend.pbl6schoolsystem.mapper;
 
+import com.backend.pbl6schoolsystem.common.constant.Constants;
 import com.backend.pbl6schoolsystem.model.dto.common.UserDTO;
 import com.backend.pbl6schoolsystem.model.entity.UserEntity;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
+import org.aspectj.apache.bcel.classfile.Constant;
 
 public class UserMapper {
     public static UserDTO entity2dto(UserEntity entity) {
         UserDTO dto = new UserDTO();
         dto.setUserId(entity.getUserId());
         dto.setUsername(RequestUtil.blankIfNull(entity.getUsername()));
+        dto.setPassword(Constants.PROTECTED);
         dto.setLastName(entity.getLastName());
         dto.setFirstName(entity.getFirstName());
         dto.setDisplayName(entity.getLastName() + " " + entity.getFirstName());

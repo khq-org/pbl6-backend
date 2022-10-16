@@ -31,7 +31,7 @@ public class CommonConverter {
     public Response<MessageDTO> getResponse(NoContentResponse response) {
         return Response.<MessageDTO>builder()
                 .setSuccess(true)
-                .setMessage("Deleted")
+                .setMessage("Successful")
                 .setTimestamp(new Timestamp(System.currentTimeMillis()))
                 .build();
     }

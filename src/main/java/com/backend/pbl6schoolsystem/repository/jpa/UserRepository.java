@@ -16,13 +16,13 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             " LEFT JOIN FETCH u.role r" +
             " LEFT JOIN FETCH u.school s" +
             " WHERE u.username = :username")
-    UserEntity findByUsername(String username);
+    Optional<UserEntity> findByUsername(String username);
 
     @Query("SELECT u FROM UserEntity u" +
-            " LEFT JOIN FETCH u.school" +
-            " LEFT JOIN FETCH u.role" +
-            " WHERE u.userId = :userid")
-    Optional<UserEntity> findById(@Param("id") Long userId);
+            " LEFT JOIN FETCH u.school s" +
+            " LEFT JOIN FETCH u.role r" +
+            " WHERE u.userId = :userId")
+    Optional<UserEntity> findById(@Param("userId") Long userId);
 
     @Query("SELECT s FROM UserEntity s" +
             " LEFT JOIN FETCH s.school sch" +

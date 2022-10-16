@@ -1,6 +1,8 @@
 package com.backend.pbl6schoolsystem.common.constant;
 
 public class Constants {
+    //
+    public static final String PROTECTED = "Protected";
     // Role
     public static final String ADMIN_ROLE = "ADMIN";
     public static final String SCHOOL_ROLE = "SCHOOL";
@@ -15,7 +17,6 @@ public class Constants {
     public static final String UPDATE_PERSONAL_INFORMATION = "Update personal information";
     public static final String SETUP_CALENDAR = "Setup calendar";
     public static final String SETUP_INFORMATION_SCHOOL_YEAR = "Setup information school year";
-
     public static final String CHANGE_PASSWORD = "Change password";
     public static final String INPUT_SCORE = "Input score";
     public static final String SEE_SCORE = "See score";
