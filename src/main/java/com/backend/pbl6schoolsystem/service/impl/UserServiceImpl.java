@@ -5,10 +5,13 @@ import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
 import com.backend.pbl6schoolsystem.mapper.UserMapper;
 import com.backend.pbl6schoolsystem.model.entity.UserEntity;
+import com.backend.pbl6schoolsystem.repository.jpa.RoleRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.UserRepository;
 import com.backend.pbl6schoolsystem.request.user.ChangePasswordRequest;
+import com.backend.pbl6schoolsystem.request.user.UpdateUserRequest;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
+import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.UserInfoResponse;
 import com.backend.pbl6schoolsystem.security.CustomUser;
 import com.backend.pbl6schoolsystem.service.UserService;
@@ -31,6 +34,7 @@ import java.util.*;
 @Slf4j
 public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final String ADMIN = Constants.ADMIN_ROLE;
     private final String SCHOOL = Constants.SCHOOL_ROLE;
     private final String TEACHER = Constants.TEACHER_ROLE;
@@ -63,6 +67,50 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .setSuccess(true)
                 .setUser(UserMapper.entity2dto(user))
                 .setAuthorities(authorities)
+                .build();
+    }
+
+    @Override
+    public OnlyIdResponse updateInfoAccount(Long userId, UpdateUserRequest request) {
+        Map<String, String> errors = new HashMap<>();
+
+        if (!StringUtils.hasText(request.getFirstName())) {
+            errors.put("FirstName", ErrorCode.MISSING_VALUE.name());
+        }
+        if (!StringUtils.hasText(request.getLastName())) {
+            errors.put("LastName", ErrorCode.MISSING_VALUE.name());
+        }
+        if (!StringUtils.hasText(request.getEmail())) {
+            errors.put("Email", ErrorCode.MISSING_VALUE.name());
+        }
+        if (!StringUtils.hasText(request.getWorkingPosition())) {
+            errors.put("WorkingPosition", ErrorCode.MISSING_VALUE.name());
+        }
+
+        if (!errors.isEmpty()) {
+            return OnlyIdResponse.builder()
+                    .setSuccess(false)
+                    .setErrorResponse(ErrorResponse.builder()
+                            .setErrors(errors)
+                            .build())
+                    .build();
+        }
+
+        UserEntity user = userRepository.findById(userId).get();
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setEmail(request.getEmail());
+        user.setPhone(RequestUtil.blankIfNull(request.getPhone()));
+        user.setStreet(RequestUtil.blankIfNull(request.getStreet()));
+        user.setDistrict(RequestUtil.blankIfNull(request.getDistrict()));
+        user.setCity(RequestUtil.blankIfNull(request.getCity()));
+        user.setPlaceOfBirth(RequestUtil.blankIfNull(request.getPlaceOfBirth()));
+        user.setRole(roleRepository.findById(request.getRoleId()).get());
+
+        return OnlyIdResponse.builder()
+                .setSuccess(true)
+                .setId(user.getUserId())
+                .setName(user.getFirstName() + " " + user.getLastName())
                 .build();
     }
 

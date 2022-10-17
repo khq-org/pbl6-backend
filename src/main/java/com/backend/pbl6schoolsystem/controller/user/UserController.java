@@ -2,9 +2,12 @@ package com.backend.pbl6schoolsystem.controller.user;
 
 import com.backend.pbl6schoolsystem.converter.UserConverter;
 import com.backend.pbl6schoolsystem.model.dto.common.MessageDTO;
+import com.backend.pbl6schoolsystem.model.dto.common.OnlyIdDTO;
 import com.backend.pbl6schoolsystem.model.dto.user.UserInfoDTO;
 import com.backend.pbl6schoolsystem.request.user.ChangePasswordRequest;
+import com.backend.pbl6schoolsystem.request.user.UpdateUserRequest;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
+import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.Response;
 import com.backend.pbl6schoolsystem.response.UserInfoResponse;
 import com.backend.pbl6schoolsystem.security.UserPrincipal;
@@ -28,8 +31,13 @@ public class UserController {
     }
 
     @PutMapping
-    public Response<UserInfoDTO> updateMyInfo() {
-        return null;
+    public Response<OnlyIdDTO> updateMyInfo(@RequestBody UpdateUserRequest request) {
+        UserPrincipal principal = SecurityUtils.getPrincipal();
+        OnlyIdResponse response = userService.updateInfoAccount(principal.getUserId(), request);
+        if (response.getSuccess()) {
+            return userConverter.getResponse(response);
+        }
+        return userConverter.getError(response.getErrorResponse());
     }
 
     @PutMapping("/password")

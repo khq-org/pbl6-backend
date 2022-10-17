@@ -2,6 +2,7 @@ package com.backend.pbl6schoolsystem.filter;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
 import com.backend.pbl6schoolsystem.security.CustomUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -32,12 +34,16 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         CustomUser customUser = (CustomUser) userDetailsService.loadUserByUsername(username);
+        if (!passwordEncoder.matches(password, customUser.getPassword())) {
+            throw new NotFoundException("Password invalid");
+        }
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
         return token;
     }
