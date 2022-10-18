@@ -38,8 +38,17 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
+        String username, password;
+        
+        try{
+            Map<String, String> requestMap = new ObjectMapper().readValue(request.getInputStream(), Map.class);
+            username = requestMap.get("username");
+            password = requestMap.get("password");
+        }
+        catch(IOException e){
+            throw new AuthenticationServiceException(e.getMessage(), e);
+        }
+        
         CustomUser customUser = (CustomUser) userDetailsService.loadUserByUsername(username);
         if (!passwordEncoder.matches(password, customUser.getPassword())) {
             throw new NotFoundException("Password invalid");
