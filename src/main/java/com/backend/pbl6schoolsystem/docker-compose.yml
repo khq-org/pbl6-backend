@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: ./
+    container_name: schoolsystem-app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+      - cache
+    links:
+      - db
+      - cache
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASS}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+    networks:
+      - schoolsystem_network
+
+  db:
+    image: postgresql:latest
+    container_name: schoolsystem-db
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+    networks:
+      - schoolsystem_network
+
+  cache:
+    image: redis:latest
+    container_name: schoolsystem-cache
+    ports:
+      - "6379:6379"
+    restart: always
+    networks:
+      - schoolsystem_network
+
+networks:
+  schoolsystem_network:
+    driver: bridge

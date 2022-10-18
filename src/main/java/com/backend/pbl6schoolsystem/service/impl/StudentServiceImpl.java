@@ -70,8 +70,9 @@ public class StudentServiceImpl implements StudentService {
             UserPrincipal principal = SecurityUtils.getPrincipal();
             SchoolEntity school = schoolRepository.findById(principal.getSchoolId())
                     .orElseThrow(() -> new NotFoundException("Not found school with id " + request.getSchoolId()));
-            String studentId = Constants.USERNAME_STUDENT.concat(String.valueOf(userDslRepository.countStudentTeacherInSchool(school.getSchoolId(),
-                    UserRole.STUDENT_ROLE.getRoleId()) + 1));
+            UserEntity lastStudentInSchool = userDslRepository.getLastStudentTeacherInSchool(school.getSchoolId(), UserRole.STUDENT_ROLE.getRoleId());
+            String studentId = Constants.USERNAME_STUDENT.concat(lastStudentInSchool != null ?
+                    String.valueOf(Integer.valueOf(lastStudentInSchool.getStudentId().replace(Constants.USERNAME_STUDENT, "")) + 1) : "1");
             String username = studentId.concat("@").concat(school.getSchool().replace(" ", "").toLowerCase());
             student.setStudentId(studentId);
             student.setRole(roleRepository.findById(UserRole.STUDENT_ROLE.getRoleId()).get());
@@ -175,10 +176,10 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public ListUserResponse getListStudent(ListStudentRequest request) {
-        request.setSchoolId(RequestUtil.defaultIfNull(request.getSchoolId(), (long) -1));
         request.setGradeId(RequestUtil.defaultIfNull(request.getGradeId(), (long) -1));
         request.setClassId(RequestUtil.defaultIfNull(request.getClassId(), (long) -1));
-        List<UserEntity> userEntities = studentDslRepository.getListStudent(request);
+        UserPrincipal principal = SecurityUtils.getPrincipal();
+        List<UserEntity> userEntities = studentDslRepository.getListStudent(request, principal.getSchoolId());
         return ListUserResponse.builder()
                 .setPageResponse(PageResponse.builder()
                         .setTotalItems((long) userEntities.size())

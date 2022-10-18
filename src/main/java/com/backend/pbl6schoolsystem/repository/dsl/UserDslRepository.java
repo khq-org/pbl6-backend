@@ -64,12 +64,12 @@ public class UserDslRepository {
         return query.fetch();
     }
 
-    public Long countSchoolAdmin() {
+    public UserEntity getLastSchoolAdmin() {
         JPAQuery<UserEntity> query = queryFactory.select(user)
                 .from(user)
-                .where(user.role.roleId.eq(UserRole.SCHOOL_ROLE.getRoleId()));
-        JPAQuery<Long> count = query.clone().select(user.userId.count());
-        return count.fetchFirst();
+                .where(user.role.roleId.eq(UserRole.SCHOOL_ROLE.getRoleId()))
+                .orderBy(new OrderSpecifier<>(Order.DESC, user.userId));
+        return query.fetchFirst();
     }
 
     public Long countStudentTeacherInSchool(Long schoolId, Long roleId) {
@@ -79,5 +79,14 @@ public class UserDslRepository {
                 .where(user.role.roleId.eq(roleId));
         JPAQuery<Long> countQuery = query.clone().select(user.userId.count());
         return countQuery.fetchFirst();
+    }
+
+    public UserEntity getLastStudentTeacherInSchool(Long schoolId, Long roleId) {
+        JPAQuery<UserEntity> query = queryFactory.select(user)
+                .from(user)
+                .where(user.school.schoolId.eq(schoolId))
+                .where(user.role.roleId.eq(roleId))
+                .orderBy(new OrderSpecifier<>(Order.DESC, user.userId));
+        return query.fetchFirst();
     }
 }

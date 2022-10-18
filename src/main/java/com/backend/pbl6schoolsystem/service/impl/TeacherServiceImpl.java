@@ -124,7 +124,9 @@ public class TeacherServiceImpl implements TeacherService {
 
         SchoolEntity school = schoolRepository.findById(schoolId).orElseThrow(() -> new NotFoundException("Not found school with id " + schoolId));
         UserEntity teacher = new UserEntity();
-        String teacherId = Constants.USERNAME_TEACHER.concat(String.valueOf(userDslRepository.countStudentTeacherInSchool(schoolId, UserRole.TEACHER_ROLE.getRoleId()) + 1));
+        UserEntity lastTeacherInSchool = userDslRepository.getLastStudentTeacherInSchool(school.getSchoolId(), UserRole.TEACHER_ROLE.getRoleId());
+        String teacherId = Constants.USERNAME_TEACHER.concat(lastTeacherInSchool != null ?
+                String.valueOf(Integer.valueOf(lastTeacherInSchool.getTeacherId().replace(Constants.USERNAME_TEACHER, "")) + 1) : "1");
         String username = teacherId.concat("@").concat(school.getSchool().replace(" ", "").toLowerCase());
         teacher.setTeacherId(teacherId);
         teacher.setUsername(username);

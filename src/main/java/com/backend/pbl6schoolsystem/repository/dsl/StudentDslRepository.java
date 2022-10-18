@@ -21,10 +21,10 @@ public class StudentDslRepository {
     private final QUserEntity user = QUserEntity.userEntity;
     private final JPAQueryFactory queryFactory;
 
-    public List<UserEntity> getListStudent(ListStudentRequest request) {
+    public List<UserEntity> getListStudent(ListStudentRequest request, Long schoolId) {
         JPAQuery<UserEntity> query = queryFactory.select(user)
                 .from(user)
-                .where(user.school.schoolId.eq(request.getSchoolId()))
+                .where(user.school.schoolId.eq(schoolId))
                 .where(user.role.roleId.eq(UserRole.STUDENT_ROLE.getRoleId()));
         if (StringUtils.hasText(request.getSearch())) {
             query.where(user.firstName.containsIgnoreCase(request.getSearch())

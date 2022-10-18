@@ -12,6 +12,5 @@ public class ListTeacherRequest extends PageRequest {
     private String search;
     private String district;
     private Long classId;
-    private Long schoolId;
     private String workingPosition;
 }

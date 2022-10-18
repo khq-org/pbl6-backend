@@ -107,6 +107,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setPlaceOfBirth(RequestUtil.blankIfNull(request.getPlaceOfBirth()));
         user.setRole(roleRepository.findById(request.getRoleId()).get());
 
+        userRepository.save(user);
+
         return OnlyIdResponse.builder()
                 .setSuccess(true)
                 .setId(user.getUserId())

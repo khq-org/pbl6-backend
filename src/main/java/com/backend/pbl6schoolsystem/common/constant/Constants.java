@@ -14,6 +14,7 @@ public class Constants {
     public static final String MANAGE_SCHOOL_ADMIN = "Manage school admin";
     public static final String MANAGE_TEACHER = "Manage teacher";
     public static final String MANAGE_STUDENT = "Manage student";
+    public static final String MANAGE_CLASS = "Manage class";
     public static final String UPDATE_PERSONAL_INFORMATION = "Update personal information";
     public static final String SETUP_CALENDAR = "Setup calendar";
     public static final String SETUP_INFORMATION_SCHOOL_YEAR = "Setup information school year";

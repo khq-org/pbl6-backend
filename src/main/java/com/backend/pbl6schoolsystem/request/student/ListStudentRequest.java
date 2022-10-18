@@ -13,6 +13,5 @@ public class ListStudentRequest extends PageRequest {
     private String city;
     private Long classId;
     private Long gradeId;
-    private Long schoolId;
     private String search;
 }

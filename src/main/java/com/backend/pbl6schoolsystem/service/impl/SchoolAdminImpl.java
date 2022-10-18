@@ -62,7 +62,9 @@ public class SchoolAdminImpl implements SchoolAdminService {
 
         SchoolEntity school = schoolRepository.findById(request.getSchoolId())
                 .orElseThrow(() -> new NotFoundException("Not found school with id " + request.getSchoolId()));
-        String username = Constants.USERNAME_SCHOOL_ADMIN.concat(String.valueOf(userDslRepository.countSchoolAdmin() + 1));
+        UserEntity lastSchoolAdmin = userDslRepository.getLastSchoolAdmin();
+        String username = Constants.USERNAME_SCHOOL_ADMIN.concat(lastSchoolAdmin != null ?
+                String.valueOf(Integer.valueOf(lastSchoolAdmin.getUsername().replace(Constants.USERNAME_SCHOOL_ADMIN, "")) + 1) : "1");
         UserEntity schoolAdmin = new UserEntity();
         schoolAdmin.setFirstName(request.getFirstName());
         schoolAdmin.setLastName(request.getLastName());
