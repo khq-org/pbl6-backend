@@ -24,15 +24,14 @@ public class ClassEntity implements Serializable {
     private String clazz;
     @Column(name = "specializedclass")
     private Boolean isSpecializedClass;
+    @Column(name = "subject")
+    private String subject;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gradeid", referencedColumnName = "gradeid", nullable = false)
     private GradeEntity grade;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "schoolid", referencedColumnName = "schoolid", nullable = false)
     private SchoolEntity school;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "teacherid", referencedColumnName = "userid")
-    private UserEntity teacher;
     @Column(name = "createddate")
     private Timestamp createdDate;
     @Column(name = "modifieddate")

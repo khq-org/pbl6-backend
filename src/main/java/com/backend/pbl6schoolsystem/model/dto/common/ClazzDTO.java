@@ -14,16 +14,6 @@ public class ClazzDTO implements Serializable {
     private Long classId;
     private String clazz;
     private GradeDTO grade;
-    private Teacher teacher;
     private Boolean specializedClass;
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder(setterPrefix = "set")
-    public static class Teacher {
-        private Long teacherId;
-        private String teacher;
-    }
+    private String subject;
 }
