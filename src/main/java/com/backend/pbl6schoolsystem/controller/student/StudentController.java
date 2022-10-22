@@ -15,9 +15,11 @@ import com.backend.pbl6schoolsystem.response.student.GetStudentResponse;
 import com.backend.pbl6schoolsystem.response.user.ListUserResponse;
 import com.backend.pbl6schoolsystem.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Student", description = "Student APIs")
 @RestController
 @RequestMapping("/api/students")
 @RequiredArgsConstructor

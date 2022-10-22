@@ -16,7 +16,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.util.Collections;
 
 @SpringBootApplication
-@EnableSwagger2
 public class Pbl6SchoolsystemApplication {
 
     public static void main(String[] args) {
@@ -28,24 +27,4 @@ public class Pbl6SchoolsystemApplication {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public Docket swaggerConfig() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .select()
-                .paths(PathSelectors.ant("/api/*"))
-                .build()
-                .apiInfo(apiInfo());
-    }
-
-    private ApiInfo apiInfo() {
-        return new ApiInfo(
-                "PBL6 - School System",
-                "APIs for Project",
-                "1.0",
-                "Privacy",
-                "https://www.facebook.com/kiet.nguyendang.1705/",
-                "API license",
-                "ndkiet.dev"
-        );
-    }
 }

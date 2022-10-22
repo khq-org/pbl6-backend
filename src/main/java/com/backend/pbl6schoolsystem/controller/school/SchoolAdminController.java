@@ -15,11 +15,13 @@ import com.backend.pbl6schoolsystem.response.Response;
 import com.backend.pbl6schoolsystem.service.SchoolAdminService;
 import com.backend.pbl6schoolsystem.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+@Tag(name = "School Admin", description = "School Admin APIs")
 @RestController
 @RequestMapping("/api/schooladmins")
 @RequiredArgsConstructor

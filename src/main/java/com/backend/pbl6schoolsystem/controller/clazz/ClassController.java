@@ -14,11 +14,13 @@ import com.backend.pbl6schoolsystem.response.clazz.GetClassResponse;
 import com.backend.pbl6schoolsystem.response.clazz.ListClassResponse;
 import com.backend.pbl6schoolsystem.service.ClazzService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+@Tag(name = "Class", description = "Class APIs")
 @RestController
 @RequestMapping("/api/classes")
 @RequiredArgsConstructor
