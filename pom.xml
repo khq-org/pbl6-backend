@@ -140,7 +140,9 @@
                 </configuration>
             </plugin>
         </plugins>
-        <finalName>pbl6-schoolsystem-backend</finalName>
+        <finalName>
+            pbl6-schoolsystem
+        </finalName>
     </build>
 
 </project>
