@@ -4,18 +4,21 @@ import com.backend.pbl6schoolsystem.common.constant.Constants;
 import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
 import com.backend.pbl6schoolsystem.mapper.UserMapper;
-import com.backend.pbl6schoolsystem.model.entity.UserEntity;
-import com.backend.pbl6schoolsystem.repository.jpa.RoleRepository;
-import com.backend.pbl6schoolsystem.repository.jpa.UserRepository;
+import com.backend.pbl6schoolsystem.model.dto.calendar.CalendarEventDTO;
+import com.backend.pbl6schoolsystem.model.entity.*;
+import com.backend.pbl6schoolsystem.repository.jpa.*;
 import com.backend.pbl6schoolsystem.request.user.ChangePasswordRequest;
 import com.backend.pbl6schoolsystem.request.user.UpdateUserRequest;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.UserInfoResponse;
+import com.backend.pbl6schoolsystem.response.calendar.ListCalendarResponse;
 import com.backend.pbl6schoolsystem.security.CustomUser;
+import com.backend.pbl6schoolsystem.security.UserPrincipal;
 import com.backend.pbl6schoolsystem.service.UserService;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
+import com.backend.pbl6schoolsystem.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,6 +31,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +39,9 @@ import java.util.*;
 public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final StudentClazzRepository studentClazzRepository;
+    private final ClassCalendarRepository classCalendarRepository;
+    private final UserCalendarRepository userCalendarRepository;
     private final String ADMIN = Constants.ADMIN_ROLE;
     private final String SCHOOL = Constants.SCHOOL_ROLE;
     private final String TEACHER = Constants.TEACHER_ROLE;
@@ -159,6 +166,47 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .setErrorResponse(ErrorResponse.builder()
                         .setErrors(errors)
                         .build())
+                .build();
+    }
+
+    @Override
+    public ListCalendarResponse getListCalendar() {
+        UserPrincipal principal = SecurityUtils.getPrincipal();
+        List<CalendarEventEntity> listCalendarEvent = new ArrayList<>();
+        ClassEntity clazz;
+        List<ClassCalendarEventEntity> listClassCalendar;
+
+        if (principal.isStudent()) {
+            clazz = studentClazzRepository.getCurrentClassForStudent(principal.getUserId()).orElse(null);
+            listClassCalendar = classCalendarRepository.listClassCalendarEvent(clazz != null ? clazz.getClassId() : -1L);
+            if (listClassCalendar != null) {
+                listCalendarEvent.addAll(listClassCalendar.stream()
+                        .map(cc -> cc.getCalendarEvent())
+                        .collect(Collectors.toList()));
+            }
+        }
+
+        List<UserCalendarEventEntity> listUserCalendar = userCalendarRepository.findListUserCalendar(principal.getUserId());
+        if (listUserCalendar != null) {
+            listCalendarEvent.addAll(listUserCalendar.stream()
+                    .map(uc -> uc.getCalendarEvent())
+                    .collect(Collectors.toList()));
+        }
+
+        return ListCalendarResponse.builder()
+                .setSuccess(true)
+                .setItems(listCalendarEvent.stream()
+                        .map(ce -> CalendarEventDTO.builder()
+                                .setCalendarEventId(ce.getCalendarEventId())
+                                .setCalendarEvent(ce.getCalendarEvent())
+                                .setCalendarDate(ce.getCalendarDate())
+                                .setCalendarEventType(ce.getCalendarEventType())
+                                .setLessonStart(RequestUtil.defaultIfNull(ce.getLessonStart(), -1))
+                                .setLessonFinish(RequestUtil.defaultIfNull(ce.getLessonStart(), -1))
+                                .setRoomName(ce.getRoom().getRoom())
+                                .setDayOfWeek(RequestUtil.blankIfNull(ce.getDayOfWeek()))
+                                .build())
+                        .collect(Collectors.toList()))
                 .build();
     }
 

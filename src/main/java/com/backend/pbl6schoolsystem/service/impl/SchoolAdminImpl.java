@@ -148,7 +148,7 @@ public class SchoolAdminImpl implements SchoolAdminService {
                         .setFirstName(schoolAdmin.getFirstName())
                         .setLastName(schoolAdmin.getLastName())
                         .setEmail(schoolAdmin.getEmail())
-                        .setPassword("Anonymous")
+                        .setPassword(Constants.PROTECTED)
                         .setSchoolId(schoolAdmin.getSchool().getSchoolId())
                         .setSchoolName(schoolAdmin.getSchool().getSchool())
                         .build())

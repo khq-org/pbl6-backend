@@ -29,4 +29,9 @@ public class Constants {
     public static final String USERNAME_SCHOOL_ADMIN = "schooladmin";
     public static final String USERNAME_TEACHER = "teacher";
     public static final String USERNAME_STUDENT = "student";
+
+    // Calendar type
+    public static final String MEETING = "Meeting";
+    public static final String STUDY = "Study";
+    public static final String EXAMINATION = "Examination";
 }

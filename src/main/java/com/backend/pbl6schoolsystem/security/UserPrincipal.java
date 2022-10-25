@@ -20,15 +20,15 @@ public class UserPrincipal implements Serializable {
     private Long schoolId;
     private Timestamp createdDate;
 
-    private Boolean isSchoolAdmin() {
+    public Boolean isSchoolAdmin() {
         return UserRole.SCHOOL_ROLE.getRole().equalsIgnoreCase(role);
     }
 
-    private Boolean isStudent() {
+    public Boolean isStudent() {
         return UserRole.STUDENT_ROLE.getRole().equalsIgnoreCase(role);
     }
 
-    private Boolean isTeacher() {
+    public Boolean isTeacher() {
         return UserRole.TEACHER_ROLE.getRole().equalsIgnoreCase(role);
     }
 }

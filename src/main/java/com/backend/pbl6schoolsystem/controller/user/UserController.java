@@ -1,6 +1,8 @@
 package com.backend.pbl6schoolsystem.controller.user;
 
 import com.backend.pbl6schoolsystem.converter.UserConverter;
+import com.backend.pbl6schoolsystem.model.dto.calendar.CalendarEventDTO;
+import com.backend.pbl6schoolsystem.model.dto.common.ListDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.MessageDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.OnlyIdDTO;
 import com.backend.pbl6schoolsystem.model.dto.user.UserInfoDTO;
@@ -10,6 +12,7 @@ import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.Response;
 import com.backend.pbl6schoolsystem.response.UserInfoResponse;
+import com.backend.pbl6schoolsystem.response.calendar.ListCalendarResponse;
 import com.backend.pbl6schoolsystem.security.UserPrincipal;
 import com.backend.pbl6schoolsystem.service.UserService;
 import com.backend.pbl6schoolsystem.util.SecurityUtils;
@@ -31,6 +34,13 @@ public class UserController {
     public Response<UserInfoDTO> getMyInfo() {
         UserPrincipal principal = SecurityUtils.getPrincipal();
         UserInfoResponse response = userService.getInfoAccount(principal.getUserId());
+        return userConverter.getResponse(response);
+    }
+
+    @Operation(summary = "List calendar event")
+    @GetMapping("/calendar")
+    public Response<ListDTO<CalendarEventDTO>> listCalendarEvent() {
+        ListCalendarResponse response = userService.getListCalendar();
         return userConverter.getResponse(response);
     }
 

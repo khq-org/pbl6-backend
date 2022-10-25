@@ -11,8 +11,7 @@ import java.time.LocalTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@JsonIgnoreProperties()
+@Builder(setterPrefix = "set")
 public class CalendarEventDTO implements Serializable {
     private Long calendarEventId;
     private String calendarEvent;

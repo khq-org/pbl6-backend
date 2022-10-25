@@ -1,5 +1,7 @@
 package com.backend.pbl6schoolsystem.converter;
 
+import com.backend.pbl6schoolsystem.common.constant.Constants;
+import com.backend.pbl6schoolsystem.model.dto.calendar.CalendarEventDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.ListDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.UserDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.StudentDTO;
@@ -7,6 +9,7 @@ import com.backend.pbl6schoolsystem.model.dto.teacher.TeacherDTO;
 import com.backend.pbl6schoolsystem.model.dto.user.SchoolAdminDTO;
 import com.backend.pbl6schoolsystem.model.dto.user.UserInfoDTO;
 import com.backend.pbl6schoolsystem.response.UserInfoResponse;
+import com.backend.pbl6schoolsystem.response.calendar.ListCalendarResponse;
 import com.backend.pbl6schoolsystem.response.teacher.GetTeacherResponse;
 import com.backend.pbl6schoolsystem.response.user.GetSchoolAdminResponse;
 import com.backend.pbl6schoolsystem.response.user.ListUserResponse;
@@ -50,7 +53,7 @@ public class UserConverter extends CommonConverter {
                                         .setFirstName(r.getFirstName())
                                         .setLastName(r.getLastName())
                                         .setEmail(r.getEmail())
-                                        .setPassword("Anonymous")
+                                        .setPassword(Constants.PROTECTED)
                                         .setSchoolId(r.getSchoolId())
                                         .setSchoolName(r.getSchoolName())
                                         .build())
@@ -82,6 +85,17 @@ public class UserConverter extends CommonConverter {
                 .setData(UserInfoDTO.builder()
                         .setUser(response.getUser())
                         .setAuthorities(response.getAuthorities())
+                        .build())
+                .setTimestamp(new Timestamp(System.currentTimeMillis()))
+                .build();
+    }
+
+    public Response<ListDTO<CalendarEventDTO>> getResponse(ListCalendarResponse response) {
+        return Response.<ListDTO<CalendarEventDTO>>builder()
+                .setSuccess(true)
+                .setData(ListDTO.<CalendarEventDTO>builder()
+                        .setTotalItems((long) response.getItems().size())
+                        .setItems(response.getItems())
                         .build())
                 .setTimestamp(new Timestamp(System.currentTimeMillis()))
                 .build();
