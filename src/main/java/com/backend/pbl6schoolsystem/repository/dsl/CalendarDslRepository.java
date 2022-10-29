@@ -1,13 +1,20 @@
 package com.backend.pbl6schoolsystem.repository.dsl;
 
+import com.backend.pbl6schoolsystem.common.constant.Constants;
 import com.backend.pbl6schoolsystem.model.entity.CalendarEventEntity;
 import com.backend.pbl6schoolsystem.model.entity.QCalendarEventEntity;
+import com.backend.pbl6schoolsystem.model.entity.QClassCalendarEventEntity;
+import com.backend.pbl6schoolsystem.model.entity.QUserCalendarEventEntity;
 import com.backend.pbl6schoolsystem.request.calendar.ListCalendarRequest;
 import com.backend.pbl6schoolsystem.security.UserPrincipal;
+import com.backend.pbl6schoolsystem.util.RequestUtil;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -15,11 +22,49 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CalendarDslRepository {
     private final QCalendarEventEntity calendar = QCalendarEventEntity.calendarEventEntity;
+    private final QUserCalendarEventEntity userCalendar = QUserCalendarEventEntity.userCalendarEventEntity;
+    private final QClassCalendarEventEntity classCalendar = QClassCalendarEventEntity.classCalendarEventEntity;
     private final JPAQueryFactory queryFactory;
 
-    public List<CalendarEventEntity> listCalendar(ListCalendarRequest request) {
-        return null;
-    }
+    public List<CalendarEventEntity> listCalendar(ListCalendarRequest request, Long userId) {
+        JPAQuery<CalendarEventEntity> query = queryFactory.select(calendar)
+                .from(calendar)
+                .innerJoin(userCalendar).on(userCalendar.calendarEvent.calendarEventId.eq(calendar.calendarEventId))
+                .innerJoin(classCalendar).on(classCalendar.calendarEvent.calendarEventId.eq(calendar.calendarEventId))
+                .where(calendar.createdBy.userId.eq(userId));
 
+        if (request.getClassId() > 0) {
+            query.where(classCalendar.clazz.classId.eq(request.getClassId()));
+        }
+        if (request.getUserId() > 0) {
+            query.where(userCalendar.user.userId.eq(request.getUserId()));
+        }
+        if (StringUtils.hasText(request.getCalendarEvent())) {
+            query.where(calendar.calendarEvent.containsIgnoreCase(request.getCalendarEvent()));
+        }
+        if (request.getCalendarEvent().equalsIgnoreCase(Constants.STUDY)
+                || request.getCalendarEvent().equalsIgnoreCase(Constants.MEETING)
+                || request.getCalendarEvent().equalsIgnoreCase(Constants.EXAMINATION)) {
+            query.where(calendar.calendarEventType.equalsIgnoreCase(request.getCalendarEvent()));
+        }
+
+        query.leftJoin(calendar.room).fetchJoin();
+        query.leftJoin(calendar.subject).fetchJoin();
+
+        int page = RequestUtil.getPage(request.getPage());
+        int size = RequestUtil.getSize(request.getSize());
+        int offset = page * size;
+        String sort = request.getSort();
+        Order order = Order.DESC.name().equalsIgnoreCase(request.getDirection()) ? Order.DESC : Order.ASC;
+        if ("name".equalsIgnoreCase(sort)) {
+            query.orderBy(new OrderSpecifier<>(order, calendar.calendarEvent));
+        }
+        if (!request.getAll()) {
+            query.limit(size);
+        }
+        query.offset(offset);
+
+        return query.fetch();
+    }
 
 }

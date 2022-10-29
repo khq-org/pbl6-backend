@@ -17,7 +17,7 @@ public class UpdateUserRequest {
     private String street;
     private String district;
     private String city;
-    private LocalDate dateOfBirth;
+    private String dateOfBirth;
     private String placeOfBirth;
     private String nationality;
     private String workingPosition;

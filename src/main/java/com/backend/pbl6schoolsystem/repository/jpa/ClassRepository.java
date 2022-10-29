@@ -19,4 +19,8 @@ public interface ClassRepository extends JpaRepository<ClassEntity, Long> {
             " WHERE c.school.schoolId = :schoolId" +
             " AND c.clazz = :className")
     Optional<ClassEntity> findClassByName(@Param("className") String className, @Param("schoolId") Long schoolId);
+
+    @Query("SELECT c FROM ClassEntity c" +
+            " WHERE c.classId IN (:classIds)")
+    List<ClassEntity> findClassesByIds(@Param("classIds") List<Long> classIds);
 }

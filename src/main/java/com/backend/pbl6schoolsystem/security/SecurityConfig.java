@@ -42,6 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UserRole.ADMIN_ROLE.getRole(), UserRole.TEACHER_ROLE.getRole(), UserRole.STUDENT_ROLE.getRole());
         http.authorizeRequests().antMatchers("/api/schooladmins/**", "/api/schools/**").hasAuthority(UserRole.ADMIN_ROLE.getRole());
         http.authorizeRequests().antMatchers("/api/teachers/**", "/api/students/**", "/api/classes/**").hasAuthority(UserRole.SCHOOL_ROLE.getRole());
+        http.authorizeRequests().antMatchers("/api/calendars/**").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(), UserRole.TEACHER_ROLE.getRole());
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(filter);
         http.addFilterBefore(new CustomAuthorizationFilter(userDetailsService), UsernamePasswordAuthenticationFilter.class);
