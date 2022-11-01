@@ -86,6 +86,7 @@ public class StudentServiceImpl implements StudentService {
             student.setDistrict(RequestUtil.blankIfNull(request.getDistrict()));
             student.setCity(RequestUtil.blankIfNull(request.getCity()));
             student.setSchool(school);
+            student = userRepository.save(student); // save student
             UserEntity parentEntity;
             ParentStudentEntity parentStudentEntity;
             if (request.getParents() != null) {
@@ -117,7 +118,6 @@ public class StudentServiceImpl implements StudentService {
                     listParent.add(parentEntity);
                 }
 
-                userRepository.save(student); // save student
                 for (UserEntity parent : listParent) {
                     userRepository.save(parent); // save parent
                     parentStudentEntity = new ParentStudentEntity();

@@ -14,11 +14,11 @@ public class CreateUpdateCalendarRequest {
     private String calendarEventType;
     private List<Long> classIds;
     private List<Long> userIds;
-    @Schema(example = "07:00")
+    @Schema(example = "07:00") // hh:mm
     private String timeStart;
-    @Schema(example = "08:45")
+    @Schema(example = "08:45") // hh:mm
     private String timeFinish;
-    @Schema(example = "2022-10-20")
+    @Schema(example = "2022-10-20") // yyyy-mm-dd
     private String date;
     @Schema(description = "Monday -> Saturday", example = "Tuesday")
     private String dayOfWeek;

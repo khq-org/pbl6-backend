@@ -53,4 +53,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             " WHERE u.school.schoolId = :schoolId" +
             " AND u.email = :email")
     Optional<UserEntity> findByEmailInSchool(String email, Long schoolId);
+
+    @Query("SELECT uce.user.userId FROM UserCalendarEventEntity uce" +
+            " WHERE uce.calendarEvent.calendarEventId = :calendarEventId" +
+            " AND uce.user.role.roleId = :roleId")
+    List<Long> findUsersByCalendar(@Param("calendarEventId") Long calendarEventId, @Param("roleId") Long roleId);
 }

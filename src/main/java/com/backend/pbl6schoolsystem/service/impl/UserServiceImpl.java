@@ -179,7 +179,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (principal.isStudent()) {
             clazz = studentClazzRepository.getCurrentClassForStudent(principal.getUserId()).orElse(null);
             listClassCalendar = classCalendarRepository.listClassCalendarEvent(clazz != null ? clazz.getClassId() : -1L);
-            if (listClassCalendar != null) {
+            if (!listClassCalendar.isEmpty()) {
                 listCalendarEvent.addAll(listClassCalendar.stream()
                         .map(cc -> cc.getCalendarEvent())
                         .collect(Collectors.toList()));
@@ -187,28 +187,47 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
 
         List<UserCalendarEventEntity> listUserCalendar = userCalendarRepository.findListUserCalendar(principal.getUserId());
-        if (listUserCalendar != null) {
+        if (!listUserCalendar.isEmpty()) {
             listCalendarEvent.addAll(listUserCalendar.stream()
                     .map(uc -> uc.getCalendarEvent())
                     .collect(Collectors.toList()));
         }
 
+
+        CalendarEventDTO.CalendarEventDTOBuilder builder = CalendarEventDTO.builder();
+
         return ListCalendarResponse.builder()
                 .setSuccess(true)
                 .setItems(listCalendarEvent.stream()
-                        .map(ce -> CalendarEventDTO.builder()
-                                .setCalendarEventId(ce.getCalendarEventId())
-                                .setCalendarEvent(ce.getCalendarEvent())
-                                .setCalendarDate(ce.getCalendarDate())
-                                .setCalendarEventType(ce.getCalendarEventType())
-                                .setLessonStart(RequestUtil.defaultIfNull(ce.getLessonStart(), -1))
-                                .setLessonFinish(RequestUtil.defaultIfNull(ce.getLessonStart(), -1))
-                                .setRoomName(ce.getRoom().getRoom())
-                                .setDayOfWeek(RequestUtil.blankIfNull(ce.getDayOfWeek()))
-                                .build())
+                        .map(ce -> entity2dto(ce))
                         .collect(Collectors.toList()))
                 .build();
     }
+
+    public CalendarEventDTO entity2dto(CalendarEventEntity entity) {
+        CalendarEventDTO.CalendarEventDTOBuilder builder = CalendarEventDTO.builder();
+        builder.setCalendarEventId(entity.getCalendarEventId())
+                .setCalendarEvent(entity.getCalendarEvent())
+                .setCalendarEventType(entity.getCalendarEventType())
+                .setDayOfWeek(RequestUtil.blankIfNull(entity.getDayOfWeek()))
+                .setLessonStart(RequestUtil.defaultIfNull(entity.getLessonStart(), -1))
+                .setLessonFinish(RequestUtil.defaultIfNull(entity.getLessonFinish(), -1));
+        if (entity.getTimeStart() != null && entity.getTimeFinish() != null) {
+            builder.setTimeStart(entity.getTimeStart().toString());
+            builder.setTimeFinish(entity.getTimeFinish().toString());
+        }
+        if (entity.getCalendarDate() != null) {
+            builder.setCalendarDate(entity.getCalendarDate().toString());
+        }
+        if (entity.getRoom() != null) {
+            builder.setRoomName(entity.getRoom().getRoom());
+        }
+        if (entity.getSubject() != null) {
+            builder.setSubjectName(entity.getSubject().getSubject());
+        }
+        return builder.build();
+    }
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

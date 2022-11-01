@@ -1,5 +1,6 @@
 package com.backend.pbl6schoolsystem.model.dto.calendar;
 
+import com.backend.pbl6schoolsystem.model.dto.student.StudentDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
@@ -18,10 +19,10 @@ public class CalendarEventDTO implements Serializable {
     private String calendarEventType;
     private Integer lessonStart;
     private Integer lessonFinish;
-    private LocalTime timeStart;
-    private LocalTime timeFinish;
+    private String timeStart;
+    private String timeFinish;
     private String roomName;
     private String subjectName;
-    private LocalDate calendarDate;
+    private String calendarDate;
     private String dayOfWeek;
 }

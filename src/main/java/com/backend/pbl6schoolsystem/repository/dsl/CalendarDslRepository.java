@@ -26,18 +26,16 @@ public class CalendarDslRepository {
     private final QClassCalendarEventEntity classCalendar = QClassCalendarEventEntity.classCalendarEventEntity;
     private final JPAQueryFactory queryFactory;
 
-    public List<CalendarEventEntity> listCalendar(ListCalendarRequest request, Long userId) {
+    public List<CalendarEventEntity> listCalendar(ListCalendarRequest request, UserPrincipal principal) {
         JPAQuery<CalendarEventEntity> query = queryFactory.select(calendar)
-                .from(calendar)
-                .innerJoin(userCalendar).on(userCalendar.calendarEvent.calendarEventId.eq(calendar.calendarEventId))
-                .innerJoin(classCalendar).on(classCalendar.calendarEvent.calendarEventId.eq(calendar.calendarEventId))
-                .where(calendar.createdBy.userId.eq(userId));
-
+                .from(calendar);
         if (request.getClassId() > 0) {
-            query.where(classCalendar.clazz.classId.eq(request.getClassId()));
+            query.innerJoin(classCalendar).on(classCalendar.calendarEvent.calendarEventId.eq(calendar.calendarEventId))
+                    .where(classCalendar.clazz.classId.eq(request.getClassId()));
         }
         if (request.getUserId() > 0) {
-            query.where(userCalendar.user.userId.eq(request.getUserId()));
+            query.innerJoin(userCalendar).on(userCalendar.calendarEvent.calendarEventId.eq(calendar.calendarEventId))
+                    .where(userCalendar.user.userId.eq(request.getUserId()));
         }
         if (StringUtils.hasText(request.getCalendarEvent())) {
             query.where(calendar.calendarEvent.containsIgnoreCase(request.getCalendarEvent()));
@@ -48,6 +46,7 @@ public class CalendarDslRepository {
             query.where(calendar.calendarEventType.equalsIgnoreCase(request.getCalendarEvent()));
         }
 
+        query.where(calendar.createdBy.school.schoolId.eq(principal.getSchoolId()));
         query.leftJoin(calendar.room).fetchJoin();
         query.leftJoin(calendar.subject).fetchJoin();
 

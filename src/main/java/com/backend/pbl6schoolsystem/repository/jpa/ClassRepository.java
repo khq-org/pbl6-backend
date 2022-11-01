@@ -23,4 +23,11 @@ public interface ClassRepository extends JpaRepository<ClassEntity, Long> {
     @Query("SELECT c FROM ClassEntity c" +
             " WHERE c.classId IN (:classIds)")
     List<ClassEntity> findClassesByIds(@Param("classIds") List<Long> classIds);
+
+    @Query("SELECT c FROM ClassCalendarEventEntity cce" +
+            " INNER JOIN cce.clazz c" +
+            " ON cce.clazz.classId = c.classId" +
+            " LEFT JOIN FETCH c.grade" +
+            " WHERE cce.calendarEvent.calendarEventId = :calendarEventId")
+    List<ClassEntity> findClassesByCalendar(@Param("calendarEventId") Long calendarEventId);
 }
