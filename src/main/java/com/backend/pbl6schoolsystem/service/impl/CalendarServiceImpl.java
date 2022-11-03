@@ -84,7 +84,15 @@ public class CalendarServiceImpl implements CalendarService {
 
         if (!studentIds.isEmpty() && Constants.EXAMINATION.equalsIgnoreCase(calendarEvent.getCalendarEventType())) {
             List<StudentClazzEntity> studentClasses = studentClazzRepository.findByStudents(studentIds);
-            builder.setUsers(studentClasses.stream()
+            Map<Long/*studentId*/, StudentClazzEntity> studentClazzMap = new HashMap<>();
+
+            for (StudentClazzEntity sc : studentClasses) {
+                if (!studentClazzMap.containsKey(sc.getStudent().getUserId())) {
+                    studentClazzMap.put(sc.getStudent().getUserId(), sc);
+                }
+            }
+
+            builder.setUsers(studentClazzMap.values().stream()
                     .map(u -> CalendarEventDetailDTO.User.builder()
                             .setUserId(u.getStudent().getUserId())
                             .setFirstName(u.getStudent().getFirstName())

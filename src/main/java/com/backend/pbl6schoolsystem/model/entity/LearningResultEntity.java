@@ -19,12 +19,10 @@ public class LearningResultEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "learningresultid")
     private Long learningResultId;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "profilestudentid", referencedColumnName = "profilestudentid")
-    private ProfileStudentEntity profileStudent;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "schoolyearid", referencedColumnName = "schoolyearid")
-    private SchoolYearEntity schoolYear;
+    @Column(name = "schoolyear")
+    private String schoolYear;
+    @Column(name = "classid")
+    private Long clazzId;
     @Column(name = "averagescore")
     private Double averageScore;
     @Column(name = "conduct")
@@ -33,4 +31,7 @@ public class LearningResultEntity implements Serializable {
     private String learningGrading;
     @Column(name = "isPassed")
     private Boolean isPassed;
+    @ManyToOne
+    @JoinColumn(name = "profilestudentid", referencedColumnName = "profilestudentid")
+    private ProfileStudentEntity profileStudent;
 }

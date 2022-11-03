@@ -23,6 +23,7 @@ public interface StudentClazzRepository extends JpaRepository<StudentClazzEntity
     @Query("SELECT sc FROM StudentClazzEntity sc" +
             " LEFT JOIN FETCH sc.clazz" +
             " LEFT JOIN FETCH sc.student s" +
-            " WHERE s.userId IN (:studentIds)")
+            " WHERE s.userId IN (:studentIds)" +
+            " ORDER BY sc.studentClassId DESC")
     List<StudentClazzEntity> findByStudents(@Param("studentIds") List<Long> studentIds);
 }
