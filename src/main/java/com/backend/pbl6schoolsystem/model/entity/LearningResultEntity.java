@@ -19,10 +19,12 @@ public class LearningResultEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "learningresultid")
     private Long learningResultId;
-    @Column(name = "schoolyear")
-    private String schoolYear;
-    @Column(name = "classid")
-    private Long clazzId;
+    @ManyToOne
+    @JoinColumn(name = "schoolyearid", referencedColumnName = "schoolyearid")
+    private SchoolYearEntity schoolYear;
+    @ManyToOne
+    @JoinColumn(name = "classid", referencedColumnName = "classid")
+    private ClassEntity clazz;
     @Column(name = "averagescore")
     private Double averageScore;
     @Column(name = "conduct")

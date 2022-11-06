@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Getter
@@ -25,4 +26,8 @@ public class ProfileStudentEntity implements Serializable {
     private UserEntity student;
     @OneToMany(mappedBy = "profileStudent", cascade = CascadeType.ALL)
     private List<LearningResultEntity> learningResults;
+    @Column(name = "createddate")
+    private Timestamp createdDate;
+    @Column(name = "updateddate")
+    private Timestamp updateddate;
 }

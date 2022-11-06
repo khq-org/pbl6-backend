@@ -59,9 +59,10 @@ public class SchoolServiceImpl implements SchoolService {
 
     @Override
     public OnlyIdResponse updateSchool(Long schoolId, UpdateSchoolRequest request) {
+        SchoolEntity school = schoolRepository.findById(schoolId).orElseThrow(() -> new NotFoundException("Not found school " + schoolId));
         boolean isExistSchoolInCity = schoolRepository.findSchoolByNameAndCity(request.getSchool(),
                 request.getCity()).isPresent();
-        if (isExistSchoolInCity) {
+        if (isExistSchoolInCity && !school.getSchool().equalsIgnoreCase(request.getSchool())) {
             Map<String, String> errors = new HashMap<>();
             errors.put("School name", ErrorCode.ALREADY_EXIST.name() + " in city");
             return OnlyIdResponse.builder()
@@ -71,7 +72,6 @@ public class SchoolServiceImpl implements SchoolService {
                             .build())
                     .build();
         } else {
-            SchoolEntity school = schoolRepository.findById(schoolId).orElseThrow(() -> new NotFoundException("Not found school " + schoolId));
             school = updateEntity(school, request);
             schoolRepository.save(school);
             return OnlyIdResponse.builder()

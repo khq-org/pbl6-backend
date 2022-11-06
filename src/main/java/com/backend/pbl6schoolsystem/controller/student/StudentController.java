@@ -5,12 +5,14 @@ import com.backend.pbl6schoolsystem.model.dto.common.ListDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.MessageDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.OnlyIdDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.UserDTO;
+import com.backend.pbl6schoolsystem.model.dto.student.ProfileStudentDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.StudentDTO;
 import com.backend.pbl6schoolsystem.request.student.CreateStudentRequest;
 import com.backend.pbl6schoolsystem.request.student.ListStudentRequest;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.Response;
+import com.backend.pbl6schoolsystem.response.student.GetProfileStudentResponse;
 import com.backend.pbl6schoolsystem.response.student.GetStudentResponse;
 import com.backend.pbl6schoolsystem.response.user.ListUserResponse;
 import com.backend.pbl6schoolsystem.service.StudentService;
@@ -39,6 +41,13 @@ public class StudentController {
     public Response<StudentDTO> getStudent(@PathVariable("id") Long studentId) {
         GetStudentResponse response = studentService.getStudent(studentId);
         return userConverter.getResponse(response);
+    }
+
+    @Operation(summary = "Profile student")
+    @GetMapping("/{id}/profile")
+    public Response<ProfileStudentDTO> getProfileStudent(@PathVariable("id") Long studentId) {
+        GetProfileStudentResponse response = studentService.getProfileStudent(studentId);
+        return null;
     }
 
     @Operation(summary = "Create student")

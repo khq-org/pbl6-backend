@@ -1,6 +1,5 @@
 package com.backend.pbl6schoolsystem.model.dto.student;
 
-import com.backend.pbl6schoolsystem.model.dto.common.SchoolYearDTO;
 import lombok.*;
 
 import java.io.Serializable;
@@ -9,10 +8,11 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(setterPrefix = "set")
 public class LearningResultDTO implements Serializable {
     private Long learningResultId;
-    private SchoolYearDTO schoolYear;
+    private String schoolYear;
+    private String className;
     private Double averageScore;
     private String conduct;
     private String learningGrade;

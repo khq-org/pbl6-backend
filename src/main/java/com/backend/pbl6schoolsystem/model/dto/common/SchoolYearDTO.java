@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @Builder
 public class SchoolYearDTO implements Serializable {
     private Long schoolYearId;
+    private String schoolYear;
     private LocalDate startDate;
     private LocalDate endDate;
 }

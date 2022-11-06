@@ -9,6 +9,7 @@ import com.backend.pbl6schoolsystem.model.dto.calendar.CalendarEventDetailDTO;
 import com.backend.pbl6schoolsystem.model.entity.*;
 import com.backend.pbl6schoolsystem.repository.dsl.CalendarDslRepository;
 import com.backend.pbl6schoolsystem.repository.dsl.ClassCalendarDslRepository;
+import com.backend.pbl6schoolsystem.repository.dsl.UserCalendarDslRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.*;
 import com.backend.pbl6schoolsystem.request.calendar.CreateUpdateCalendarRequest;
 import com.backend.pbl6schoolsystem.request.calendar.ListCalendarRequest;
@@ -43,6 +44,7 @@ public class CalendarServiceImpl implements CalendarService {
     private final UserRepository userRepository;
     private final StudentClazzRepository studentClazzRepository;
     private final ClassCalendarDslRepository classCalendarDslRepository;
+    private final UserCalendarDslRepository userCalendarDslRepository;
     private final CalendarDslRepository calendarDslRepository;
 
     @Override
@@ -160,6 +162,18 @@ public class CalendarServiceImpl implements CalendarService {
             if (!classCalendarEvents.isEmpty()) {
                 for (ClassCalendarEventEntity classCalendarEvent : classCalendarEvents) {
                     errors.put("Class " + classCalendarEvent.getClazz().getClazz(), ErrorCode.DUPLICATE_LESSON.name());
+                }
+            }
+        }
+
+        if (!CollectionUtils.isEmpty(request.getUserIds())) {
+            List<UserCalendarEventEntity> userCalendarEvents = userCalendarDslRepository.findUserCalendar(request);
+            if (!userCalendarEvents.isEmpty()) {
+                String role;
+                for (UserCalendarEventEntity userCalendarEvent : userCalendarEvents) {
+                    role = userCalendarEvent.getUser().getRole().getRole();
+                    errors.put(role.equalsIgnoreCase(UserRole.TEACHER_ROLE.getRole()) ? "Teacher " : "Student " +
+                            userCalendarEvent.getUser().getLastName() + userCalendarEvent.getUser().getFirstName(), ErrorCode.DUPLICATE_TIME.name());
                 }
             }
         }

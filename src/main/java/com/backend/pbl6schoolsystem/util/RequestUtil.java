@@ -32,4 +32,7 @@ public class RequestUtil {
     public static Integer defaultIfNull(Integer id, Integer df) {
         return id == null ? df : id;
     }
+    public static Double defaultIfNull(Double id, Double df) {
+        return id == null ? df : id;
+    }
 }

@@ -5,6 +5,7 @@ import com.backend.pbl6schoolsystem.request.student.CreateStudentRequest;
 import com.backend.pbl6schoolsystem.request.student.ListStudentRequest;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
+import com.backend.pbl6schoolsystem.response.student.GetProfileStudentResponse;
 import com.backend.pbl6schoolsystem.response.student.GetStudentResponse;
 import com.backend.pbl6schoolsystem.response.user.ListUserResponse;
 
@@ -18,4 +19,6 @@ public interface StudentService {
     OnlyIdResponse updateStudent(Long studentId, StudentDTO request);
 
     NoContentResponse deleteStudent(Long studentId);
+
+    GetProfileStudentResponse getProfileStudent(Long studentId);
 }

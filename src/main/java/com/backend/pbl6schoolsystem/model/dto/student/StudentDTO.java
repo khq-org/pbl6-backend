@@ -1,6 +1,5 @@
 package com.backend.pbl6schoolsystem.model.dto.student;
 
-import com.backend.pbl6schoolsystem.model.dto.common.ClazzDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.UserDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;

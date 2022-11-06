@@ -17,7 +17,7 @@ public interface StudentClazzRepository extends JpaRepository<StudentClazzEntity
             " ON sc.clazz.classId = c.classId" +
             " WHERE sc.student.userId = :studentId" +
             " ORDER BY sc.studentClassId DESC")
-    Optional<ClassEntity> getCurrentClassForStudent(@Param("studentId") Long studentId);
+    List<ClassEntity> getCurrentClassForStudent(@Param("studentId") Long studentId);
 
 
     @Query("SELECT sc FROM StudentClazzEntity sc" +

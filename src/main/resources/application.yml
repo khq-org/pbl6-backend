@@ -8,13 +8,13 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASS}
     driver-class-name: org.postgresql.Driver
-  redis:
-    host: ${REDIS_HOST}
-    port: ${REDIS_PORT}
-  cache:
-    type: redis
-    redis:
-      cache-null-values: false
+#  redis:
+#    host: ${REDIS_HOST}
+#    port: ${REDIS_PORT}
+#  cache:
+#    type: redis
+#    redis:
+#      cache-null-values: false
   jpa:
     show-sql: true
     properties:

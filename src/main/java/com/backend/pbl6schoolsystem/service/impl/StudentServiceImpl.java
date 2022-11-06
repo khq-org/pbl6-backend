@@ -6,11 +6,10 @@ import com.backend.pbl6schoolsystem.common.enums.UserRole;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
 import com.backend.pbl6schoolsystem.mapper.UserMapper;
 import com.backend.pbl6schoolsystem.model.dto.common.UserDTO;
+import com.backend.pbl6schoolsystem.model.dto.student.LearningResultDTO;
+import com.backend.pbl6schoolsystem.model.dto.student.ProfileStudentDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.StudentDTO;
-import com.backend.pbl6schoolsystem.model.entity.ClassEntity;
-import com.backend.pbl6schoolsystem.model.entity.ParentStudentEntity;
-import com.backend.pbl6schoolsystem.model.entity.SchoolEntity;
-import com.backend.pbl6schoolsystem.model.entity.UserEntity;
+import com.backend.pbl6schoolsystem.model.entity.*;
 import com.backend.pbl6schoolsystem.repository.dsl.SchoolDslRepository;
 import com.backend.pbl6schoolsystem.repository.dsl.StudentDslRepository;
 import com.backend.pbl6schoolsystem.repository.dsl.UserDslRepository;
@@ -21,6 +20,7 @@ import com.backend.pbl6schoolsystem.response.ErrorResponse;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.PageResponse;
+import com.backend.pbl6schoolsystem.response.student.GetProfileStudentResponse;
 import com.backend.pbl6schoolsystem.response.student.GetStudentResponse;
 import com.backend.pbl6schoolsystem.response.user.ListUserResponse;
 import com.backend.pbl6schoolsystem.security.UserPrincipal;
@@ -32,6 +32,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,7 +46,8 @@ public class StudentServiceImpl implements StudentService {
     private final RoleRepository roleRepository;
     private final ClassRepository classRepository;
     private final ParentStudentRepository parentStudentRepository;
-    private final SchoolDslRepository schoolDslRepository;
+    private final LearningResultRepository learningResultRepository;
+    private final ProfileStudentRepository profileStudentRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -126,6 +128,13 @@ public class StudentServiceImpl implements StudentService {
                     parentStudentRepository.save(parentStudentEntity);
                 }
             }
+
+
+            // save new profile student
+            ProfileStudentEntity profileStudent = new ProfileStudentEntity();
+            profileStudent.setStudent(student);
+            profileStudent.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+            profileStudentRepository.save(profileStudent);
 
             return OnlyIdResponse.builder()
                     .setSuccess(true)
@@ -213,6 +222,39 @@ public class StudentServiceImpl implements StudentService {
                                         .setClazz(c.getClazz())
                                         .build())
                                 .collect(Collectors.toList()) : Collections.emptyList())
+                        .build())
+                .build();
+    }
+
+    @Override
+    public GetProfileStudentResponse getProfileStudent(Long studentId) {
+        ProfileStudentEntity profileStudent = profileStudentRepository.findByStudent(studentId);
+        List<LearningResultEntity> learningResults = learningResultRepository.findByProfileStudent(profileStudent.getProfileStudentId());
+        return GetProfileStudentResponse.builder()
+                .setSuccess(true)
+                .setProfileStudentDTO(ProfileStudentDTO.builder()
+                        .setProfileStudentId(profileStudent.getProfileStudentId())
+                        .setStudent(ProfileStudentDTO.Student.builder()
+                                .setStudentId(profileStudent.getStudent().getUserId())
+                                .setFirstName(profileStudent.getStudent().getFirstName())
+                                .setLastName(profileStudent.getStudent().getLastName())
+                                .setDayOfBirth(profileStudent.getStudent().getDateOfBirth().toString())
+                                .setPlaceOfBirth(profileStudent.getStudent().getPlaceOfBirth())
+                                .setStreet(profileStudent.getStudent().getStreet())
+                                .setDistrict(profileStudent.getStudent().getDistrict())
+                                .setCity(profileStudent.getStudent().getCity())
+                                .build())
+                        .setLearningResults(!learningResults.isEmpty() ? learningResults.stream()
+                                .map(lr -> LearningResultDTO.builder()
+                                        .setLearningResultId(lr.getLearningResultId())
+                                        .setSchoolYear(lr.getSchoolYear().getSchoolYear())
+                                        .setClassName(lr.getClazz().getClazz())
+                                        .setAverageScore(RequestUtil.defaultIfNull(lr.getAverageScore(), -1D))
+                                        .setConduct(RequestUtil.blankIfNull(lr.getConduct()))
+                                        .setLearningGrade(RequestUtil.blankIfNull(lr.getLearningGrading()))
+                                        .setIsPassed(Boolean.TRUE.equals(lr.getIsPassed()) ? Boolean.TRUE : Boolean.FALSE)
+                                        .build()).collect(Collectors.toList())
+                                : Collections.emptyList())
                         .build())
                 .build();
     }

@@ -177,7 +177,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         List<ClassCalendarEventEntity> listClassCalendar;
 
         if (principal.isStudent()) {
-            clazz = studentClazzRepository.getCurrentClassForStudent(principal.getUserId()).orElse(null);
+            clazz = studentClazzRepository.getCurrentClassForStudent(principal.getUserId()).get(0);
             listClassCalendar = classCalendarRepository.listClassCalendarEvent(clazz != null ? clazz.getClassId() : -1L);
             if (!listClassCalendar.isEmpty()) {
                 listCalendarEvent.addAll(listClassCalendar.stream()
