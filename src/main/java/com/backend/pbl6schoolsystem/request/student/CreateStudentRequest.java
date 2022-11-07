@@ -18,6 +18,10 @@ public class CreateStudentRequest {
     private String district;
     private String city;
     private Long schoolId;
+    private Boolean gender;
+    private String dateOfBirth;
+    private String placeOfBirth;
+    private String nationality;
     private List<Parent> parents;
     private Boolean notHaveParents;
 

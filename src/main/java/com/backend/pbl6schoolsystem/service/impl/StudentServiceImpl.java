@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -87,6 +88,10 @@ public class StudentServiceImpl implements StudentService {
             student.setStreet(RequestUtil.blankIfNull(request.getStreet()));
             student.setDistrict(RequestUtil.blankIfNull(request.getDistrict()));
             student.setCity(RequestUtil.blankIfNull(request.getCity()));
+            student.setGender(Boolean.TRUE.equals(request.getGender()) ? Boolean.TRUE : Boolean.FALSE);
+            student.setDateOfBirth(LocalDate.parse(request.getDateOfBirth()));
+            student.setPlaceOfBirth(RequestUtil.blankIfNull(request.getPlaceOfBirth()));
+            student.setNationality(RequestUtil.blankIfNull(request.getNationality()));
             student.setSchool(school);
             student = userRepository.save(student); // save student
             UserEntity parentEntity;
@@ -178,8 +183,10 @@ public class StudentServiceImpl implements StudentService {
         userEntity.setEmail(RequestUtil.blankIfNull(request.getStudent().getEmail()));
         userEntity.setStreet(RequestUtil.blankIfNull(request.getStudent().getStreet()));
         userEntity.setDistrict(RequestUtil.blankIfNull(request.getStudent().getDistrict()));
+        userEntity.setNationality(RequestUtil.blankIfNull(request.getStudent().getNationality()));
+        userEntity.setGender(Boolean.TRUE.equals(request.getStudent().getGender()) ? Boolean.TRUE : Boolean.FALSE);
         userEntity.setCity(RequestUtil.blankIfNull(request.getStudent().getCity()));
-        userEntity.setDateOfBirth(request.getStudent().getDateOfBirth());
+        userEntity.setDateOfBirth(LocalDate.parse(request.getStudent().getDateOfBirth()));
         userEntity.setPlaceOfBirth(RequestUtil.blankIfNull(request.getStudent().getPlaceOfBirth()));
     }
 

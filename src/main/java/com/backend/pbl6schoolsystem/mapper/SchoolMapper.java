@@ -12,6 +12,7 @@ public class SchoolMapper {
         dto.setDistrict(entity.getDistrict());
         dto.setCity(entity.getCity());
         dto.setSchoolType(entity.getSchoolType());
+        dto.setPhone(entity.getPhone());
         dto.setWebsite(entity.getWebsite());
         return dto;
     }
