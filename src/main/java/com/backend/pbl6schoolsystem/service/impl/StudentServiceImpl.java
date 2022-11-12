@@ -14,6 +14,7 @@ import com.backend.pbl6schoolsystem.repository.dsl.SchoolDslRepository;
 import com.backend.pbl6schoolsystem.repository.dsl.StudentDslRepository;
 import com.backend.pbl6schoolsystem.repository.dsl.UserDslRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.*;
+import com.backend.pbl6schoolsystem.request.leaningresult.CreateUpdateLearningResultRequest;
 import com.backend.pbl6schoolsystem.request.student.CreateStudentRequest;
 import com.backend.pbl6schoolsystem.request.student.ListStudentRequest;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
@@ -46,9 +47,12 @@ public class StudentServiceImpl implements StudentService {
     private final SchoolRepository schoolRepository;
     private final RoleRepository roleRepository;
     private final ClassRepository classRepository;
+    private final StudentClazzRepository studentClazzRepository;
+    private final UserCalendarRepository userCalendarRepository;
     private final ParentStudentRepository parentStudentRepository;
     private final LearningResultRepository learningResultRepository;
     private final ProfileStudentRepository profileStudentRepository;
+    private final SchoolYearRepository schoolYearRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -235,7 +239,8 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public GetProfileStudentResponse getProfileStudent(Long studentId) {
-        ProfileStudentEntity profileStudent = profileStudentRepository.findByStudent(studentId);
+        ProfileStudentEntity profileStudent = profileStudentRepository.findByStudent(studentId)
+                .orElseThrow(() -> new NotFoundException("Not found profile with studentId " + studentId));
         List<LearningResultEntity> learningResults = learningResultRepository.findByProfileStudent(profileStudent.getProfileStudentId());
         return GetProfileStudentResponse.builder()
                 .setSuccess(true)
@@ -270,12 +275,121 @@ public class StudentServiceImpl implements StudentService {
     public NoContentResponse deleteStudent(Long studentId) {
         UserEntity student = userRepository.findById(studentId).orElseThrow(() -> new NotFoundException("Not found student with id " + studentId));
         List<UserEntity> parents = userRepository.findParentsByStudent(studentId);
+        List<StudentClazzEntity> listInStudentClass = studentClazzRepository.findByStudentId(studentId);
+        List<UserCalendarEventEntity> listInUserCalendar = userCalendarRepository.findByStudentId(studentId);
+        if (!listInStudentClass.isEmpty()) {
+            studentClazzRepository.deleteAll(listInStudentClass);
+        }
+        if (!listInUserCalendar.isEmpty()) {
+            userCalendarRepository.deleteAll(listInUserCalendar);
+        }
         if (!parents.isEmpty()) {
             userRepository.deleteAll(parents);
         }
         userRepository.delete(student);
         return NoContentResponse.builder()
                 .setSuccess(true)
+                .build();
+    }
+
+    @Override
+    public OnlyIdResponse addLearningResultForProfileStudent(Long profileStudentId, CreateUpdateLearningResultRequest request) {
+        ProfileStudentEntity profileStudent = profileStudentRepository.findById(profileStudentId)
+                .orElseThrow(() -> new NotFoundException("Not found profile student with id " + profileStudentId));
+
+        Map<String, String> errors = new HashMap<>();
+        if (request.getClassId() == null) {
+            errors.put("class", ErrorCode.MISSING_VALUE.name());
+        }
+
+        if (request.getSchoolYearId() == null) {
+            errors.put("schoolYear", ErrorCode.MISSING_VALUE.name());
+        }
+
+        Optional<LearningResultEntity> existLearningResult = learningResultRepository.findByProfileAndClazzAndSchoolYear(profileStudentId,
+                null, request.getClassId(), request.getSchoolYearId());
+        if (existLearningResult.isPresent()) {
+            errors.put("learningResult", ErrorCode.ALREADY_EXIST.name());
+        }
+
+        if (!errors.isEmpty()) {
+            return OnlyIdResponse.builder()
+                    .setSuccess(false)
+                    .setErrorResponse(ErrorResponse.builder()
+                            .setErrors(errors)
+                            .build())
+                    .build();
+        }
+
+        LearningResultEntity learningResult = new LearningResultEntity();
+        ClassEntity clazz = classRepository.findById(request.getClassId()).
+                orElseThrow(() -> new NotFoundException("Not found clazz with id " + request.getClassId()));
+        SchoolYearEntity schoolYear = schoolYearRepository.findById(request.getSchoolYearId())
+                .orElseThrow(() -> new NotFoundException("Not found school with id " + request.getSchoolYearId()));
+        learningResult.setProfileStudent(profileStudent);
+        learningResult.setClazz(clazz);
+        learningResult.setSchoolYear(schoolYear);
+        learningResult.setAverageScore(RequestUtil.defaultIfNull(request.getAverageScore(), 0D));
+        learningResult.setConduct(RequestUtil.defaultIfNull(request.getConduct(), ""));
+        learningResult = learningResultRepository.save(learningResult);
+
+        // save new student clazz
+        StudentClazzEntity studentClazz = new StudentClazzEntity();
+        studentClazz.setStudent(profileStudent.getStudent());
+        studentClazz.setClazz(clazz);
+        studentClazzRepository.save(studentClazz);
+
+        return OnlyIdResponse.builder()
+                .setSuccess(true)
+                .setId(learningResult.getLearningResultId())
+                .build();
+    }
+
+    @Override
+    public OnlyIdResponse updateLearningResultForProfileStudent(Long learningResultId, CreateUpdateLearningResultRequest request) {
+        LearningResultEntity learningResult = learningResultRepository.findByLearningResult(learningResultId)
+                .orElseThrow(() -> new NotFoundException("Not found learning result with id " + learningResultId));
+
+        Map<String, String> errors = new HashMap<>();
+        if (request.getClassId() == null) {
+            errors.put("class", ErrorCode.MISSING_VALUE.name());
+        }
+
+        if (request.getSchoolYearId() == null) {
+            errors.put("schoolYear", ErrorCode.MISSING_VALUE.name());
+        }
+
+        Optional<LearningResultEntity> existLearningResult = learningResultRepository.findByProfileAndClazzAndSchoolYear(learningResult.getProfileStudent().getProfileStudentId()
+                , learningResultId, request.getClassId(), request.getSchoolYearId());
+        if (existLearningResult.isPresent()) {
+            errors.put("learningResult", ErrorCode.ALREADY_EXIST.name());
+        }
+
+        if (!errors.isEmpty()) {
+            return OnlyIdResponse.builder()
+                    .setSuccess(false)
+                    .setErrorResponse(ErrorResponse.builder()
+                            .setErrors(errors)
+                            .build())
+                    .build();
+        }
+
+        ClassEntity clazz = classRepository.findById(request.getClassId())
+                .orElseThrow(() -> new NotFoundException("Not found clazz with id " + request.getClassId()));
+        StudentClazzEntity studentClazz = studentClazzRepository.findByStudentIdAndClazzId(learningResult.getProfileStudent().getStudent().getStudentId(),
+                learningResult.getClazz().getClassId());
+
+        learningResult.setClazz(clazz);
+        learningResult.setSchoolYear(schoolYearRepository.findById(request.getSchoolYearId()).get());
+        learningResult.setAverageScore(RequestUtil.defaultIfNull(request.getAverageScore(), 0D));
+        learningResult.setConduct(RequestUtil.blankIfNull(request.getConduct()));
+        studentClazz.setClazz(clazz);
+        learningResultRepository.save(learningResult);
+        studentClazzRepository.save(studentClazz);
+
+        return OnlyIdResponse.builder()
+                .setSuccess(true)
+                .setId(learningResult.getLearningResultId())
                 .build();
     }
 }

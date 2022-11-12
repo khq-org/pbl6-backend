@@ -33,7 +33,6 @@ public class UserCalendarDslRepository {
                         .and(userCalendarEvent.calendarEvent.timeStart.between(LocalTime.parse(request.getTimeStart()), LocalTime.parse(request.getTimeFinish()))
                                 .or(userCalendarEvent.calendarEvent.timeFinish.between(LocalTime.parse(request.getTimeStart()), LocalTime.parse(request.getTimeFinish())))));
         query.leftJoin(userCalendarEvent.user).fetchJoin();
-        query.leftJoin(userCalendarEvent.user.role).fetchJoin();
         return query.fetch();
     }
 }

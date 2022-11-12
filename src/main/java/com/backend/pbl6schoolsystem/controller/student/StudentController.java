@@ -7,6 +7,7 @@ import com.backend.pbl6schoolsystem.model.dto.common.OnlyIdDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.UserDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.ProfileStudentDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.StudentDTO;
+import com.backend.pbl6schoolsystem.request.leaningresult.CreateUpdateLearningResultRequest;
 import com.backend.pbl6schoolsystem.request.student.CreateStudentRequest;
 import com.backend.pbl6schoolsystem.request.student.ListStudentRequest;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
@@ -47,7 +48,27 @@ public class StudentController {
     @GetMapping("/{id}/profile")
     public Response<ProfileStudentDTO> getProfileStudent(@PathVariable("id") Long studentId) {
         GetProfileStudentResponse response = studentService.getProfileStudent(studentId);
-        return null;
+        return userConverter.getResponse(response);
+    }
+
+    @Operation(summary = "Create learning result in profile student")
+    @PostMapping("profile/{id}/learningResult")
+    public Response<OnlyIdDTO> addLearningResultForProfileStudent(@PathVariable("id") Long profileStudentId, @RequestBody CreateUpdateLearningResultRequest request) {
+        OnlyIdResponse response = studentService.addLearningResultForProfileStudent(profileStudentId, request);
+        if (response.getSuccess()) {
+            return userConverter.getResponse(response);
+        }
+        return userConverter.getError(response.getErrorResponse());
+    }
+
+    @Operation(summary = "Update learning result in profile student")
+    @PutMapping("profile/learningResult/{id}")
+    public Response<OnlyIdDTO> updateLearningResultForProfileStudent(@PathVariable("id") Long learningResultId, @RequestBody CreateUpdateLearningResultRequest request) {
+        OnlyIdResponse response = studentService.updateLearningResultForProfileStudent(learningResultId, request);
+        if (response.getSuccess()) {
+            return userConverter.getResponse(response);
+        }
+        return userConverter.getError(response.getErrorResponse());
     }
 
     @Operation(summary = "Create student")

@@ -169,11 +169,8 @@ public class CalendarServiceImpl implements CalendarService {
         if (!CollectionUtils.isEmpty(request.getUserIds())) {
             List<UserCalendarEventEntity> userCalendarEvents = userCalendarDslRepository.findUserCalendar(request);
             if (!userCalendarEvents.isEmpty()) {
-                String role;
                 for (UserCalendarEventEntity userCalendarEvent : userCalendarEvents) {
-                    role = userCalendarEvent.getUser().getRole().getRole();
-                    errors.put(role.equalsIgnoreCase(UserRole.TEACHER_ROLE.getRole()) ? "Teacher " : "Student " +
-                            userCalendarEvent.getUser().getLastName() + userCalendarEvent.getUser().getFirstName(), ErrorCode.DUPLICATE_TIME.name());
+                    errors.put("User " + userCalendarEvent.getUser().getLastName() + userCalendarEvent.getUser().getFirstName(), ErrorCode.DUPLICATE_TIME.name());
                 }
             }
         }

@@ -29,5 +29,5 @@ public class ProfileStudentEntity implements Serializable {
     @Column(name = "createddate")
     private Timestamp createdDate;
     @Column(name = "updateddate")
-    private Timestamp updateddate;
+    private Timestamp updatedate;
 }

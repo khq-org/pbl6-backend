@@ -26,4 +26,13 @@ public interface StudentClazzRepository extends JpaRepository<StudentClazzEntity
             " WHERE s.userId IN (:studentIds)" +
             " ORDER BY sc.studentClassId DESC")
     List<StudentClazzEntity> findByStudents(@Param("studentIds") List<Long> studentIds);
+
+    @Query("SELECT sc FROM StudentClazzEntity sc" +
+            " WHERE sc.student.userId = :studentId")
+    List<StudentClazzEntity> findByStudentId(@Param("studentId") Long studentId);
+
+    @Query("SELECT sc FROM StudentClazzEntity sc" +
+            " WHERE sc.clazz.classId = :classId" +
+            " AND sc.student.studentId = :studentId")
+    StudentClazzEntity findByStudentIdAndClazzId(@Param("studentId") String studentId, @Param("classId") Long classId);
 }

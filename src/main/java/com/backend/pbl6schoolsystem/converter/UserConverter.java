@@ -4,12 +4,14 @@ import com.backend.pbl6schoolsystem.common.constant.Constants;
 import com.backend.pbl6schoolsystem.model.dto.calendar.CalendarEventDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.ListDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.UserDTO;
+import com.backend.pbl6schoolsystem.model.dto.student.ProfileStudentDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.StudentDTO;
 import com.backend.pbl6schoolsystem.model.dto.teacher.TeacherDTO;
 import com.backend.pbl6schoolsystem.model.dto.user.SchoolAdminDTO;
 import com.backend.pbl6schoolsystem.model.dto.user.UserInfoDTO;
 import com.backend.pbl6schoolsystem.response.UserInfoResponse;
 import com.backend.pbl6schoolsystem.response.calendar.ListCalendarResponse;
+import com.backend.pbl6schoolsystem.response.student.GetProfileStudentResponse;
 import com.backend.pbl6schoolsystem.response.teacher.GetTeacherResponse;
 import com.backend.pbl6schoolsystem.response.user.GetSchoolAdminResponse;
 import com.backend.pbl6schoolsystem.response.user.ListUserResponse;
@@ -97,6 +99,14 @@ public class UserConverter extends CommonConverter {
                         .setTotalItems((long) response.getItems().size())
                         .setItems(response.getItems())
                         .build())
+                .setTimestamp(new Timestamp(System.currentTimeMillis()))
+                .build();
+    }
+
+    public Response<ProfileStudentDTO> getResponse(GetProfileStudentResponse response) {
+        return Response.<ProfileStudentDTO>builder()
+                .setSuccess(true)
+                .setData(response.getProfileStudentDTO())
                 .setTimestamp(new Timestamp(System.currentTimeMillis()))
                 .build();
     }

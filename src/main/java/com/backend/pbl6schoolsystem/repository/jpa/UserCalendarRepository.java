@@ -22,4 +22,8 @@ public interface UserCalendarRepository extends JpaRepository<UserCalendarEventE
             " LEFT JOIN FETCH uce.user" +
             " WHERE uce.calendarEvent.calendarEventId = :calendarEventId")
     List<UserCalendarEventEntity> findByCalendar(@Param("calendarEventId") Long calendarEventId);
+
+    @Query("SELECT uce FROM UserCalendarEventEntity uce" +
+            " WHERE uce.user.userId = :studentId")
+    List<UserCalendarEventEntity> findByStudentId(@Param("studentId") Long studentId);
 }
