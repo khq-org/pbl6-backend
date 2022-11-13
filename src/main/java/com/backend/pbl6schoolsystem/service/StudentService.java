@@ -23,7 +23,7 @@ public interface StudentService {
 
     GetProfileStudentResponse getProfileStudent(Long studentId);
 
-    OnlyIdResponse addLearningResultForProfileStudent(Long profileStudentId, CreateUpdateLearningResultRequest request);
+//    OnlyIdResponse addLearningResultForProfileStudent(Long profileStudentId, CreateUpdateLearningResultRequest request);
 
     OnlyIdResponse updateLearningResultForProfileStudent(Long learningResultId, CreateUpdateLearningResultRequest request);
 }

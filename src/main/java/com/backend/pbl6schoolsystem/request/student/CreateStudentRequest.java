@@ -24,6 +24,7 @@ public class CreateStudentRequest {
     private String nationality;
     private List<Parent> parents;
     private Boolean notHaveParents;
+    private Long classId;
 
     @Getter
     @Setter

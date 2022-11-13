@@ -2,6 +2,7 @@ package com.backend.pbl6schoolsystem.repository.jpa;
 
 import com.backend.pbl6schoolsystem.model.entity.ClassEntity;
 import com.backend.pbl6schoolsystem.model.entity.StudentClazzEntity;
+import com.backend.pbl6schoolsystem.model.entity.UserEntity;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -35,4 +36,9 @@ public interface StudentClazzRepository extends JpaRepository<StudentClazzEntity
             " WHERE sc.clazz.classId = :classId" +
             " AND sc.student.studentId = :studentId")
     StudentClazzEntity findByStudentIdAndClazzId(@Param("studentId") String studentId, @Param("classId") Long classId);
+
+    @Query("SELECT sc FROM StudentClazzEntity sc" +
+            " LEFT JOIN FETCH sc.student" +
+            " WHERE sc.clazz.classId = :clazzId")
+    List<StudentClazzEntity> findByClazzId(@Param("clazzId") Long clazzId);
 }
