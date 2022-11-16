@@ -15,4 +15,6 @@ public class CreateTeacherRequest {
     private String district;
     private String city;
     private String workingPosition;
+    private Boolean gender;
+    private String nationality;
 }

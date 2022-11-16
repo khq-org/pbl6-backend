@@ -283,7 +283,7 @@ public class StudentServiceImpl implements StudentService {
                                         .setLearningResultId(lr.getLearningResultId())
                                         .setSchoolYear(lr.getSchoolYear().getSchoolYear())
                                         .setClassName(lr.getClazz().getClazz())
-                                        .setAverageScore(RequestUtil.defaultIfNull(lr.getAverageScore(), -1D))
+                                        .setAverageScore(RequestUtil.defaultIfNull(lr.getAverageScore(), 0D))
                                         .setConduct(RequestUtil.blankIfNull(lr.getConduct()))
                                         .setLearningGrade(RequestUtil.blankIfNull(lr.getLearningGrading()))
                                         .setIsPassed(Boolean.TRUE.equals(lr.getIsPassed()) ? Boolean.TRUE : Boolean.FALSE)
@@ -414,6 +414,7 @@ public class StudentServiceImpl implements StudentService {
         learningResult.setAverageScore(RequestUtil.defaultIfNull(request.getAverageScore(), 0D));
         learningResult.setConduct(RequestUtil.blankIfNull(request.getConduct()));
         studentClazz.setClazz(clazz);
+        studentClazz.setSchoolYear(schoolYearRepository.findById(request.getSchoolYearId()).get());
         learningResultRepository.save(learningResult);
         studentClazzRepository.save(studentClazz);
 

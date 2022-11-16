@@ -1,7 +1,9 @@
 package com.backend.pbl6schoolsystem.repository.dsl;
 
 import com.backend.pbl6schoolsystem.common.enums.UserRole;
+import com.backend.pbl6schoolsystem.model.entity.QStudentClazzEntity;
 import com.backend.pbl6schoolsystem.model.entity.QUserEntity;
+import com.backend.pbl6schoolsystem.model.entity.StudentClazzEntity;
 import com.backend.pbl6schoolsystem.model.entity.UserEntity;
 import com.backend.pbl6schoolsystem.request.student.ListStudentRequest;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
@@ -19,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StudentDslRepository {
     private final QUserEntity user = QUserEntity.userEntity;
+    private final QStudentClazzEntity studentClazz = QStudentClazzEntity.studentClazzEntity;
     private final JPAQueryFactory queryFactory;
 
     public List<UserEntity> getListStudent(ListStudentRequest request, Long schoolId) {
@@ -42,9 +45,15 @@ public class StudentDslRepository {
         if (StringUtils.hasText(request.getCity())) {
             query.where(user.city.equalsIgnoreCase(request.getCity()));
         }
-        if (request.getClassId() > 0) {
 
+        if (request.getClassId() > 0 && request.getSchoolYearId() > 0) {
+            JPAQuery<Long> studentClazzIds = queryFactory.select(studentClazz.student.userId)
+                    .from(studentClazz)
+                    .where(studentClazz.clazz.classId.eq(request.getClassId()))
+                    .where(studentClazz.schoolYear.schoolYearId.eq(request.getSchoolYearId()));
+            query.where(user.userId.in(studentClazzIds));
         }
+
         int page = RequestUtil.getPage(request.getPage());
         int size = RequestUtil.getSize(request.getSize());
         int offset = page * size;

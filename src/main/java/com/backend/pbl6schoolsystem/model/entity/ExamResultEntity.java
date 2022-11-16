@@ -21,6 +21,9 @@ public class ExamResultEntity implements Serializable {
     @Column(name = "examresultid")
     private Long examResultId;
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learningresultid", referencedColumnName = "learningresultid")
+    private LearningResultEntity learningResult;
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subjectid", referencedColumnName = "subjectid")
     private SubjectEntity subject;
     @ManyToOne(fetch = FetchType.LAZY)

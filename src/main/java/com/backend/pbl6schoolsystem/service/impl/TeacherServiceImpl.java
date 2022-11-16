@@ -34,6 +34,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -140,7 +141,9 @@ public class TeacherServiceImpl implements TeacherService {
         teacher.setCity(RequestUtil.blankIfNull(request.getCity()));
         teacher.setRole(roleRepository.findById(UserRole.TEACHER_ROLE.getRoleId()).get());
         teacher.setWorkingPosition(request.getWorkingPosition());
-//        teacher.setDateOfBirth();
+        teacher.setDateOfBirth(LocalDate.parse(request.getDateOfBirth()));
+        teacher.setNationality(RequestUtil.blankIfNull(request.getNationality()));
+        teacher.setGender(Boolean.TRUE.equals(request.getGender()) ? Boolean.TRUE : Boolean.FALSE);
         userRepository.save(teacher);
         return OnlyIdResponse.builder()
                 .setSuccess(true)
@@ -194,7 +197,9 @@ public class TeacherServiceImpl implements TeacherService {
         teacher.setCity(RequestUtil.blankIfNull(request.getCity()));
         teacher.setPhone(RequestUtil.blankIfNull(request.getPhone()));
         teacher.setRole(roleRepository.findById(request.getRoleId()).get());
-
+        teacher.setDateOfBirth(LocalDate.parse(request.getDateOfBirth()));
+        teacher.setNationality(RequestUtil.blankIfNull(request.getNationality()));
+        teacher.setGender(Boolean.TRUE.equals(request.getGender()) ? Boolean.TRUE : Boolean.FALSE);
         userRepository.save(teacher);
         return OnlyIdResponse.builder()
                 .setSuccess(true)

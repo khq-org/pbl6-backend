@@ -25,4 +25,7 @@ public class StudentClazzEntity implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "classid", referencedColumnName = "classid")
     private ClassEntity clazz;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schoolyearid", referencedColumnName = "schoolyearid")
+    private SchoolYearEntity schoolYear;
 }

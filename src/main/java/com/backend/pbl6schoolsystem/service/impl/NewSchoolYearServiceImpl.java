@@ -2,6 +2,7 @@ package com.backend.pbl6schoolsystem.service.impl;
 
 import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
+import com.backend.pbl6schoolsystem.model.dto.common.SchoolYearDTO;
 import com.backend.pbl6schoolsystem.model.entity.*;
 import com.backend.pbl6schoolsystem.repository.jpa.*;
 import com.backend.pbl6schoolsystem.request.schoolyear.CreateUpdateSchoolYearRequest;
@@ -9,16 +10,14 @@ import com.backend.pbl6schoolsystem.request.schoolyear.NewSchoolYearRequest;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
+import com.backend.pbl6schoolsystem.response.schoolyear.ListSchoolYearResponse;
 import com.backend.pbl6schoolsystem.service.NewSchoolYearService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,8 +26,22 @@ public class NewSchoolYearServiceImpl implements NewSchoolYearService {
     private final SchoolYearRepository schoolYearRepository;
     private final ClassRepository classRepository;
     private final StudentClazzRepository studentClazzRepository;
+    private final UserRepository userRepository;
     private final ProfileStudentRepository profileStudentRepository;
     private final LearningResultRepository learningResultRepository;
+
+    @Override
+    public ListSchoolYearResponse getListSchoolYear() {
+        List<SchoolYearEntity> schoolYears = schoolYearRepository.findAll();
+        return ListSchoolYearResponse.builder()
+                .setSuccess(true)
+                .setItems(!schoolYears.isEmpty()
+                        ? schoolYears.stream().map(s -> SchoolYearDTO.builder()
+                        .schoolYearId(s.getSchoolYearId())
+                        .schoolYear(s.getSchoolYear())
+                        .build()).collect(Collectors.toList()) : Collections.emptyList())
+                .build();
+    }
 
     @Override
     public OnlyIdResponse createSchoolYear(CreateUpdateSchoolYearRequest request) {
@@ -109,11 +122,12 @@ public class NewSchoolYearServiceImpl implements NewSchoolYearService {
                 learningResult.setClazz(newClazz);
                 learningResult.setSchoolYear(newSchoolYear);
                 learningResults.add(learningResult);
-
                 studentClazz = new StudentClazzEntity();
                 studentClazz.setClazz(newClazz);
                 studentClazz.setStudent(profileStudent.getStudent());
+                studentClazz.setSchoolYear(newSchoolYear);
                 studentClasses.add(studentClazz);
+
             }
         }
 

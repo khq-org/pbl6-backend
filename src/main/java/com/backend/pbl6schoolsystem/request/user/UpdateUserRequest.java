@@ -21,5 +21,6 @@ public class UpdateUserRequest {
     private String placeOfBirth;
     private String nationality;
     private String workingPosition;
+    private Boolean gender;
     private Long roleId;
 }
