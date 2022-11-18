@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,8 +61,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 authorities.addAll(Arrays.asList(Constants.MANAGE_SCHOOL, Constants.MANAGE_SCHOOL_ADMIN));
                 break;
             case SCHOOL:
-                authorities.addAll(Arrays.asList(Constants.MANAGE_TEACHER, Constants.MANAGE_STUDENT, Constants.SETUP_CALENDAR,
-                        Constants.SETUP_INFORMATION_SCHOOL_YEAR));
+                authorities.addAll(Arrays.asList(Constants.MANAGE_TEACHER, Constants.MANAGE_STUDENT, Constants.MANAGE_CLASS
+                        , Constants.SETUP_CALENDAR, Constants.SETUP_INFORMATION_SCHOOL_YEAR));
                 break;
             case TEACHER:
                 authorities.addAll(Arrays.asList(Constants.MANAGE_STUDENT, Constants.SEE_CALENDAR, Constants.INPUT_SCORE));
@@ -113,7 +114,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setCity(RequestUtil.blankIfNull(request.getCity()));
         user.setPlaceOfBirth(RequestUtil.blankIfNull(request.getPlaceOfBirth()));
         user.setRole(roleRepository.findById(request.getRoleId()).get());
-
+        user.setGender(Boolean.TRUE.equals(request.getGender()) ? Boolean.TRUE : Boolean.FALSE);
+        user.setDateOfBirth(LocalDate.parse(request.getDateOfBirth() != null ? request.getDateOfBirth() : Constants.DEFAULT_DATE_OF_BIRTH));
         userRepository.save(user);
 
         return OnlyIdResponse.builder()

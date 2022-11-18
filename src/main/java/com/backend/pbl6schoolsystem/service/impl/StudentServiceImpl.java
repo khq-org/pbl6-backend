@@ -100,7 +100,7 @@ public class StudentServiceImpl implements StudentService {
             student.setDistrict(RequestUtil.blankIfNull(request.getDistrict()));
             student.setCity(RequestUtil.blankIfNull(request.getCity()));
             student.setGender(Boolean.TRUE.equals(request.getGender()) ? Boolean.TRUE : Boolean.FALSE);
-            student.setDateOfBirth(LocalDate.parse(request.getDateOfBirth()));
+            student.setDateOfBirth(LocalDate.parse(request.getDateOfBirth() != null ? request.getDateOfBirth() : Constants.DEFAULT_DATE_OF_BIRTH));
             student.setPlaceOfBirth(RequestUtil.blankIfNull(request.getPlaceOfBirth()));
             student.setNationality(RequestUtil.blankIfNull(request.getNationality()));
             student.setSchool(school);
@@ -155,16 +155,29 @@ public class StudentServiceImpl implements StudentService {
             ClassEntity clazz = classRepository.findById(request.getClassId())
                     .orElseThrow(() -> new NotFoundException("Not found clazz with id " + request.getClassId()));
 
+            // get current schoolYear;
+            int year = LocalDate.now().getYear();
+            String strSchoolYear = year + "-" + ++year;
+            Optional<SchoolYearEntity> schoolYear = schoolYearRepository.findByName(strSchoolYear);
+            SchoolYearEntity newSchoolYear = schoolYear.isPresent() ? schoolYear.get() : null;
+            if (newSchoolYear == null) {
+                newSchoolYear = new SchoolYearEntity();
+                newSchoolYear.setSchoolYear(strSchoolYear);
+                newSchoolYear = schoolYearRepository.save(newSchoolYear);
+            }
+
             // save new learning result
             LearningResultEntity learningResult = new LearningResultEntity();
             learningResult.setProfileStudent(profileStudent);
             learningResult.setClazz(clazz);
+            learningResult.setSchoolYear(newSchoolYear);
             learningResultRepository.save(learningResult);
 
             // save student class
             StudentClazzEntity studentClazz = new StudentClazzEntity();
             studentClazz.setStudent(student);
             studentClazz.setClazz(clazz);
+            studentClazz.setSchoolYear(newSchoolYear);
             studentClazzRepository.save(studentClazz);
 
             return OnlyIdResponse.builder()
@@ -281,7 +294,7 @@ public class StudentServiceImpl implements StudentService {
                         .setLearningResults(!learningResults.isEmpty() ? learningResults.stream()
                                 .map(lr -> LearningResultDTO.builder()
                                         .setLearningResultId(lr.getLearningResultId())
-                                        .setSchoolYear(lr.getSchoolYear().getSchoolYear())
+                                        .setSchoolYear(lr.getSchoolYear() != null ? lr.getSchoolYear().getSchoolYear() : null)
                                         .setClassName(lr.getClazz().getClazz())
                                         .setAverageScore(RequestUtil.defaultIfNull(lr.getAverageScore(), 0D))
                                         .setConduct(RequestUtil.blankIfNull(lr.getConduct()))

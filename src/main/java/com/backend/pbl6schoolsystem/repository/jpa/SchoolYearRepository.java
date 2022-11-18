@@ -15,4 +15,8 @@ public interface SchoolYearRepository extends JpaRepository<SchoolYearEntity, Lo
             " WHERE sy.schoolYear = :schoolYearName" +
             " AND :schoolYearId IS NULL OR (:schoolYearId IS NOT NULL AND sy.schoolYearId <> :schoolYearId)")
     List<SchoolYearEntity> findBySchoolYear(@Param("schoolYearId") Long schoolYearId, @Param("schoolYearName") String schoolYearName);
+
+    @Query("SELECT sy FROM SchoolYearEntity sy" +
+            " WHERE sy.schoolYear = :schoolYearName")
+    Optional<SchoolYearEntity> findByName(@Param("schoolYearName") String schoolYearName);
 }

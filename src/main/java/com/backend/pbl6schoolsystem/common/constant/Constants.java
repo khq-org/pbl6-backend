@@ -3,6 +3,7 @@ package com.backend.pbl6schoolsystem.common.constant;
 public class Constants {
     //
     public static final String PROTECTED = "Protected";
+    public static final String DEFAULT_DATE_OF_BIRTH = "1999-01-01";
     // Role
     public static final String ADMIN_ROLE = "ADMIN";
     public static final String SCHOOL_ROLE = "SCHOOL";

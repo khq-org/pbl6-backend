@@ -141,6 +141,7 @@ public class SchoolServiceImpl implements SchoolService {
         entity.setCity(RequestUtil.blankIfNull(request.getCity()));
         entity.setWebsite(RequestUtil.blankIfNull(request.getWebsite()));
         entity.setModifiedDate(new Timestamp(System.currentTimeMillis()));
+        entity.setPhone(RequestUtil.blankIfNull(request.getPhone()));
         return entity;
     }
 }
