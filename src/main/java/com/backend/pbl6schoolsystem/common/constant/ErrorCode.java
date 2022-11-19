@@ -6,5 +6,6 @@ public enum ErrorCode {
     NOT_FOUND,
     INVALID_VALUE,
     DUPLICATE_LESSON,
-    DUPLICATE_TIME;
+    DUPLICATE_TIME,
+    DUPLICATE_VALUE;
 }

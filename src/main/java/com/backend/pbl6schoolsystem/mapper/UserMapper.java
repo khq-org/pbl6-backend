@@ -37,6 +37,9 @@ public class UserMapper {
         dto.setStudentId(RequestUtil.blankIfNull(entity.getStudentId()));
         dto.setTeacherId(RequestUtil.blankIfNull(entity.getTeacherId()));
         dto.setWorkingPosition(RequestUtil.blankIfNull(entity.getWorkingPosition()));
+        if (entity.getSubject() != null) {
+            dto.setTeachSubject(entity.getSubject().getSubject());
+        }
         return dto;
     }
 

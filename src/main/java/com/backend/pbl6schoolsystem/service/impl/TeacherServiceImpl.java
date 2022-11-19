@@ -11,10 +11,7 @@ import com.backend.pbl6schoolsystem.model.entity.TeacherClassEntity;
 import com.backend.pbl6schoolsystem.model.entity.UserEntity;
 import com.backend.pbl6schoolsystem.repository.dsl.TeacherDslRepository;
 import com.backend.pbl6schoolsystem.repository.dsl.UserDslRepository;
-import com.backend.pbl6schoolsystem.repository.jpa.RoleRepository;
-import com.backend.pbl6schoolsystem.repository.jpa.SchoolRepository;
-import com.backend.pbl6schoolsystem.repository.jpa.TeacherClassRepository;
-import com.backend.pbl6schoolsystem.repository.jpa.UserRepository;
+import com.backend.pbl6schoolsystem.repository.jpa.*;
 import com.backend.pbl6schoolsystem.request.teacher.CreateTeacherRequest;
 import com.backend.pbl6schoolsystem.request.teacher.ListTeacherRequest;
 import com.backend.pbl6schoolsystem.request.user.UpdateUserRequest;
@@ -48,6 +45,7 @@ public class TeacherServiceImpl implements TeacherService {
     private final TeacherDslRepository teacherDslRepository;
     private final SchoolRepository schoolRepository;
     private final RoleRepository roleRepository;
+    private final SubjectRepository subjectRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -102,9 +100,7 @@ public class TeacherServiceImpl implements TeacherService {
         if (!StringUtils.hasText(request.getEmail())) {
             errors.put("Email", ErrorCode.MISSING_VALUE.name());
         }
-        if (!StringUtils.hasText(request.getWorkingPosition())) {
-            errors.put("Working position", ErrorCode.MISSING_VALUE.name());
-        }
+
         UserPrincipal principal = SecurityUtils.getPrincipal();
         Long schoolId = principal.getSchoolId();
         if (StringUtils.hasText(request.getEmail())) {
@@ -140,7 +136,11 @@ public class TeacherServiceImpl implements TeacherService {
         teacher.setDistrict(RequestUtil.blankIfNull(request.getDistrict()));
         teacher.setCity(RequestUtil.blankIfNull(request.getCity()));
         teacher.setRole(roleRepository.findById(UserRole.TEACHER_ROLE.getRoleId()).get());
-        teacher.setWorkingPosition(request.getWorkingPosition());
+        teacher.setWorkingPosition(RequestUtil.blankIfNull(request.getWorkingPosition()));
+        if (request.getSubjectId() != null && request.getSubjectId() > -1) {
+            teacher.setSubject(subjectRepository.findById(request.getSubjectId())
+                    .orElseThrow(() -> new NotFoundException("Not found subject with id " + request.getSubjectId())));
+        }
         teacher.setDateOfBirth(LocalDate.parse(request.getDateOfBirth() != null ? request.getDateOfBirth() : Constants.DEFAULT_DATE_OF_BIRTH));
         teacher.setNationality(RequestUtil.blankIfNull(request.getNationality()));
         teacher.setGender(Boolean.TRUE.equals(request.getGender()) ? Boolean.TRUE : Boolean.FALSE);
@@ -168,9 +168,6 @@ public class TeacherServiceImpl implements TeacherService {
         if (!StringUtils.hasText(request.getEmail())) {
             errors.put("Email", ErrorCode.MISSING_VALUE.name());
         }
-        if (!StringUtils.hasText(request.getWorkingPosition())) {
-            errors.put("Working position", ErrorCode.MISSING_VALUE.name());
-        }
         if (StringUtils.hasText(request.getEmail())) {
             boolean isExistEmail = userRepository.findByEmailInSchool(request.getEmail(), principal.getSchoolId()).isPresent()
                     && !teacher.getEmail().equals(request.getEmail());
@@ -191,7 +188,7 @@ public class TeacherServiceImpl implements TeacherService {
         teacher.setFirstName(request.getFirstName());
         teacher.setLastName(request.getLastName());
         teacher.setEmail(request.getEmail());
-        teacher.setWorkingPosition(request.getWorkingPosition());
+        teacher.setWorkingPosition(RequestUtil.blankIfNull(request.getWorkingPosition()));
         teacher.setStreet(RequestUtil.blankIfNull(request.getStreet()));
         teacher.setDistrict(RequestUtil.blankIfNull(request.getDistrict()));
         teacher.setCity(RequestUtil.blankIfNull(request.getCity()));
@@ -200,6 +197,10 @@ public class TeacherServiceImpl implements TeacherService {
         teacher.setDateOfBirth(LocalDate.parse(request.getDateOfBirth() != null ? request.getDateOfBirth() : Constants.DEFAULT_DATE_OF_BIRTH));
         teacher.setNationality(RequestUtil.blankIfNull(request.getNationality()));
         teacher.setGender(Boolean.TRUE.equals(request.getGender()) ? Boolean.TRUE : Boolean.FALSE);
+        if (request.getSubjectId() != null && request.getSubjectId() > -1) {
+            teacher.setSubject(subjectRepository.findById(request.getSubjectId())
+                    .orElseThrow(() -> new NotFoundException("Not found subject with id " + request.getSubjectId())));
+        }
         userRepository.save(teacher);
         return OnlyIdResponse.builder()
                 .setSuccess(true)

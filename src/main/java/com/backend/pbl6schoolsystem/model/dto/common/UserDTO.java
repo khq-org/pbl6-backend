@@ -29,6 +29,7 @@ public class UserDTO implements Serializable {
     private String job;
     private String recruitmentDay;
     private String workingPosition;
+    private String teachSubject;
     private String role;
     private Long schoolId;
     private String schoolName;

@@ -11,4 +11,5 @@ public class NewSchoolYearRequest {
     private Long newSchoolYearId;
     private List<Long> oldClassIds;
     private List<Long> newClassIds;
+    private List<Long> teacherIds;
 }

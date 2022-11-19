@@ -1,6 +1,7 @@
 package com.backend.pbl6schoolsystem.service.impl;
 
 import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
+import com.backend.pbl6schoolsystem.common.enums.Grade;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
 import com.backend.pbl6schoolsystem.model.dto.common.SchoolYearDTO;
 import com.backend.pbl6schoolsystem.model.entity.*;
@@ -12,6 +13,7 @@ import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.schoolyear.ListSchoolYearResponse;
 import com.backend.pbl6schoolsystem.service.NewSchoolYearService;
+import com.backend.pbl6schoolsystem.util.RequestUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -26,6 +28,7 @@ public class NewSchoolYearServiceImpl implements NewSchoolYearService {
     private final SchoolYearRepository schoolYearRepository;
     private final ClassRepository classRepository;
     private final StudentClazzRepository studentClazzRepository;
+    private final TeacherClassRepository teacherClassRepository;
     private final UserRepository userRepository;
     private final ProfileStudentRepository profileStudentRepository;
     private final LearningResultRepository learningResultRepository;
@@ -93,17 +96,50 @@ public class NewSchoolYearServiceImpl implements NewSchoolYearService {
 
     @Override
     public NoContentResponse startNewSchoolYear(NewSchoolYearRequest request) {
+        Map<String, String> errors = new HashMap<>();
+        if (!checkDuplicatedValue(request.getNewClassIds())) { // duplicated
+            errors.put("newClassIds", ErrorCode.DUPLICATE_VALUE.name());
+        }
+        if (!checkDuplicatedValue(request.getTeacherIds())) { // duplicated
+            errors.put("teacherIds", ErrorCode.DUPLICATE_VALUE.name());
+        }
+        if (!errors.isEmpty()) {
+            return NoContentResponse.builder()
+                    .setSuccess(false)
+                    .build();
+        }
+
         List<ClassEntity> oldClassesByIds = classRepository.findClassesByIds(request.getOldClassIds());
         List<ClassEntity> newClassesByIds = classRepository.findClassesByIds(request.getNewClassIds());
+        List<UserEntity> teachers = userRepository.findAllById(request.getTeacherIds());
         SchoolYearEntity newSchoolYear = schoolYearRepository.findById(request.getNewSchoolYearId())
                 .orElseThrow(() -> new NotFoundException("Not found school year with id " + request.getNewSchoolYearId()));
         ClassEntity oldClazz, newClazz;
         StudentClazzEntity studentClazz;
+        TeacherClassEntity teacherClazz;
         LearningResultEntity learningResult;
         List<ProfileStudentEntity> profileStudents;
         List<ClassEntity> saveClasses = new ArrayList<>();
         List<LearningResultEntity> learningResults = new ArrayList<>();
         List<StudentClazzEntity> studentClasses = new ArrayList<>();
+        List<TeacherClassEntity> teacherClasses = new ArrayList<>();
+        List<ClassEntity> onlyGrade10 = oldClassesByIds.stream()
+                .filter(c -> c.getGrade().getGradeId().equals(Grade.GRADE_10.getGradeId()))
+                .collect(Collectors.toList());
+
+        for (int i = 0; i < onlyGrade10.size(); i++) {
+            onlyGrade10.get(i).setSubject(""); // FIX ME
+            onlyGrade10.get(i).setIsSpecializedClass(Boolean.FALSE); // FIX ME
+            teacherClazz = new TeacherClassEntity();
+            teacherClazz.setTeacher(teachers.get(i));
+            teacherClazz.setSchoolYear(newSchoolYear);
+            teacherClazz.setIsClassLeader(Boolean.TRUE);
+            teacherClazz.setClazz(onlyGrade10.get(i));
+
+            teachers.remove(teachers.get(i));
+            saveClasses.add(onlyGrade10.get(i));
+            teacherClasses.add(teacherClazz);
+        }
 
         for (int i = 0; i < oldClassesByIds.size(); i++) {
             oldClazz = oldClassesByIds.get(i);
@@ -129,14 +165,29 @@ public class NewSchoolYearServiceImpl implements NewSchoolYearService {
                 studentClasses.add(studentClazz);
 
             }
+            teacherClazz = new TeacherClassEntity();
+            teacherClazz.setTeacher(teachers.get(i));
+            teacherClazz.setClazz(newClazz);
+            teacherClazz.setIsClassLeader(Boolean.TRUE);
+            teacherClazz.setSchoolYear(newSchoolYear);
+            teacherClasses.add(teacherClazz);
         }
 
         classRepository.saveAll(saveClasses);
         studentClazzRepository.saveAll(studentClasses);
+        teacherClassRepository.saveAll(teacherClasses);
         learningResultRepository.saveAll(learningResults);
         return NoContentResponse.builder()
                 .setSuccess(true)
                 .build();
+    }
+
+    public Boolean checkDuplicatedValue(List<Long> ids) {
+        Set<Long> setIds = new HashSet<>();
+        for (Long id : ids) {
+            if (!setIds.add(id)) return false;
+        }
+        return true;
     }
 
     public void validRequest(Map<String, String> errors, CreateUpdateSchoolYearRequest request, Long schoolYearId) {

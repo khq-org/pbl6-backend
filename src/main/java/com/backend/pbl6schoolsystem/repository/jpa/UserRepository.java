@@ -26,6 +26,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     @Query("SELECT s FROM UserEntity s" +
             " LEFT JOIN FETCH s.school sch" +
+            " LEFT JOIN FETCH s.subject sb" +
             " WHERE s.role.roleId = :roleId" +
             " AND s.userId = :userId" +
             " AND sch.schoolId = :schoolId")

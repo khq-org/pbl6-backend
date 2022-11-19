@@ -64,6 +64,9 @@ public class UserEntity implements Serializable {
     private Integer numOfPeriodsInWeek;
     @Column(name = "workingposition")
     private String workingPosition;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subjectid", referencedColumnName = "subjectid")
+    private SubjectEntity subject;
     // =============================================================
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roleid", referencedColumnName = "roleid")

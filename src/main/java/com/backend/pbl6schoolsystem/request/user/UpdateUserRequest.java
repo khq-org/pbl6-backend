@@ -20,7 +20,9 @@ public class UpdateUserRequest {
     private String dateOfBirth;
     private String placeOfBirth;
     private String nationality;
-    private String workingPosition;
     private Boolean gender;
     private Long roleId;
+    // for teacher
+    private String workingPosition;
+    private Long subjectId;
 }

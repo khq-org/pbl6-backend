@@ -8,7 +8,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(setterPrefix = "set")
 public class SubjectDTO implements Serializable {
     private Long subjectId;
     private String subject;
