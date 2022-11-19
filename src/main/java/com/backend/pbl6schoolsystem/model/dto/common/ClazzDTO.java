@@ -1,6 +1,5 @@
 package com.backend.pbl6schoolsystem.model.dto.common;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import java.io.Serializable;
@@ -16,4 +15,6 @@ public class ClazzDTO implements Serializable {
     private GradeDTO grade;
     private Boolean specializedClass;
     private String subject;
+    private Long teacherId;
+    private String teacher;
 }

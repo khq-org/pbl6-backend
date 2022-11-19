@@ -8,5 +8,7 @@ import lombok.Setter;
 @Setter
 public class ListClassRequest extends PageRequest {
     private String clazzName;
+    private Long schoolYearId;
     private Long gradeId;
+    private Long schoolId;
 }

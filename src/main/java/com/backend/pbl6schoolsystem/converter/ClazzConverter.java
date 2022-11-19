@@ -26,6 +26,8 @@ public class ClazzConverter extends CommonConverter {
                                                 .setGradeId(r.getGrade().getGradeId())
                                                 .setGrade(r.getGrade().getGrade())
                                                 .build())
+                                        .setTeacherId(r.getTeacherId())
+                                        .setTeacher(r.getTeacher())
                                         .setSpecializedClass(r.getSpecializedClass())
                                         .setSubject(r.getSubject())
                                         .build())

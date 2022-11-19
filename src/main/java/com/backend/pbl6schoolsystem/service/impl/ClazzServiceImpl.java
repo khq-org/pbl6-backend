@@ -5,7 +5,9 @@ import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
 import com.backend.pbl6schoolsystem.model.dto.common.ClazzDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.GradeDTO;
 import com.backend.pbl6schoolsystem.model.entity.ClassEntity;
+import com.backend.pbl6schoolsystem.model.entity.TeacherClassEntity;
 import com.backend.pbl6schoolsystem.repository.dsl.ClassDslRepository;
+import com.backend.pbl6schoolsystem.repository.dsl.TeacherClassDslRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.ClassRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.GradeRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.SchoolRepository;
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ClazzServiceImpl implements ClazzService {
     private final ClassDslRepository classDslRepository;
+    private final TeacherClassDslRepository teacherClassDslRepository;
     private final ClassRepository classRepository;
 
     private final SchoolRepository schoolRepository;
@@ -43,22 +46,26 @@ public class ClazzServiceImpl implements ClazzService {
     @Override
     public ListClassResponse getListClass(ListClassRequest request) {
         UserPrincipal principal = SecurityUtils.getPrincipal();
-        Long schoolId = principal.getSchoolId();
+        request.setSchoolId(principal.getSchoolId());
         request.setClazzName(RequestUtil.blankIfNull(request.getClazzName()));
         request.setGradeId(RequestUtil.defaultIfNull(request.getGradeId(), -1L));
-        List<ClassEntity> listClazz = classDslRepository.getListClass(request, schoolId);
+//        List<ClassEntity> listClazz = classDslRepository.getListClass(request, schoolId);
+        List<TeacherClassEntity> teacherClasses = teacherClassDslRepository.listTeacherClass(request);
         return ListClassResponse.builder()
                 .setSuccess(true)
-                .setItems(listClazz.stream()
+                .setItems(teacherClasses.stream()
                         .map(lc -> ClazzDTO.builder()
-                                .setClassId(lc.getClassId())
-                                .setClazz(lc.getClazz())
+                                .setClassId(lc.getClazz().getClassId())
+                                .setClazz(lc.getClazz().getClazz())
                                 .setGrade(GradeDTO.builder()
-                                        .setGradeId(lc.getGrade().getGradeId())
-                                        .setGrade(lc.getGrade().getGrade())
+                                        .setGradeId(lc.getClazz().getGrade().getGradeId())
+                                        .setGrade(lc.getClazz().getGrade().getGrade())
                                         .build())
-                                .setSpecializedClass(lc.getIsSpecializedClass() == null ? false : lc.getIsSpecializedClass())
-                                .setSubject(RequestUtil.blankIfNull(lc.getSubject()))
+                                .setTeacherId(lc.getTeacher().getUserId())
+                                .setTeacher(lc.getTeacher().getFirstName() + " " + lc.getTeacher().getLastName())
+                                .setSpecializedClass(lc.getClazz().getIsSpecializedClass() == null ? false
+                                        : lc.getClazz().getIsSpecializedClass())
+                                .setSubject(RequestUtil.blankIfNull(lc.getClazz().getSubject()))
                                 .build())
                         .collect(Collectors.toList()))
                 .build();
