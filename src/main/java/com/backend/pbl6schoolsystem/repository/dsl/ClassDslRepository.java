@@ -21,16 +21,17 @@ public class ClassDslRepository {
     private final QClassEntity clazz = QClassEntity.classEntity;
     private final JPAQueryFactory queryFactory;
 
-    public List<ClassEntity> getListClass(ListClassRequest request, Long schoolId) {
+    public List<ClassEntity> getListClass(ListClassRequest request) {
         JPAQuery<ClassEntity> query = queryFactory.select(clazz)
                 .from(clazz)
-                .where(clazz.school.schoolId.eq(schoolId));
+                .where(clazz.school.schoolId.eq(request.getSchoolId()));
         if (StringUtils.hasText(request.getClazzName())) {
             query.where(clazz.clazz.containsIgnoreCase(request.getClazzName()));
         }
         if (request.getGradeId() > 0) {
             query.where(clazz.grade.gradeId.eq(request.getGradeId()));
         }
+        query.leftJoin(clazz.grade).fetch();
         int page = RequestUtil.getPage(request.getPage());
         int size = RequestUtil.getSize(request.getSize());
         int offset = page * size;

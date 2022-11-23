@@ -49,7 +49,15 @@ public class ClazzServiceImpl implements ClazzService {
         request.setSchoolId(principal.getSchoolId());
         request.setClazzName(RequestUtil.blankIfNull(request.getClazzName()));
         request.setGradeId(RequestUtil.defaultIfNull(request.getGradeId(), -1L));
-//        List<ClassEntity> listClazz = classDslRepository.getListClass(request, schoolId);
+        if (request.getSchoolYearId() == null) {
+            List<ClassEntity> listClazz = classDslRepository.getListClass(request);
+            return ListClassResponse.builder()
+                    .setSuccess(true)
+                    .setItems(listClazz.stream()
+                            .map(c -> toBuilder(c))
+                            .collect(Collectors.toList()))
+                    .build();
+        }
         List<TeacherClassEntity> teacherClasses = teacherClassDslRepository.listTeacherClass(request);
         return ListClassResponse.builder()
                 .setSuccess(true)
@@ -61,8 +69,10 @@ public class ClazzServiceImpl implements ClazzService {
                                         .setGradeId(lc.getClazz().getGrade().getGradeId())
                                         .setGrade(lc.getClazz().getGrade().getGrade())
                                         .build())
-                                .setTeacherId(lc.getTeacher().getUserId())
-                                .setTeacher(lc.getTeacher().getFirstName() + " " + lc.getTeacher().getLastName())
+                                .setTeacher(ClazzDTO.Teacher.builder()
+                                        .setTeacherId(lc.getTeacher().getUserId())
+                                        .setTeacher(lc.getTeacher().getFirstName() + " " + lc.getTeacher().getLastName())
+                                        .build())
                                 .setSpecializedClass(lc.getClazz().getIsSpecializedClass() == null ? false
                                         : lc.getClazz().getIsSpecializedClass())
                                 .setSubject(RequestUtil.blankIfNull(lc.getClazz().getSubject()))
@@ -77,17 +87,21 @@ public class ClazzServiceImpl implements ClazzService {
                 .orElseThrow(() -> new NotFoundException("Not found class with id " + clazzId));
         return GetClassResponse.builder()
                 .setSuccess(true)
-                .setClazzDTO(ClazzDTO.builder()
-                        .setClassId(clazz.getClassId())
-                        .setClazz(clazz.getClazz())
-                        .setGrade(GradeDTO.builder()
-                                .setGradeId(clazz.getGrade().getGradeId())
-                                .setGrade(clazz.getGrade().getGrade())
-                                .build())
-                        .setSpecializedClass(clazz.getIsSpecializedClass() == null ? false : clazz.getIsSpecializedClass())
-                        .setSubject(RequestUtil.blankIfNull(clazz.getSubject()))
-                        .build())
+                .setClazzDTO(toBuilder(clazz))
                 .build();
+    }
+
+    public ClazzDTO toBuilder(ClassEntity clazz) {
+        ClazzDTO.ClazzDTOBuilder builder = ClazzDTO.builder();
+        builder.setClassId(clazz.getClassId())
+                .setClazz(clazz.getClazz())
+                .setGrade(GradeDTO.builder()
+                        .setGradeId(clazz.getGrade().getGradeId())
+                        .setGrade(clazz.getGrade().getGrade())
+                        .build())
+                .setSpecializedClass(clazz.getIsSpecializedClass() == null ? false : clazz.getIsSpecializedClass())
+                .setSubject(RequestUtil.blankIfNull(clazz.getSubject()));
+        return builder.build();
     }
 
     @Override
