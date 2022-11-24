@@ -1,6 +1,9 @@
 server:
   port: 5000
+
 spring:
+  application:
+    name: pbl6-schoolsystem
   main:
     allow-bean-definition-overriding: true
   datasource:
@@ -23,3 +26,17 @@ spring:
         format_sql: true
     hibernate:
       ddl-auto: update
+
+logging:
+  file:
+    name: D:\kiet.nguyen-dang\project-base-learning-6\logs\elk-stack.log
+
+sentry:
+  dsn: https://9425312b5e734ef78dbf525d0a532259@o4504211653853184.ingest.sentry.io/4504212698562560
+  logging:
+    minimum-breadcrumb-level: debug
+    minimum-event-level: info
+  in-app-includes: com.backend.pbl6schoolsystem
+  send-default-pii: true
+  exception-resolver-order: -1
+  traces-sample-rate: 1.0

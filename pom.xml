@@ -99,6 +99,21 @@
             <artifactId>springdoc-openapi-ui</artifactId>
             <version>1.6.9</version>
         </dependency>
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-spring-boot-starter</artifactId>
+            <version>6.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-logback</artifactId>
+            <version>6.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-jdbc</artifactId>
+            <version>6.8.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -144,5 +159,19 @@
             pbl6-schoolsystem
         </finalName>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>deploy-nexus</id>
+            <name>Internal Releases</name>
+            <url>http://127.0.0.1:8081/repository/deploy-nexus-hosted-release/</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>deploy-nexus</id>
+            <name>Internal Releases</name>
+            <url>http://127.0.0.1:8081/repository/deploy-nexus-hosted-snapshot/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 </project>
