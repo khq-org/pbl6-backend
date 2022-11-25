@@ -15,9 +15,9 @@ services:
       - db
 #      - cache
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://database-schoolsystem.cpkrcjihmbnz.us-east-1.rds.amazonaws.com:5432/schoolsystem
-      - SPRING_DATASOURCE_USERNAME=schoolsystem
-      - SPRING_DATASOURCE_PASSWORD=nguyendangkiet123
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASS}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 #      - REDIS_HOST=schoolsystem-redis-001.4nbd8h.0001.use1.cache.amazonaws.com
 #      - REDIS_PORT=6379
@@ -31,8 +31,8 @@ services:
       - "5432:5432"
     restart: always
     environment:
-      - POSTGRES_USER=schooladmin
-      - POSTGRES_PASSWORD=nguyendangkiet123
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
     networks:
       - schoolsystem_network
 
