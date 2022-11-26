@@ -61,11 +61,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 authorities.addAll(Arrays.asList(Constants.MANAGE_SCHOOL, Constants.MANAGE_SCHOOL_ADMIN));
                 break;
             case SCHOOL:
-                authorities.addAll(Arrays.asList(Constants.MANAGE_TEACHER, Constants.MANAGE_STUDENT, Constants.MANAGE_CLASS
-                        , Constants.SETUP_CALENDAR, Constants.SETUP_INFORMATION_SCHOOL_YEAR));
+                authorities.addAll(Arrays.asList(Constants.MANAGE_TEACHER, Constants.MANAGE_STUDENT, Constants.MANAGE_CLASS,
+                        Constants.SETUP_CALENDAR, Constants.SETUP_INFORMATION_SCHOOL_YEAR));
                 break;
             case TEACHER:
-                authorities.addAll(Arrays.asList(Constants.MANAGE_STUDENT, Constants.SEE_CALENDAR, Constants.INPUT_SCORE));
+                authorities.addAll(Arrays.asList(Constants.MANAGE_STUDENT, Constants.SEE_CALENDAR, Constants.INPUT_SCORE,
+                        Constants.MANAGE_CLASS));
                 break;
             case STUDENT:
                 authorities.addAll(Arrays.asList(Constants.SEE_SCORE, Constants.SEE_CALENDAR));

@@ -3,6 +3,7 @@ package com.backend.pbl6schoolsystem.repository.dsl;
 import com.backend.pbl6schoolsystem.model.entity.QTeacherClassEntity;
 import com.backend.pbl6schoolsystem.model.entity.TeacherClassEntity;
 import com.backend.pbl6schoolsystem.request.clazz.ListClassRequest;
+import com.backend.pbl6schoolsystem.security.UserPrincipal;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -20,10 +21,13 @@ public class TeacherClassDslRepository {
     private final QTeacherClassEntity teacherClass = QTeacherClassEntity.teacherClassEntity;
     private final JPAQueryFactory queryFactory;
 
-    public List<TeacherClassEntity> listTeacherClass(ListClassRequest request) {
+    public List<TeacherClassEntity> listTeacherClass(ListClassRequest request, UserPrincipal principal) {
         JPAQuery<TeacherClassEntity> query = queryFactory.select(teacherClass)
-                .from(teacherClass)
-                .where(teacherClass.clazz.school.schoolId.eq(request.getSchoolId()))
+                .from(teacherClass);
+        if (principal.isTeacher()) {
+            query.where(teacherClass.teacher.userId.eq(principal.getUserId()));
+        }
+        query.where(teacherClass.clazz.school.schoolId.eq(request.getSchoolId()))
                 .where(teacherClass.schoolYear.schoolYearId.eq(request.getSchoolYearId()));
         if (StringUtils.hasText(request.getClazzName())) {
             query.where(teacherClass.clazz.clazz.containsIgnoreCase(request.getClazzName()));

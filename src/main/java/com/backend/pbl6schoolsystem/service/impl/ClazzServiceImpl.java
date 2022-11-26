@@ -50,15 +50,24 @@ public class ClazzServiceImpl implements ClazzService {
         request.setClazzName(RequestUtil.blankIfNull(request.getClazzName()));
         request.setGradeId(RequestUtil.defaultIfNull(request.getGradeId(), -1L));
         if (request.getSchoolYearId() == null) {
-            List<ClassEntity> listClazz = classDslRepository.getListClass(request);
-            return ListClassResponse.builder()
-                    .setSuccess(true)
-                    .setItems(listClazz.stream()
-                            .map(c -> toBuilder(c))
-                            .collect(Collectors.toList()))
-                    .build();
+            if (principal.isSchoolAdmin()) {
+                List<ClassEntity> listClazz = classDslRepository.getListClass(request);
+                return ListClassResponse.builder()
+                        .setSuccess(true)
+                        .setItems(listClazz.stream()
+                                .map(c -> toBuilder(c))
+                                .collect(Collectors.toList()))
+                        .build();
+            } else {
+                return ListClassResponse.builder()
+                        .setSuccess(false)
+                        .setErrorResponse(ErrorResponse.builder()
+                                .setErrors(Map.of("schoolYearId", ErrorCode.MISSING_VALUE.name()))
+                                .build())
+                        .build();
+            }
         }
-        List<TeacherClassEntity> teacherClasses = teacherClassDslRepository.listTeacherClass(request);
+        List<TeacherClassEntity> teacherClasses = teacherClassDslRepository.listTeacherClass(request, principal);
         return ListClassResponse.builder()
                 .setSuccess(true)
                 .setItems(teacherClasses.stream()
