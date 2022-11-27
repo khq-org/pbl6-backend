@@ -43,7 +43,7 @@ public class CalendarDslRepository {
         if (request.getCalendarEvent().equalsIgnoreCase(Constants.STUDY)
                 || request.getCalendarEvent().equalsIgnoreCase(Constants.MEETING)
                 || request.getCalendarEvent().equalsIgnoreCase(Constants.EXAMINATION)) {
-            query.where(calendar.calendarEventType.equalsIgnoreCase(request.getCalendarEvent()));
+            query.where(calendar.calendarEventType.equalsIgnoreCase(request.getCalendarType()));
         }
 
         query.where(calendar.createdBy.school.schoolId.eq(principal.getSchoolId()));

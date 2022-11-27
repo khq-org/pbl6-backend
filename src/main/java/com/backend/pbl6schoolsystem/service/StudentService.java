@@ -3,6 +3,7 @@ package com.backend.pbl6schoolsystem.service;
 import com.backend.pbl6schoolsystem.model.dto.student.StudentDTO;
 import com.backend.pbl6schoolsystem.request.leaningresult.CreateUpdateLearningResultRequest;
 import com.backend.pbl6schoolsystem.request.student.CreateStudentRequest;
+import com.backend.pbl6schoolsystem.request.student.GetProfileStudentRequest;
 import com.backend.pbl6schoolsystem.request.student.ListStudentRequest;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
@@ -21,7 +22,7 @@ public interface StudentService {
 
     NoContentResponse deleteStudent(Long studentId);
 
-    GetProfileStudentResponse getProfileStudent(Long studentId);
+    GetProfileStudentResponse getProfileStudent(GetProfileStudentRequest request);
 
 //    OnlyIdResponse addLearningResultForProfileStudent(Long profileStudentId, CreateUpdateLearningResultRequest request);
 

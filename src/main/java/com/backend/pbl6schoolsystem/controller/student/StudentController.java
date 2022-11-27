@@ -9,6 +9,7 @@ import com.backend.pbl6schoolsystem.model.dto.student.ProfileStudentDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.StudentDTO;
 import com.backend.pbl6schoolsystem.request.leaningresult.CreateUpdateLearningResultRequest;
 import com.backend.pbl6schoolsystem.request.student.CreateStudentRequest;
+import com.backend.pbl6schoolsystem.request.student.GetProfileStudentRequest;
 import com.backend.pbl6schoolsystem.request.student.ListStudentRequest;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
@@ -21,6 +22,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @Tag(name = "Student", description = "Student APIs")
 @RestController
@@ -45,9 +48,9 @@ public class StudentController {
     }
 
     @Operation(summary = "Profile student")
-    @GetMapping("/{id}/profile")
-    public Response<ProfileStudentDTO> getProfileStudent(@PathVariable("id") Long studentId) {
-        GetProfileStudentResponse response = studentService.getProfileStudent(studentId);
+    @GetMapping("/profile")
+    public Response<ProfileStudentDTO> getProfileStudent(@ModelAttribute @Valid GetProfileStudentRequest request) {
+        GetProfileStudentResponse response = studentService.getProfileStudent(request);
         return userConverter.getResponse(response);
     }
 

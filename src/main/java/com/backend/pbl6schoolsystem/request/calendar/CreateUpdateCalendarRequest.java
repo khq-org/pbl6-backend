@@ -12,6 +12,7 @@ public class CreateUpdateCalendarRequest {
     private String calendarEventName;
     @Schema(example = "Study, Examination, ...")
     private String calendarEventType;
+    private Long schoolYearId;
     private List<Long> classIds;
     private List<Long> userIds;
     @Schema(example = "07:00") // hh:mm

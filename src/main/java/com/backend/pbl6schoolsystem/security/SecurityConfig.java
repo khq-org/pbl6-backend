@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -41,9 +42,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers("/api/users/**").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(),
                 UserRole.ADMIN_ROLE.getRole(), UserRole.TEACHER_ROLE.getRole(), UserRole.STUDENT_ROLE.getRole());
         http.authorizeRequests().antMatchers("/api/schooladmins/**", "/api/schools/**").hasAuthority(UserRole.ADMIN_ROLE.getRole());
-        http.authorizeRequests().antMatchers("/api/teachers/**", "/api/students/**", "/api/subjects/**", "/api/schoolyear/**")
+        http.authorizeRequests().antMatchers("/api/teachers/**", "/api/schoolyear/**")
                 .hasAuthority(UserRole.SCHOOL_ROLE.getRole());
-        http.authorizeRequests().antMatchers("/api/classes/**").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(), UserRole.TEACHER_ROLE.getRole());
+        http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/students/profile").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(),
+                UserRole.STUDENT_ROLE.getRole());
+        http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/students").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(), UserRole.TEACHER_ROLE.getRole());
+        http.authorizeRequests().antMatchers("/api/students/**").hasAuthority(UserRole.SCHOOL_ROLE.getRole());
+        http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/classes").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(), UserRole.TEACHER_ROLE.getRole());
+        http.authorizeRequests().antMatchers("/api/classes/**").hasAuthority(UserRole.SCHOOL_ROLE.getRole());
         http.authorizeRequests().antMatchers("/api/learningresults/**").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(), UserRole.STUDENT_ROLE.getRole());
         http.authorizeRequests().antMatchers("/api/calendars/**").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(), UserRole.TEACHER_ROLE.getRole());
         http.authorizeRequests().anyRequest().authenticated();

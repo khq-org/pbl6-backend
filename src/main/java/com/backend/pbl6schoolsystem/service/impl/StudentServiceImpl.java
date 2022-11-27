@@ -15,6 +15,7 @@ import com.backend.pbl6schoolsystem.repository.dsl.UserDslRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.*;
 import com.backend.pbl6schoolsystem.request.leaningresult.CreateUpdateLearningResultRequest;
 import com.backend.pbl6schoolsystem.request.student.CreateStudentRequest;
+import com.backend.pbl6schoolsystem.request.student.GetProfileStudentRequest;
 import com.backend.pbl6schoolsystem.request.student.ListStudentRequest;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
@@ -273,7 +274,12 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public GetProfileStudentResponse getProfileStudent(Long studentId) {
+    public GetProfileStudentResponse getProfileStudent(GetProfileStudentRequest request) {
+        UserPrincipal principal = SecurityUtils.getPrincipal();
+        if (principal.isStudent()) {
+            request.setStudentId(principal.getUserId());
+        }
+        Long studentId = request.getStudentId();
         ProfileStudentEntity profileStudent = profileStudentRepository.findByStudent(studentId)
                 .orElseThrow(() -> new NotFoundException("Not found profile with studentId " + studentId));
         List<LearningResultEntity> learningResults = learningResultRepository.findByProfileStudent(profileStudent.getProfileStudentId());

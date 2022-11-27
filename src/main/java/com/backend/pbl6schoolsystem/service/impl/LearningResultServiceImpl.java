@@ -4,17 +4,24 @@ import com.backend.pbl6schoolsystem.common.enums.ExamType;
 import com.backend.pbl6schoolsystem.common.enums.Semester;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
 import com.backend.pbl6schoolsystem.model.dto.common.SubjectDTO;
+import com.backend.pbl6schoolsystem.model.dto.student.ExamResultDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.LearningResultDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.LearningResultDetailDTO;
 import com.backend.pbl6schoolsystem.model.entity.ExamResultEntity;
 import com.backend.pbl6schoolsystem.model.entity.LearningResultEntity;
 import com.backend.pbl6schoolsystem.model.entity.SubjectEntity;
+import com.backend.pbl6schoolsystem.model.entity.UserEntity;
+import com.backend.pbl6schoolsystem.repository.dsl.ExamResultDslRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.ExamResultRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.LearningResultRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.SubjectRepository;
+import com.backend.pbl6schoolsystem.repository.jpa.UserRepository;
+import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultRequest;
 import com.backend.pbl6schoolsystem.response.learningresult.LearningResultDetailResponse;
+import com.backend.pbl6schoolsystem.response.learningresult.LoadExamResultResponse;
 import com.backend.pbl6schoolsystem.service.LearningResultService;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
+import com.backend.pbl6schoolsystem.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +31,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class LearningResultServiceImpl implements LearningResultService {
+    private final UserRepository userRepository;
     private final LearningResultRepository learningResultRepository;
     private final SubjectRepository subjectRepository;
     private final ExamResultRepository examResultRepository;
+    private final ExamResultDslRepository examResultDslRepository;
 
     @Override
     public LearningResultDetailResponse getLearningResultDetail(Long learningResultId) {
@@ -82,6 +91,23 @@ public class LearningResultServiceImpl implements LearningResultService {
                                         .build())
                                 .collect(Collectors.toList()))
                         .build())
+                .build();
+    }
+
+    @Override
+    public LoadExamResultResponse loadExamResult(LoadExamResultRequest request) {
+        UserEntity teacher = userRepository.findById(SecurityUtils.getPrincipal().getUserId()).get();
+        request.setSubjectId(teacher.getSubject().getSubjectId());
+        List<ExamResultEntity> examResults = examResultDslRepository.listExamResult(request);
+        return LoadExamResultResponse.builder()
+                .setSuccess(true)
+                .setExamResult(examResults.stream()
+                        .map(e -> ExamResultDTO.builder()
+                                .examResultId(e.getExamResultId())
+                                .examType(e.getExamType())
+                                .score(e.getScore())
+                                .build())
+                        .collect(Collectors.toList()))
                 .build();
     }
 

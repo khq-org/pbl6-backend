@@ -43,6 +43,8 @@ public class CalendarServiceImpl implements CalendarService {
     private final ClassRepository classRepository;
     private final UserRepository userRepository;
     private final StudentClazzRepository studentClazzRepository;
+    private final TeacherClassRepository teacherClassRepository;
+    private final SchoolYearRepository schoolYearRepository;
     private final ClassCalendarDslRepository classCalendarDslRepository;
     private final UserCalendarDslRepository userCalendarDslRepository;
     private final CalendarDslRepository calendarDslRepository;
@@ -54,6 +56,17 @@ public class CalendarServiceImpl implements CalendarService {
         request.setClassId(RequestUtil.defaultIfNull(request.getClassId(), -1L));
         UserPrincipal principal = SecurityUtils.getPrincipal();
         List<CalendarEventEntity> calendarEvents = calendarDslRepository.listCalendar(request, principal);
+        List<UserCalendarEventEntity> teacherCalendars;
+        if (request.getClassId() > 0) {
+            teacherCalendars = userCalendarRepository.findByListCalendar(calendarEvents.stream()
+                    .map(ce -> ce.getCalendarEventId()).collect(Collectors.toList()));
+            return ListCalendarResponse.builder()
+                    .setSuccess(true)
+                    .setItems(teacherCalendars.stream()
+                            .map(tc -> returnClazzCalendar(tc))
+                            .collect(Collectors.toList()))
+                    .build();
+        }
         return ListCalendarResponse.builder()
                 .setSuccess(true)
                 .setItems(calendarEvents.stream()
@@ -125,6 +138,17 @@ public class CalendarServiceImpl implements CalendarService {
                 .build();
     }
 
+    public CalendarEventDTO returnClazzCalendar(UserCalendarEventEntity teacherClassCalendar) {
+        CalendarEventDTO builder;
+        builder = returnCalendarDTO(teacherClassCalendar.getCalendarEvent());
+        builder.setTeacher(CalendarEventDTO.Teacher.builder()
+                .setId(teacherClassCalendar.getUser().getUserId())
+                .setFirstName(teacherClassCalendar.getUser().getFirstName())
+                .setLastName(teacherClassCalendar.getUser().getLastName())
+                .build());
+        return builder;
+    }
+
     public CalendarEventDTO returnCalendarDTO(CalendarEventEntity entity) {
         CalendarEventDTO.CalendarEventDTOBuilder builder = CalendarEventDTO.builder();
         builder.setCalendarEventId(entity.getCalendarEventId())
@@ -151,12 +175,17 @@ public class CalendarServiceImpl implements CalendarService {
 
     public void checkValidRequest(CreateUpdateCalendarRequest request, Map<String, String> errors) {
         if (!StringUtils.hasText(request.getCalendarEventName())) {
-            errors.put("CalendarEventName", ErrorCode.MISSING_VALUE.name());
+            errors.put("calendarEventName", ErrorCode.MISSING_VALUE.name());
         }
         if (CollectionUtils.isEmpty(request.getClassIds()) && CollectionUtils.isEmpty(request.getUserIds())) {
-            errors.put("Class or User", ErrorCode.MISSING_VALUE.name());
+            errors.put("classOrUser", ErrorCode.MISSING_VALUE.name());
         }
-
+        if (request.getSchoolYearId() == null) {
+            errors.put("schoolYearId", ErrorCode.MISSING_VALUE.name());
+        }
+        if (!StringUtils.hasText(request.getCalendarEventType())) {
+            errors.put("calendarEventType", ErrorCode.MISSING_VALUE.name());
+        }
         if (!CollectionUtils.isEmpty(request.getClassIds())) {
             List<ClassCalendarEventEntity> classCalendarEvents = classCalendarDslRepository.findClassCalendar(request);
             if (!classCalendarEvents.isEmpty()) {
@@ -190,6 +219,7 @@ public class CalendarServiceImpl implements CalendarService {
         }
 
         UserPrincipal principal = SecurityUtils.getPrincipal();
+        SchoolYearEntity schoolYear = schoolYearRepository.findById(request.getSchoolYearId()).get();
 
         // calendar event
         CalendarEventEntity calendarEvent = new CalendarEventEntity();
@@ -215,27 +245,44 @@ public class CalendarServiceImpl implements CalendarService {
 
         List<ClassCalendarEventEntity> classCalendarEventEntities = new ArrayList<>();
         List<UserCalendarEventEntity> userCalendarEventEntities = new ArrayList<>();
+        // for teacher class
+        List<TeacherClassEntity> teacherClasses = new ArrayList<>();
 
-        if (!CollectionUtils.isEmpty(request.getClassIds())) {
-            List<ClassEntity> classes = classRepository.findAllById(request.getClassIds());
-            ClassCalendarEventEntity classCalendarEvent;
-            for (ClassEntity clazz : classes) {
-                classCalendarEvent = new ClassCalendarEventEntity();
-                classCalendarEvent.setCalendarEvent(calendarEvent);
-                classCalendarEvent.setClazz(clazz);
-                classCalendarEventEntities.add(classCalendarEvent);
+        List<ClassEntity> classes = classRepository.findAllById(!CollectionUtils.isEmpty(request.getClassIds()) ?
+                request.getClassIds() : Collections.emptyList());
+        ClassCalendarEventEntity classCalendarEvent;
+        for (ClassEntity clazz : classes) {
+            classCalendarEvent = new ClassCalendarEventEntity();
+            classCalendarEvent.setCalendarEvent(calendarEvent);
+            classCalendarEvent.setClazz(clazz);
+            classCalendarEventEntities.add(classCalendarEvent);
+        }
+
+        List<UserEntity> users = userRepository.findAllById(!CollectionUtils.isEmpty(request.getUserIds()) ?
+                request.getUserIds() : Collections.emptyList());
+        UserCalendarEventEntity userCalendarEvent;
+        for (UserEntity user : users) {
+            userCalendarEvent = new UserCalendarEventEntity();
+            userCalendarEvent.setCalendarEvent(calendarEvent);
+            userCalendarEvent.setUser(user);
+            userCalendarEventEntities.add(userCalendarEvent);
+        }
+
+        if (!classes.isEmpty() && !users.isEmpty() && request.getCalendarEventType().equalsIgnoreCase(Constants.STUDY)
+                && users.stream().allMatch(u -> u.getRole().getRoleId().equals(UserRole.TEACHER_ROLE))) {
+            TeacherClassEntity teacherClazz;
+            for (int i = 0; i < classes.size(); i++) {
+                teacherClazz = new TeacherClassEntity();
+                teacherClazz.setTeacher(users.get(i));
+                teacherClazz.setClazz(classes.get(i));
+                teacherClazz.setIsClassLeader(false);
+                teacherClazz.setSchoolYear(schoolYear);
+                teacherClasses.add(teacherClazz);
             }
         }
 
-        if (!CollectionUtils.isEmpty(request.getUserIds())) {
-            List<UserEntity> users = userRepository.findAllById(request.getUserIds());
-            UserCalendarEventEntity userCalendarEvent;
-            for (UserEntity user : users) {
-                userCalendarEvent = new UserCalendarEventEntity();
-                userCalendarEvent.setCalendarEvent(calendarEvent);
-                userCalendarEvent.setUser(user);
-                userCalendarEventEntities.add(userCalendarEvent);
-            }
+        if (!teacherClasses.isEmpty()) {
+            teacherClassRepository.saveAll(teacherClasses);
         }
 
         if (!classCalendarEventEntities.isEmpty()) {
@@ -269,6 +316,7 @@ public class CalendarServiceImpl implements CalendarService {
         }
 
         UserPrincipal principal = SecurityUtils.getPrincipal();
+        SchoolYearEntity schoolYear = schoolYearRepository.findById(request.getSchoolYearId()).get();
 
         calendarEvent.setCalendarEvent(request.getCalendarEventName());
         calendarEvent.setCalendarEventType(request.getCalendarEventType());
@@ -292,63 +340,76 @@ public class CalendarServiceImpl implements CalendarService {
 
         List<ClassCalendarEventEntity> newListClazzForCalendar = new ArrayList<>();
         List<UserCalendarEventEntity> newListUserForCalendar = new ArrayList<>();
+        // for teacher class
+        List<TeacherClassEntity> teacherClasses = new ArrayList<>();
 
-        if (!CollectionUtils.isEmpty(request.getClassIds())) {
-            List<ClassCalendarEventEntity> listClazzForCalendarInDB = classCalendarRepository.findByCalendar(calendarEventId);
-            List<ClassEntity> classesFromRequest = classRepository.findAllById(request.getClassIds());
-            for (ClassEntity clazzFromRequest : classesFromRequest) {
-                boolean isExistClass = false;
-                for (ClassCalendarEventEntity clazzCalendarEvent : listClazzForCalendarInDB) {
-                    if (clazzCalendarEvent.getClazz().getClassId().equals(clazzFromRequest.getClassId())) {
-                        isExistClass = true;
-                        listClazzForCalendarInDB.remove(clazzCalendarEvent);
-                        break;
-                    }
-                }
-                if (!isExistClass) {
-                    ClassCalendarEventEntity calendarEventEntity = new ClassCalendarEventEntity();
-                    calendarEventEntity.setCalendarEvent(calendarEvent);
-                    calendarEventEntity.setClazz(clazzFromRequest);
-                    newListClazzForCalendar.add(calendarEventEntity);
+        List<ClassCalendarEventEntity> listClazzForCalendarInDB = classCalendarRepository.findByCalendar(calendarEventId);
+        List<ClassEntity> classesFromRequest = classRepository.findAllById(!CollectionUtils.isEmpty(request.getClassIds()) ?
+                request.getClassIds() : Collections.emptyList());
+        for (ClassEntity clazzFromRequest : classesFromRequest) {
+            boolean isExistClass = false;
+            for (ClassCalendarEventEntity clazzCalendarEvent : listClazzForCalendarInDB) {
+                if (clazzCalendarEvent.getClazz().getClassId().equals(clazzFromRequest.getClassId())) {
+                    isExistClass = true;
+                    listClazzForCalendarInDB.remove(clazzCalendarEvent);
+                    break;
                 }
             }
-
-            if (!listClazzForCalendarInDB.isEmpty()) {
-                classCalendarRepository.deleteAll(listClazzForCalendarInDB);
-            }
-
-            if (!newListClazzForCalendar.isEmpty()) {
-                classCalendarRepository.saveAll(newListClazzForCalendar);
+            if (!isExistClass) {
+                ClassCalendarEventEntity calendarEventEntity = new ClassCalendarEventEntity();
+                calendarEventEntity.setCalendarEvent(calendarEvent);
+                calendarEventEntity.setClazz(clazzFromRequest);
+                newListClazzForCalendar.add(calendarEventEntity);
             }
         }
 
-        if (!CollectionUtils.isEmpty(request.getUserIds())) {
-            List<UserCalendarEventEntity> listUserForCalendarInDB = userCalendarRepository.findByCalendar(calendarEventId);
-            List<UserEntity> usersFromRequest = userRepository.findAllById(request.getUserIds());
-            for (UserEntity userFromRequest : usersFromRequest) {
-                boolean isExistUser = false;
-                for (UserCalendarEventEntity userCalendarEvent : listUserForCalendarInDB) {
-                    if (userCalendarEvent.getUser().getUserId().equals(userFromRequest.getUserId())) {
-                        isExistUser = true;
-                        listUserForCalendarInDB.remove(userCalendarEvent);
-                        break;
-                    }
-                }
-                if (!isExistUser) {
-                    UserCalendarEventEntity userCalendarEventEntity = new UserCalendarEventEntity();
-                    userCalendarEventEntity.setCalendarEvent(calendarEvent);
-                    userCalendarEventEntity.setUser(userFromRequest);
-                    newListUserForCalendar.add(userCalendarEventEntity);
-                }
-            }
+        if (!listClazzForCalendarInDB.isEmpty()) {
+            classCalendarRepository.deleteAll(listClazzForCalendarInDB);
+        }
 
-            if (!listUserForCalendarInDB.isEmpty()) {
-                userCalendarRepository.deleteAll(listUserForCalendarInDB);
-            }
+        if (!newListClazzForCalendar.isEmpty()) {
+            classCalendarRepository.saveAll(newListClazzForCalendar);
+        }
 
-            if (!newListUserForCalendar.isEmpty()) {
-                userCalendarRepository.saveAll(newListUserForCalendar);
+        List<UserCalendarEventEntity> listUserForCalendarInDB = userCalendarRepository.findByCalendar(calendarEventId);
+        List<UserEntity> usersFromRequest = userRepository.findAllById(!CollectionUtils.isEmpty(request.getUserIds()) ?
+                request.getUserIds() : Collections.emptyList());
+        for (UserEntity userFromRequest : usersFromRequest) {
+            boolean isExistUser = false;
+            for (UserCalendarEventEntity userCalendarEvent : listUserForCalendarInDB) {
+                if (userCalendarEvent.getUser().getUserId().equals(userFromRequest.getUserId())) {
+                    isExistUser = true;
+                    listUserForCalendarInDB.remove(userCalendarEvent);
+                    break;
+                }
             }
+            if (!isExistUser) {
+                UserCalendarEventEntity userCalendarEventEntity = new UserCalendarEventEntity();
+                userCalendarEventEntity.setCalendarEvent(calendarEvent);
+                userCalendarEventEntity.setUser(userFromRequest);
+                newListUserForCalendar.add(userCalendarEventEntity);
+            }
+        }
+
+        if (!classesFromRequest.isEmpty() && !usersFromRequest.isEmpty() && request.getCalendarEventType().equalsIgnoreCase(Constants.STUDY)
+                && usersFromRequest.stream().allMatch(u -> u.getRole().getRoleId().equals(UserRole.TEACHER_ROLE))) {
+            TeacherClassEntity teacherClazz;
+            for (int i = 0; i < usersFromRequest.size(); i++) {
+                teacherClazz = new TeacherClassEntity();
+                teacherClazz.setTeacher(usersFromRequest.get(i));
+                teacherClazz.setClazz(classesFromRequest.get(i));
+                teacherClazz.setIsClassLeader(false);
+                teacherClazz.setSchoolYear(schoolYear);
+                teacherClasses.add(teacherClazz);
+            }
+        }
+
+        if (!listUserForCalendarInDB.isEmpty()) {
+            userCalendarRepository.deleteAll(listUserForCalendarInDB);
+        }
+
+        if (!newListUserForCalendar.isEmpty()) {
+            userCalendarRepository.saveAll(newListUserForCalendar);
         }
 
         return OnlyIdResponse.builder()
