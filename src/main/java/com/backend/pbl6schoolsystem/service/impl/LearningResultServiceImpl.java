@@ -1,5 +1,6 @@
 package com.backend.pbl6schoolsystem.service.impl;
 
+import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
 import com.backend.pbl6schoolsystem.common.enums.ExamType;
 import com.backend.pbl6schoolsystem.common.enums.Semester;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
@@ -19,6 +20,7 @@ import com.backend.pbl6schoolsystem.repository.jpa.UserRepository;
 import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultRequest;
 import com.backend.pbl6schoolsystem.response.learningresult.LearningResultDetailResponse;
 import com.backend.pbl6schoolsystem.response.learningresult.LoadExamResultResponse;
+import com.backend.pbl6schoolsystem.security.UserPrincipal;
 import com.backend.pbl6schoolsystem.service.LearningResultService;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
 import com.backend.pbl6schoolsystem.util.SecurityUtils;
@@ -96,8 +98,17 @@ public class LearningResultServiceImpl implements LearningResultService {
 
     @Override
     public LoadExamResultResponse loadExamResult(LoadExamResultRequest request) {
-        UserEntity teacher = userRepository.findById(SecurityUtils.getPrincipal().getUserId()).get();
-        request.setSubjectId(teacher.getSubject().getSubjectId());
+        UserPrincipal principal = SecurityUtils.getPrincipal();
+        Map<String, String> errors = new HashMap<>();
+        if (principal.isSchoolAdmin()) {
+            if (request.getSubjectId() == null) {
+                errors.put("subjectId", ErrorCode.MISSING_VALUE.name());
+            }
+        }
+        else if (principal.isTeacher()) {
+            request.setSubjectId(userRepository.findById(principal.getUserId())
+                    .get().getSubject().getSubjectId());
+        }
         List<ExamResultEntity> examResults = examResultDslRepository.listExamResult(request);
         return LoadExamResultResponse.builder()
                 .setSuccess(true)

@@ -42,8 +42,8 @@ public class TeacherDslRepository {
         if (StringUtils.hasText(request.getDistrict())) {
             query.where(user.district.containsIgnoreCase(request.getDistrict()));
         }
-        if (StringUtils.hasText(request.getWorkingPosition())) {
-            query.where(user.workingPosition.containsIgnoreCase(request.getWorkingPosition()));
+        if (request.getSubjectId() != null && request.getSubjectId() > 0) {
+            query.where(user.subject.subjectId.eq(request.getSubjectId()));
         }
         int page = RequestUtil.getPage(request.getPage());
         int size = RequestUtil.getSize(request.getSize());

@@ -2,7 +2,6 @@ package com.backend.pbl6schoolsystem.controller.learningresult;
 
 import com.backend.pbl6schoolsystem.converter.LearningResultConverter;
 import com.backend.pbl6schoolsystem.model.dto.common.ListDTO;
-import com.backend.pbl6schoolsystem.model.dto.common.OnlyIdDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.ExamResultDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.LearningResultDetailDTO;
 import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultRequest;

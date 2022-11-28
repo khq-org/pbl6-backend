@@ -15,6 +15,7 @@ public class CreateUpdateCalendarRequest {
     private Long schoolYearId;
     private List<Long> classIds;
     private List<Long> userIds;
+    private Long subjectId;
     @Schema(example = "07:00") // hh:mm
     private String timeStart;
     @Schema(example = "08:45") // hh:mm

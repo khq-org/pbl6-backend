@@ -42,6 +42,7 @@ public class CalendarServiceImpl implements CalendarService {
     private final ClassCalendarRepository classCalendarRepository;
     private final ClassRepository classRepository;
     private final UserRepository userRepository;
+    private final SubjectRepository subjectRepository;
     private final StudentClazzRepository studentClazzRepository;
     private final TeacherClassRepository teacherClassRepository;
     private final SchoolYearRepository schoolYearRepository;
@@ -185,8 +186,14 @@ public class CalendarServiceImpl implements CalendarService {
         }
         if (!StringUtils.hasText(request.getCalendarEventType())) {
             errors.put("calendarEventType", ErrorCode.MISSING_VALUE.name());
+        } else if (List.of(Constants.STUDY, Constants.EXAMINATION).contains(request.getCalendarEventType())
+                && request.getSubjectId() == null) {
+            errors.put("subjectId", ErrorCode.MISSING_VALUE.name());
         }
         if (!CollectionUtils.isEmpty(request.getClassIds())) {
+            if (request.getLessonFinish() == null) {
+                request.setLessonFinish(request.getLessonStart());
+            }
             List<ClassCalendarEventEntity> classCalendarEvents = classCalendarDslRepository.findClassCalendar(request);
             if (!classCalendarEvents.isEmpty()) {
                 for (ClassCalendarEventEntity classCalendarEvent : classCalendarEvents) {
@@ -195,7 +202,8 @@ public class CalendarServiceImpl implements CalendarService {
             }
         }
 
-        if (!CollectionUtils.isEmpty(request.getUserIds())) {
+        // FIX ME
+        if (!Constants.STUDY.equalsIgnoreCase(request.getCalendarEventType()) && !CollectionUtils.isEmpty(request.getUserIds())) {
             List<UserCalendarEventEntity> userCalendarEvents = userCalendarDslRepository.findUserCalendar(request);
             if (!userCalendarEvents.isEmpty()) {
                 for (UserCalendarEventEntity userCalendarEvent : userCalendarEvents) {
@@ -228,8 +236,10 @@ public class CalendarServiceImpl implements CalendarService {
         if (StringUtils.hasText(request.getDate())) {
             calendarEvent.setCalendarDate(LocalDate.parse(request.getDate()));
         }
-        if (request.getLessonStart() != null && request.getLessonFinish() != null) {
+        if (request.getLessonStart() != null) {
             calendarEvent.setLessonStart(request.getLessonStart());
+        }
+        if (request.getLessonFinish() != null) {
             calendarEvent.setLessonFinish(request.getLessonFinish());
         }
         if (StringUtils.hasText(request.getDayOfWeek())) {
@@ -238,6 +248,10 @@ public class CalendarServiceImpl implements CalendarService {
         if (StringUtils.hasText(request.getTimeStart()) && StringUtils.hasText(request.getTimeFinish())) {
             calendarEvent.setTimeStart(LocalTime.parse(request.getTimeStart()));
             calendarEvent.setTimeFinish(LocalTime.parse(request.getTimeFinish()));
+        }
+        if (List.of(Constants.STUDY, Constants.EXAMINATION).contains(request.getCalendarEventType()) && request.getSubjectId() != null
+                && request.getSubjectId() > 0) {
+            calendarEvent.setSubject(subjectRepository.findById(request.getSubjectId()).get());
         }
         calendarEvent.setCreatedBy(userRepository.findById(principal.getUserId()).get());
         calendarEvent.setCreatedDate(new Timestamp(System.currentTimeMillis()));
@@ -269,7 +283,7 @@ public class CalendarServiceImpl implements CalendarService {
         }
 
         if (!classes.isEmpty() && !users.isEmpty() && request.getCalendarEventType().equalsIgnoreCase(Constants.STUDY)
-                && users.stream().allMatch(u -> u.getRole().getRoleId().equals(UserRole.TEACHER_ROLE))) {
+                && users.stream().allMatch(u -> u.getRole().getRoleId().equals(UserRole.TEACHER_ROLE.getRoleId()))) {
             TeacherClassEntity teacherClazz;
             for (int i = 0; i < classes.size(); i++) {
                 teacherClazz = new TeacherClassEntity();
