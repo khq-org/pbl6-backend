@@ -15,6 +15,8 @@ public interface ClassCalendarRepository extends JpaRepository<ClassCalendarEven
             " LEFT JOIN FETCH cce.calendarEvent ce" +
             " LEFT JOIN FETCH ce.room" +
             " LEFT JOIN FETCH ce.subject" +
+            " LEFT JOIN FETCH cce.schoolYear" +
+            " LEFT JOIN FETCH cce.semester" +
             " WHERE cce.clazz.classId = :classId")
     List<ClassCalendarEventEntity> listClassCalendarEvent(@Param("classId") Long classId);
 

@@ -16,4 +16,5 @@ public interface TeacherClassRepository extends JpaRepository<TeacherClassEntity
             " LEFT JOIN FETCH tc.semester s" +
             " WHERE tc.teacher.userId = :teacherId")
     List<TeacherClassEntity> findByTeacher(@Param("teacherId") Long teacherId);
+
 }

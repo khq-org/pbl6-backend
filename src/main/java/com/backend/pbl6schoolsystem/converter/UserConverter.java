@@ -2,6 +2,7 @@ package com.backend.pbl6schoolsystem.converter;
 
 import com.backend.pbl6schoolsystem.common.constant.Constants;
 import com.backend.pbl6schoolsystem.model.dto.calendar.CalendarEventDTO;
+import com.backend.pbl6schoolsystem.model.dto.common.ClazzDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.ListDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.UserDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.ProfileStudentDTO;
@@ -11,6 +12,7 @@ import com.backend.pbl6schoolsystem.model.dto.user.SchoolAdminDTO;
 import com.backend.pbl6schoolsystem.model.dto.user.UserInfoDTO;
 import com.backend.pbl6schoolsystem.response.UserInfoResponse;
 import com.backend.pbl6schoolsystem.response.calendar.ListCalendarResponse;
+import com.backend.pbl6schoolsystem.response.clazz.ListClassResponse;
 import com.backend.pbl6schoolsystem.response.student.GetProfileStudentResponse;
 import com.backend.pbl6schoolsystem.response.teacher.GetTeacherResponse;
 import com.backend.pbl6schoolsystem.response.user.GetSchoolAdminResponse;
@@ -20,6 +22,7 @@ import com.backend.pbl6schoolsystem.response.student.GetStudentResponse;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -108,6 +111,13 @@ public class UserConverter extends CommonConverter {
                 .setSuccess(true)
                 .setData(response.getProfileStudentDTO())
                 .setTimestamp(new Timestamp(System.currentTimeMillis()))
+                .build();
+    }
+
+    public Response<List<ClazzDTO>> getResponse(ListClassResponse response) {
+        return Response.<List<ClazzDTO>>builder()
+                .setSuccess(true)
+                .setData(response.getItems())
                 .build();
     }
 }

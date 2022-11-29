@@ -184,6 +184,9 @@ public class CalendarServiceImpl implements CalendarService {
         if (request.getSchoolYearId() == null) {
             errors.put("schoolYearId", ErrorCode.MISSING_VALUE.name());
         }
+        if (request.getSemesterId() == null) {
+            errors.put("semesterId", ErrorCode.MISSING_VALUE.name());
+        }
         if (!StringUtils.hasText(request.getCalendarEventType())) {
             errors.put("calendarEventType", ErrorCode.MISSING_VALUE.name());
         } else if (List.of(Constants.STUDY, Constants.EXAMINATION).contains(request.getCalendarEventType())

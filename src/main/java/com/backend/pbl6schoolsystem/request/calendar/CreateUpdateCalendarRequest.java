@@ -13,6 +13,7 @@ public class CreateUpdateCalendarRequest {
     @Schema(example = "Study, Examination, ...")
     private String calendarEventType;
     private Long schoolYearId;
+    private Long semesterId;
     private List<Long> classIds;
     private List<Long> userIds;
     private Long subjectId;

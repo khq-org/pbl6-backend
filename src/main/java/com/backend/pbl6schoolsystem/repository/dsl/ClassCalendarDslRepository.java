@@ -3,6 +3,7 @@ package com.backend.pbl6schoolsystem.repository.dsl;
 import com.backend.pbl6schoolsystem.model.entity.ClassCalendarEventEntity;
 import com.backend.pbl6schoolsystem.model.entity.QClassCalendarEventEntity;
 import com.backend.pbl6schoolsystem.request.calendar.CreateUpdateCalendarRequest;
+import com.backend.pbl6schoolsystem.request.calendar.ListCalendarRequest;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -27,4 +28,15 @@ public class ClassCalendarDslRepository {
         return query.fetch();
     }
 
+    public List<ClassCalendarEventEntity> listClassCalendarEvent(ListCalendarRequest request) {
+        JPAQuery<ClassCalendarEventEntity> query = queryFactory.select(classCalendarEvent)
+                .from(classCalendarEvent)
+                .where(classCalendarEvent.schoolYear.schoolYearId.eq(request.getSchoolYearId()))
+                .where(classCalendarEvent.clazz.classId.eq(request.getClassId()));
+        if (request.getSemesterId() != null && request.getSemesterId() > 0) {
+            query.where(classCalendarEvent.semester.semesterId.eq(request.getSemesterId()));
+        }
+        query.leftJoin(classCalendarEvent.calendarEvent).fetch();
+        return query.fetch();
+    }
 }

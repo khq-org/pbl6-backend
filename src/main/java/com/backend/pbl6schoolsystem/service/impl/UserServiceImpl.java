@@ -5,8 +5,13 @@ import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
 import com.backend.pbl6schoolsystem.mapper.UserMapper;
 import com.backend.pbl6schoolsystem.model.dto.calendar.CalendarEventDTO;
+import com.backend.pbl6schoolsystem.model.dto.common.ClazzDTO;
 import com.backend.pbl6schoolsystem.model.entity.*;
+import com.backend.pbl6schoolsystem.repository.dsl.ClassCalendarDslRepository;
+import com.backend.pbl6schoolsystem.repository.dsl.UserCalendarDslRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.*;
+import com.backend.pbl6schoolsystem.request.calendar.ListCalendarRequest;
+import com.backend.pbl6schoolsystem.request.clazz.ListClassRequest;
 import com.backend.pbl6schoolsystem.request.user.ChangePasswordRequest;
 import com.backend.pbl6schoolsystem.request.user.UpdateUserRequest;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
@@ -14,6 +19,7 @@ import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.OnlyIdResponse;
 import com.backend.pbl6schoolsystem.response.UserInfoResponse;
 import com.backend.pbl6schoolsystem.response.calendar.ListCalendarResponse;
+import com.backend.pbl6schoolsystem.response.clazz.ListClassResponse;
 import com.backend.pbl6schoolsystem.security.CustomUser;
 import com.backend.pbl6schoolsystem.security.UserPrincipal;
 import com.backend.pbl6schoolsystem.service.UserService;
@@ -41,8 +47,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final StudentClazzRepository studentClazzRepository;
-    private final ClassCalendarRepository classCalendarRepository;
-    private final UserCalendarRepository userCalendarRepository;
+    private final TeacherClassRepository teacherClassRepository;
+    private final ClassCalendarDslRepository classCalendarDslRepository;
+    private final UserCalendarDslRepository userCalendarDslRepository;
     private final String ADMIN = Constants.ADMIN_ROLE;
     private final String SCHOOL = Constants.SCHOOL_ROLE;
     private final String TEACHER = Constants.TEACHER_ROLE;
@@ -173,36 +180,68 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public ListCalendarResponse getListCalendar() {
+    public ListCalendarResponse getListCalendar(ListCalendarRequest request) {
         UserPrincipal principal = SecurityUtils.getPrincipal();
         List<CalendarEventEntity> listCalendarEvent = new ArrayList<>();
-        ClassEntity clazz;
         List<ClassCalendarEventEntity> listClassCalendar;
-
+        Map<String, String> errors = new HashMap<>();
         if (principal.isStudent()) {
-            clazz = studentClazzRepository.getCurrentClassForStudent(principal.getUserId()).get(0);
-            listClassCalendar = classCalendarRepository.listClassCalendarEvent(clazz != null ? clazz.getClassId() : -1L);
+            if (request.getClassId() < 0) {
+                errors.put("classId", ErrorCode.MISSING_VALUE.name());
+            }
+            if (!errors.isEmpty()) {
+                return ListCalendarResponse.builder()
+                        .setSuccess(false)
+                        .setErrorResponse(ErrorResponse.builder()
+                                .setErrors(errors)
+                                .build())
+                        .build();
+            }
+            StudentClazzEntity studentClazz = studentClazzRepository.findByStudentIdAndClazzId(principal.getUserId(), request.getClassId());
+            request.setSchoolYearId(studentClazz.getSchoolYear().getSchoolYearId());
+            listClassCalendar = classCalendarDslRepository.listClassCalendarEvent(request);
             if (!listClassCalendar.isEmpty()) {
                 listCalendarEvent.addAll(listClassCalendar.stream()
-                        .map(cc -> cc.getCalendarEvent())
+                        .map(ClassCalendarEventEntity::getCalendarEvent)
                         .collect(Collectors.toList()));
             }
         }
 
-        List<UserCalendarEventEntity> listUserCalendar = userCalendarRepository.findListUserCalendar(principal.getUserId());
+        List<UserCalendarEventEntity> listUserCalendar = userCalendarDslRepository.findListUserCalendar(principal, request);
         if (!listUserCalendar.isEmpty()) {
             listCalendarEvent.addAll(listUserCalendar.stream()
-                    .map(uc -> uc.getCalendarEvent())
+                    .map(UserCalendarEventEntity::getCalendarEvent)
                     .collect(Collectors.toList()));
         }
-
-
-        CalendarEventDTO.CalendarEventDTOBuilder builder = CalendarEventDTO.builder();
 
         return ListCalendarResponse.builder()
                 .setSuccess(true)
                 .setItems(listCalendarEvent.stream()
-                        .map(ce -> entity2dto(ce))
+                        .map(this::entity2dto)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    @Override
+    public ListClassResponse getListMyClass() {
+        UserPrincipal principal = SecurityUtils.getPrincipal();
+        List<ClassEntity> classes = new ArrayList<>();
+        if (principal.isStudent()) {
+            List<StudentClazzEntity> studentClasses = studentClazzRepository.findByStudentId(principal.getUserId());
+            classes = studentClasses.stream().map(StudentClazzEntity::getClazz).collect(Collectors.toList());
+        } else if (principal.isTeacher()) {
+            List<TeacherClassEntity> teacherClasses = teacherClassRepository.findByTeacher(principal.getUserId());
+            classes = teacherClasses.stream()
+                    .filter(t -> Boolean.TRUE.equals(t.getIsClassLeader()))
+                    .map(TeacherClassEntity::getClazz).collect(Collectors.toList());
+        }
+        return ListClassResponse.builder()
+                .setSuccess(true)
+                .setItems(classes.stream()
+                        .map(c -> ClazzDTO.builder()
+                                .setClassId(c.getClassId())
+                                .setClazz(c.getClazz())
+                                .build())
                         .collect(Collectors.toList()))
                 .build();
     }

@@ -425,7 +425,7 @@ public class StudentServiceImpl implements StudentService {
 
         ClassEntity clazz = classRepository.findById(request.getClassId())
                 .orElseThrow(() -> new NotFoundException("Not found clazz with id " + request.getClassId()));
-        StudentClazzEntity studentClazz = studentClazzRepository.findByStudentIdAndClazzId(learningResult.getProfileStudent().getStudent().getStudentId(),
+        StudentClazzEntity studentClazz = studentClazzRepository.findByStudentIdAndClazzId(learningResult.getProfileStudent().getStudent().getUserId(),
                 learningResult.getClazz().getClassId());
 
         learningResult.setClazz(clazz);

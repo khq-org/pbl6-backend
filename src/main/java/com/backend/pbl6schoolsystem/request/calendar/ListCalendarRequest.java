@@ -11,4 +11,6 @@ public class ListCalendarRequest extends PageRequest {
     private Long classId;
     private String calendarEvent;
     private String calendarType;
+    private Long semesterId;
+    private Long schoolYearId;
 }
