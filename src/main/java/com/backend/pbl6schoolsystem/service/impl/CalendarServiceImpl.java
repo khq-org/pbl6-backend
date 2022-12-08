@@ -49,6 +49,7 @@ public class CalendarServiceImpl implements CalendarService {
     private final ClassCalendarDslRepository classCalendarDslRepository;
     private final UserCalendarDslRepository userCalendarDslRepository;
     private final CalendarDslRepository calendarDslRepository;
+    private final RoomRepository roomRepository;
 
     @Override
     public ListCalendarResponse getListCalendar(ListCalendarRequest request) {
@@ -244,6 +245,11 @@ public class CalendarServiceImpl implements CalendarService {
         }
         if (request.getLessonFinish() != null) {
             calendarEvent.setLessonFinish(request.getLessonFinish());
+        }
+        if (request.getRoomId() != null && request.getRoomId() > 0) {
+            RoomEntity room = roomRepository.findById(request.getRoomId())
+                    .orElseThrow(() -> new NotFoundException("Not found room"));
+            calendarEvent.setRoom(room);
         }
         if (StringUtils.hasText(request.getDayOfWeek())) {
             calendarEvent.setDayOfWeek(request.getDayOfWeek());

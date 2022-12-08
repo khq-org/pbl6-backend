@@ -34,12 +34,16 @@ public class UserCalendarDslRepository {
         return query.fetch();
     }
 
-    public List<UserCalendarEventEntity> findListUserCalendar(UserPrincipal principal, ListCalendarRequest request) {
+    public List<UserCalendarEventEntity> findListUserCalendar(UserPrincipal principal, ListCalendarRequest request, Boolean isTeach) {
         JPAQuery<UserCalendarEventEntity> query = queryFactory.select(userCalendarEvent)
                 .from(userCalendarEvent)
-                .where(userCalendarEvent.user.role.role.equalsIgnoreCase(principal.getRole()));
-        if (StringUtils.hasText(request.getCalendarType()) && List.of(Constants.STUDY, Constants.EXAMINATION, Constants.MEETING).contains(request.getCalendarType())) {
-            query.where(userCalendarEvent.calendarEvent.calendarEventType.eq(request.getCalendarType()));
+                .where(userCalendarEvent.user.userId.eq(principal.getUserId()));
+        if (isTeach) {
+            query.where(userCalendarEvent.calendarEvent.calendarEventType.eq(Constants.STUDY));
+        } else {
+            if (StringUtils.hasText(request.getCalendarType()) && List.of(Constants.STUDY, Constants.EXAMINATION, Constants.MEETING).contains(request.getCalendarType())) {
+                query.where(userCalendarEvent.calendarEvent.calendarEventType.eq(request.getCalendarType()));
+            }
         }
         if (request.getSchoolYearId() != null && request.getSchoolYearId() > 0) {
             query.where(userCalendarEvent.schoolYear.schoolYearId.eq(request.getSchoolYearId()));

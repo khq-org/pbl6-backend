@@ -24,4 +24,9 @@ public interface ClassCalendarRepository extends JpaRepository<ClassCalendarEven
             " LEFT JOIN FETCH cce.clazz" +
             " WHERE cce.calendarEvent.calendarEventId = :calendarEventId")
     List<ClassCalendarEventEntity> findByCalendar(@Param("calendarEventId") Long calendarEventId);
+
+    @Query("SELECT cce FROM ClassCalendarEventEntity cce" +
+            " LEFT JOIN FETCH cce.clazz" +
+            " WHERE cce.calendarEvent.calendarEventId IN (:calendarEventIds)")
+    List<ClassCalendarEventEntity> findByCalendarIds(@Param("calendarEventIds") List<Long> calendarEventIds);
 }

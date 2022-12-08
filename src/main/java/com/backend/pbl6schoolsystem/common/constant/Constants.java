@@ -35,6 +35,7 @@ public class Constants {
     public static final String MEETING = "Meeting";
     public static final String STUDY = "Study";
     public static final String EXAMINATION = "Examination";
+    public static final String TEACH = "Teach";
 
     // Learning grade
     public static final String GOOD = "Good";

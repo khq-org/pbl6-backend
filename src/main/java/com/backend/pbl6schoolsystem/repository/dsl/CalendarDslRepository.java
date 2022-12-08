@@ -32,17 +32,29 @@ public class CalendarDslRepository {
         if (request.getClassId() > 0) {
             query.innerJoin(classCalendar).on(classCalendar.calendarEvent.calendarEventId.eq(calendar.calendarEventId))
                     .where(classCalendar.clazz.classId.eq(request.getClassId()));
+            if (request.getSchoolYearId() != null && request.getSchoolYearId() > 0) {
+                query.where(classCalendar.schoolYear.schoolYearId.eq(request.getSchoolYearId()));
+            }
+            if (request.getSemesterId() != null && request.getSemesterId() > 0) {
+                query.where(classCalendar.semester.semesterId.eq(request.getSemesterId()));
+            }
         }
         if (request.getUserId() > 0) {
             query.innerJoin(userCalendar).on(userCalendar.calendarEvent.calendarEventId.eq(calendar.calendarEventId))
                     .where(userCalendar.user.userId.eq(request.getUserId()));
+            if (request.getSchoolYearId() != null && request.getSchoolYearId() > 0) {
+                query.where(userCalendar.schoolYear.schoolYearId.eq(request.getSchoolYearId()));
+            }
+            if (request.getSemesterId() != null && request.getSemesterId() > 0) {
+                query.where(userCalendar.semester.semesterId.eq(request.getSemesterId()));
+            }
         }
         if (StringUtils.hasText(request.getCalendarEvent())) {
             query.where(calendar.calendarEvent.containsIgnoreCase(request.getCalendarEvent()));
         }
-        if (request.getCalendarEvent().equalsIgnoreCase(Constants.STUDY)
-                || request.getCalendarEvent().equalsIgnoreCase(Constants.MEETING)
-                || request.getCalendarEvent().equalsIgnoreCase(Constants.EXAMINATION)) {
+        if (request.getCalendarType().equalsIgnoreCase(Constants.STUDY)
+                || request.getCalendarType().equalsIgnoreCase(Constants.MEETING)
+                || request.getCalendarType().equalsIgnoreCase(Constants.EXAMINATION)) {
             query.where(calendar.calendarEventType.equalsIgnoreCase(request.getCalendarType()));
         }
 

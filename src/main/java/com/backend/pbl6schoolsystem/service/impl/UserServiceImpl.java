@@ -50,6 +50,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final TeacherClassRepository teacherClassRepository;
     private final ClassCalendarDslRepository classCalendarDslRepository;
     private final UserCalendarDslRepository userCalendarDslRepository;
+    private final UserCalendarRepository userCalendarRepository;
+    private final ClassCalendarRepository classCalendarRepository;
     private final String ADMIN = Constants.ADMIN_ROLE;
     private final String SCHOOL = Constants.SCHOOL_ROLE;
     private final String TEACHER = Constants.TEACHER_ROLE;
@@ -182,9 +184,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public ListCalendarResponse getListCalendar(ListCalendarRequest request) {
         UserPrincipal principal = SecurityUtils.getPrincipal();
-        List<CalendarEventEntity> listCalendarEvent = new ArrayList<>();
         List<ClassCalendarEventEntity> listClassCalendar;
         Map<String, String> errors = new HashMap<>();
+        List<CalendarEventDTO> calendarEvents = new ArrayList<>();
+        CalendarEventEntity calendarEvent;
+        CalendarEventDTO calendarEventDTO;
+        // Get list calendar STUDY for student
         if (principal.isStudent()) {
             if (request.getClassId() < 0) {
                 errors.put("classId", ErrorCode.MISSING_VALUE.name());
@@ -200,27 +205,52 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             StudentClazzEntity studentClazz = studentClazzRepository.findByStudentIdAndClazzId(principal.getUserId(), request.getClassId());
             request.setSchoolYearId(studentClazz.getSchoolYear().getSchoolYearId());
             listClassCalendar = classCalendarDslRepository.listClassCalendarEvent(request);
-            if (!listClassCalendar.isEmpty()) {
-                listCalendarEvent.addAll(listClassCalendar.stream()
-                        .map(ClassCalendarEventEntity::getCalendarEvent)
-                        .collect(Collectors.toList()));
+            List<UserEntity> teacherTeachClasses = userCalendarRepository.findByListCalendar(listClassCalendar.stream()
+                            .map(cce -> cce.getCalendarEvent().getCalendarEventId()).collect(Collectors.toList()))
+                    .stream().map(UserCalendarEventEntity::getUser).collect(Collectors.toList());
+            UserEntity teacher;
+            for (int i = 0; i < listClassCalendar.size(); i++) {
+                calendarEvent = listClassCalendar.get(i).getCalendarEvent();
+                teacher = teacherTeachClasses.get(i);
+                calendarEventDTO = getCalendarEvent(calendarEvent);
+                calendarEventDTO.setTeacher(CalendarEventDTO.Teacher.builder()
+                        .setId(teacher.getUserId())
+                        .setFirstName(teacher.getFirstName())
+                        .setLastName(teacher.getLastName())
+                        .build());
+                calendarEvents.add(calendarEventDTO);
             }
         }
 
-        List<UserCalendarEventEntity> listUserCalendar = userCalendarDslRepository.findListUserCalendar(principal, request);
-        if (!listUserCalendar.isEmpty()) {
-            listCalendarEvent.addAll(listUserCalendar.stream()
-                    .map(UserCalendarEventEntity::getCalendarEvent)
-                    .collect(Collectors.toList()));
+        // Get list teach of teacher
+        if (principal.isTeacher()) {
+            List<UserCalendarEventEntity> listTeacherCalendar = userCalendarDslRepository.findListUserCalendar(principal, request, true);
+            List<ClassEntity> classes = classCalendarRepository.findByCalendarIds(listTeacherCalendar.stream()
+                            .map(tt -> tt.getCalendarEvent().getCalendarEventId()).collect(Collectors.toList()))
+                    .stream().map(ClassCalendarEventEntity::getClazz).collect(Collectors.toList());
+            ClassEntity clazz;
+            for (int i = 0; i < listTeacherCalendar.size(); i++) {
+                calendarEvent = listTeacherCalendar.get(i).getCalendarEvent();
+                clazz = classes.get(i);
+                calendarEventDTO = getCalendarEvent(calendarEvent);
+                calendarEventDTO.setCalendarEventType(Constants.TEACH);
+                calendarEventDTO.setClazz(CalendarEventDTO.Clazz.builder()
+                        .setId(clazz.getClassId())
+                        .setName(clazz.getClazz())
+                        .build());
+                calendarEvents.add(calendarEventDTO);
+            }
         }
 
+        List<UserCalendarEventEntity> listUserCalendar = userCalendarDslRepository.findListUserCalendar(principal, request, false);
+        listUserCalendar.removeIf(uc -> uc.getCalendarEvent().getCalendarEventType().equals(Constants.STUDY));
+        calendarEvents.addAll(listUserCalendar.stream().map(uc -> getCalendarEvent(uc.getCalendarEvent())).collect(Collectors.toList()));
         return ListCalendarResponse.builder()
                 .setSuccess(true)
-                .setItems(listCalendarEvent.stream()
-                        .map(this::entity2dto)
-                        .collect(Collectors.toList()))
+                .setItems(calendarEvents)
                 .build();
     }
+
 
     @Override
     public ListClassResponse getListMyClass() {
@@ -246,7 +276,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .build();
     }
 
-    public CalendarEventDTO entity2dto(CalendarEventEntity entity) {
+    public CalendarEventDTO getCalendarEvent(CalendarEventEntity entity) {
         CalendarEventDTO.CalendarEventDTOBuilder builder = CalendarEventDTO.builder();
         builder.setCalendarEventId(entity.getCalendarEventId())
                 .setCalendarEvent(entity.getCalendarEvent())
