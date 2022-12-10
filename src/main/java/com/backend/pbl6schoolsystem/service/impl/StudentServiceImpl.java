@@ -279,9 +279,22 @@ public class StudentServiceImpl implements StudentService {
         if (principal.isStudent()) {
             request.setStudentId(principal.getUserId());
         }
+
+        if (request.getStudentId() == null) {
+            return GetProfileStudentResponse.builder()
+                    .setSuccess(false)
+                    .setErrorResponse(ErrorResponse.builder()
+                            .setErrors(new HashMap<>() {{
+                                put("studentId", ErrorCode.MISSING_VALUE.name());
+                            }})
+                            .build())
+                    .build();
+        }
+
         Long studentId = request.getStudentId();
         ProfileStudentEntity profileStudent = profileStudentRepository.findByStudent(studentId)
                 .orElseThrow(() -> new NotFoundException("Not found profile with studentId " + studentId));
+        List<UserEntity> parents = userRepository.findParentsByStudent(studentId);
         List<LearningResultEntity> learningResults = learningResultRepository.findByProfileStudent(profileStudent.getProfileStudentId());
         return GetProfileStudentResponse.builder()
                 .setSuccess(true)
@@ -296,6 +309,15 @@ public class StudentServiceImpl implements StudentService {
                                 .setStreet(profileStudent.getStudent().getStreet())
                                 .setDistrict(profileStudent.getStudent().getDistrict())
                                 .setCity(profileStudent.getStudent().getCity())
+                                .setParents(parents.stream()
+                                        .map(p -> ProfileStudentDTO.Student.Parent.builder()
+                                                .setParentId(p.getUserId())
+                                                .setFirstName(p.getFirstName())
+                                                .setLastName(p.getLastName())
+                                                .setJob(RequestUtil.blankIfNull(p.getJob()))
+                                                .setDayOfBirth(p.getDateOfBirth().toString())
+                                                .build())
+                                        .collect(Collectors.toList()))
                                 .build())
                         .setLearningResults(!learningResults.isEmpty() ? learningResults.stream()
                                 .map(lr -> LearningResultDTO.builder()

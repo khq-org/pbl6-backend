@@ -51,18 +51,11 @@ public class StudentController {
     @GetMapping("/profile")
     public Response<ProfileStudentDTO> getProfileStudent(@ModelAttribute @Valid GetProfileStudentRequest request) {
         GetProfileStudentResponse response = studentService.getProfileStudent(request);
-        return userConverter.getResponse(response);
+        if (response.getSuccess()) {
+            return userConverter.getResponse(response);
+        }
+        return userConverter.getError(response.getErrorResponse());
     }
-
-//    @Operation(summary = "Create learning result in profile student")
-//    @PostMapping("profile/{id}/learningResult")
-//    public Response<OnlyIdDTO> addLearningResultForProfileStudent(@PathVariable("id") Long profileStudentId, @RequestBody CreateUpdateLearningResultRequest request) {
-//        OnlyIdResponse response = studentService.addLearningResultForProfileStudent(profileStudentId, request);
-//        if (response.getSuccess()) {
-//            return userConverter.getResponse(response);
-//        }
-//        return userConverter.getError(response.getErrorResponse());
-//    }
 
     @Operation(summary = "Update learning result in profile student")
     @PutMapping("profile/learningResult/{id}")

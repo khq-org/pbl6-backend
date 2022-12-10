@@ -24,7 +24,5 @@ public interface StudentService {
 
     GetProfileStudentResponse getProfileStudent(GetProfileStudentRequest request);
 
-//    OnlyIdResponse addLearningResultForProfileStudent(Long profileStudentId, CreateUpdateLearningResultRequest request);
-
     OnlyIdResponse updateLearningResultForProfileStudent(Long learningResultId, CreateUpdateLearningResultRequest request);
 }

@@ -26,6 +26,8 @@ public class TeacherClassDslRepository {
                 .from(teacherClass);
         if (principal.isTeacher()) {
             query.where(teacherClass.teacher.userId.eq(principal.getUserId()));
+        } else {
+            query.where(teacherClass.isClassLeader.eq(Boolean.TRUE));
         }
         query.where(teacherClass.clazz.school.schoolId.eq(request.getSchoolId()))
                 .where(teacherClass.schoolYear.schoolYearId.eq(request.getSchoolYearId()));

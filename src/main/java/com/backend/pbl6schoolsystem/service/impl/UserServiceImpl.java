@@ -247,7 +247,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         calendarEvents.addAll(listUserCalendar.stream().map(uc -> getCalendarEvent(uc.getCalendarEvent())).collect(Collectors.toList()));
         return ListCalendarResponse.builder()
                 .setSuccess(true)
-                .setItems(calendarEvents)
+                .setItems(calendarEvents.stream()
+                        .filter(ce -> ce.getCalendarEventType().equalsIgnoreCase(request.getCalendarEventType()))
+                        .collect(Collectors.toList()))
                 .build();
     }
 

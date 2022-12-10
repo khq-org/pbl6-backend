@@ -77,15 +77,23 @@ public class TeacherServiceImpl implements TeacherService {
                 .setTeacher(TeacherDTO.builder()
                         .setTeacher(UserMapper.entity2dto(teacher))
                         .setClasses(teacherClass != null ? teacherClass.stream()
-                                .map(tc -> TeacherDTO.Clazz.builder()
-                                        .setClassId(tc.getClazz().getClassId())
-                                        .setClazz(tc.getClazz().getClazz())
-                                        .setSemester(tc.getSemester().getSemester())
-                                        .setSchoolYear(tc.getSchoolYear().getSchoolYear())
-                                        .build())
+                                .map(tc -> toBuilder(tc))
                                 .collect(Collectors.toList()) : Collections.emptyList())
                         .build())
                 .build();
+    }
+
+    private TeacherDTO.Clazz toBuilder(TeacherClassEntity teacherClass) {
+        TeacherDTO.Clazz.ClazzBuilder builder = TeacherDTO.Clazz.builder();
+        builder.setClassId(teacherClass.getClazz().getClassId())
+                .setClazz(teacherClass.getClazz().getClazz());
+        if (teacherClass.getSemester() != null) {
+            builder.setSemester(teacherClass.getSemester().getSemester());
+        }
+        if (teacherClass.getSchoolYear() != null) {
+            builder.setSchoolYear(teacherClass.getSchoolYear().getSchoolYear());
+        }
+        return builder.build();
     }
 
     @Override

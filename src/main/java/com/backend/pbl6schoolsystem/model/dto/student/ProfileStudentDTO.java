@@ -26,6 +26,19 @@ public class ProfileStudentDTO {
         private String street;
         private String district;
         private String city;
+        private List<Parent> parents;
+
+        @Getter
+        @Setter
+        @Builder(setterPrefix = "set")
+        public static class Parent {
+            private Long parentId;
+            private String firstName;
+            private String lastName;
+            private String dayOfBirth;
+            private String job;
+        }
+
     }
 
 }

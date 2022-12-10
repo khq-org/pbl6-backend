@@ -50,6 +50,7 @@ public class CalendarServiceImpl implements CalendarService {
     private final UserCalendarDslRepository userCalendarDslRepository;
     private final CalendarDslRepository calendarDslRepository;
     private final RoomRepository roomRepository;
+    private final SemesterRepository semesterRepository;
 
     @Override
     public ListCalendarResponse getListCalendar(ListCalendarRequest request) {
@@ -175,7 +176,7 @@ public class CalendarServiceImpl implements CalendarService {
         return builder.build();
     }
 
-    public void checkValidRequest(CreateUpdateCalendarRequest request, Map<String, String> errors) {
+    public void checkValidRequest(CreateUpdateCalendarRequest request, Map<String, String> errors, Long calendarEventId) {
         if (!StringUtils.hasText(request.getCalendarEventName())) {
             errors.put("calendarEventName", ErrorCode.MISSING_VALUE.name());
         }
@@ -195,23 +196,24 @@ public class CalendarServiceImpl implements CalendarService {
             errors.put("subjectId", ErrorCode.MISSING_VALUE.name());
         }
         if (!CollectionUtils.isEmpty(request.getClassIds())) {
-            if (request.getLessonFinish() == null) {
-                request.setLessonFinish(request.getLessonStart());
-            }
             List<ClassCalendarEventEntity> classCalendarEvents = classCalendarDslRepository.findClassCalendar(request);
             if (!classCalendarEvents.isEmpty()) {
                 for (ClassCalendarEventEntity classCalendarEvent : classCalendarEvents) {
-                    errors.put("Class " + classCalendarEvent.getClazz().getClazz(), ErrorCode.DUPLICATE_LESSON.name());
+                    if (!classCalendarEvent.getCalendarEvent().getCalendarEventId().equals(calendarEventId)) {
+                        errors.put("Class " + classCalendarEvent.getClazz().getClazz(), ErrorCode.DUPLICATE_LESSON.name());
+                    }
                 }
             }
         }
 
         // FIX ME
-        if (!Constants.STUDY.equalsIgnoreCase(request.getCalendarEventType()) && !CollectionUtils.isEmpty(request.getUserIds())) {
+        if (!CollectionUtils.isEmpty(request.getUserIds())) {
             List<UserCalendarEventEntity> userCalendarEvents = userCalendarDslRepository.findUserCalendar(request);
             if (!userCalendarEvents.isEmpty()) {
                 for (UserCalendarEventEntity userCalendarEvent : userCalendarEvents) {
-                    errors.put("User " + userCalendarEvent.getUser().getLastName() + userCalendarEvent.getUser().getFirstName(), ErrorCode.DUPLICATE_TIME.name());
+                    if (!userCalendarEvent.getCalendarEvent().getCalendarEventId().equals(calendarEventId)) {
+                        errors.put("User " + userCalendarEvent.getUser().getLastName() + userCalendarEvent.getUser().getFirstName(), ErrorCode.DUPLICATE_TIME.name());
+                    }
                 }
             }
         }
@@ -220,7 +222,7 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public OnlyIdResponse createCalendar(CreateUpdateCalendarRequest request) {
         Map<String, String> errors = new HashMap<>();
-        checkValidRequest(request, errors);
+        checkValidRequest(request, errors, null);
         if (!errors.isEmpty()) {
             return OnlyIdResponse.builder()
                     .setSuccess(false)
@@ -232,7 +234,7 @@ public class CalendarServiceImpl implements CalendarService {
 
         UserPrincipal principal = SecurityUtils.getPrincipal();
         SchoolYearEntity schoolYear = schoolYearRepository.findById(request.getSchoolYearId()).get();
-
+        SemesterEntity semester = semesterRepository.findById(request.getSemesterId()).get();
         // calendar event
         CalendarEventEntity calendarEvent = new CalendarEventEntity();
         calendarEvent.setCalendarEvent(request.getCalendarEventName());
@@ -278,6 +280,8 @@ public class CalendarServiceImpl implements CalendarService {
             classCalendarEvent = new ClassCalendarEventEntity();
             classCalendarEvent.setCalendarEvent(calendarEvent);
             classCalendarEvent.setClazz(clazz);
+            classCalendarEvent.setSemester(semester);
+            classCalendarEvent.setSchoolYear(schoolYear);
             classCalendarEventEntities.add(classCalendarEvent);
         }
 
@@ -288,6 +292,8 @@ public class CalendarServiceImpl implements CalendarService {
             userCalendarEvent = new UserCalendarEventEntity();
             userCalendarEvent.setCalendarEvent(calendarEvent);
             userCalendarEvent.setUser(user);
+            userCalendarEvent.setSemester(semester);
+            userCalendarEvent.setSchoolYear(schoolYear);
             userCalendarEventEntities.add(userCalendarEvent);
         }
 
@@ -328,7 +334,7 @@ public class CalendarServiceImpl implements CalendarService {
         CalendarEventEntity calendarEvent = calendarRepository.findById(calendarEventId)
                 .orElseThrow(() -> new NotFoundException("Not found calendar event with id " + calendarEventId));
         Map<String, String> errors = new HashMap<>();
-        checkValidRequest(request, errors);
+        checkValidRequest(request, errors, calendarEventId);
         if (!errors.isEmpty()) {
             return OnlyIdResponse.builder()
                     .setSuccess(false)
@@ -340,7 +346,7 @@ public class CalendarServiceImpl implements CalendarService {
 
         UserPrincipal principal = SecurityUtils.getPrincipal();
         SchoolYearEntity schoolYear = schoolYearRepository.findById(request.getSchoolYearId()).get();
-
+        SemesterEntity semester = semesterRepository.findById(request.getSemesterId()).get();
         calendarEvent.setCalendarEvent(request.getCalendarEventName());
         calendarEvent.setCalendarEventType(request.getCalendarEventType());
         if (StringUtils.hasText(request.getDate())) {
@@ -382,6 +388,8 @@ public class CalendarServiceImpl implements CalendarService {
                 ClassCalendarEventEntity calendarEventEntity = new ClassCalendarEventEntity();
                 calendarEventEntity.setCalendarEvent(calendarEvent);
                 calendarEventEntity.setClazz(clazzFromRequest);
+                calendarEventEntity.setSchoolYear(schoolYear);
+                calendarEventEntity.setSemester(semester);
                 newListClazzForCalendar.add(calendarEventEntity);
             }
         }
@@ -410,6 +418,8 @@ public class CalendarServiceImpl implements CalendarService {
                 UserCalendarEventEntity userCalendarEventEntity = new UserCalendarEventEntity();
                 userCalendarEventEntity.setCalendarEvent(calendarEvent);
                 userCalendarEventEntity.setUser(userFromRequest);
+                userCalendarEventEntity.setSchoolYear(schoolYear);
+                userCalendarEventEntity.setSemester(semester);
                 newListUserForCalendar.add(userCalendarEventEntity);
             }
         }

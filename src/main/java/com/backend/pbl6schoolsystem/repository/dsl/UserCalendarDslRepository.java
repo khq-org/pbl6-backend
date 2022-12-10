@@ -7,6 +7,7 @@ import com.backend.pbl6schoolsystem.model.entity.UserCalendarEventEntity;
 import com.backend.pbl6schoolsystem.request.calendar.CreateUpdateCalendarRequest;
 import com.backend.pbl6schoolsystem.request.calendar.ListCalendarRequest;
 import com.backend.pbl6schoolsystem.security.UserPrincipal;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +26,23 @@ public class UserCalendarDslRepository {
 
     public List<UserCalendarEventEntity> findUserCalendar(CreateUpdateCalendarRequest request) {
         JPAQuery<UserCalendarEventEntity> query = queryFactory.select(userCalendarEvent)
-                .from(userCalendarEvent)
-                .where(userCalendarEvent.user.userId.in(request.getUserIds())
-                        .and(userCalendarEvent.calendarEvent.calendarDate.eq(LocalDate.parse(request.getDate())))
-                        .and(userCalendarEvent.calendarEvent.timeStart.between(LocalTime.parse(request.getTimeStart()), LocalTime.parse(request.getTimeFinish()))
-                                .or(userCalendarEvent.calendarEvent.timeFinish.between(LocalTime.parse(request.getTimeStart()), LocalTime.parse(request.getTimeFinish())))));
+                .from(userCalendarEvent);
+        BooleanExpression expressionCalendarType;
+        BooleanExpression expressionDate;
+        if (List.of(Constants.EXAMINATION, Constants.MEETING).contains(request.getCalendarEventType())) {
+            expressionCalendarType = userCalendarEvent.calendarEvent.timeStart.between(LocalTime.parse(request.getTimeStart()), LocalTime.parse(request.getTimeFinish()))
+                    .or(userCalendarEvent.calendarEvent.timeFinish.between(LocalTime.parse(request.getTimeStart()), LocalTime.parse(request.getTimeFinish())));
+            expressionDate = userCalendarEvent.calendarEvent.calendarDate.eq(LocalDate.parse(request.getDate()));
+        } else {
+            expressionCalendarType = userCalendarEvent.calendarEvent.lessonStart.between(request.getLessonStart(), request.getLessonFinish())
+                    .or(userCalendarEvent.calendarEvent.lessonFinish.between(request.getLessonStart(), request.getLessonFinish()));
+            expressionDate = userCalendarEvent.calendarEvent.dayOfWeek.eq(request.getDayOfWeek());
+        }
+        query.where(userCalendarEvent.user.userId.in(request.getUserIds())
+                .and(expressionDate)
+                .and(expressionCalendarType)
+                .and(userCalendarEvent.semester.semesterId.eq(request.getSemesterId()))
+                .and(userCalendarEvent.schoolYear.schoolYearId.eq(request.getSchoolYearId())));
         query.leftJoin(userCalendarEvent.user).fetchJoin();
         return query.fetch();
     }
@@ -41,8 +54,8 @@ public class UserCalendarDslRepository {
         if (isTeach) {
             query.where(userCalendarEvent.calendarEvent.calendarEventType.eq(Constants.STUDY));
         } else {
-            if (StringUtils.hasText(request.getCalendarType()) && List.of(Constants.STUDY, Constants.EXAMINATION, Constants.MEETING).contains(request.getCalendarType())) {
-                query.where(userCalendarEvent.calendarEvent.calendarEventType.eq(request.getCalendarType()));
+            if (StringUtils.hasText(request.getCalendarEventType()) && List.of(Constants.STUDY, Constants.EXAMINATION, Constants.MEETING, Constants.TEACH).contains(request.getCalendarEventType())) {
+                query.where(userCalendarEvent.calendarEvent.calendarEventType.eq(request.getCalendarEventType()));
             }
         }
         if (request.getSchoolYearId() != null && request.getSchoolYearId() > 0) {

@@ -42,8 +42,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers("/api/users/**").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(),
                 UserRole.ADMIN_ROLE.getRole(), UserRole.TEACHER_ROLE.getRole(), UserRole.STUDENT_ROLE.getRole());
         http.authorizeRequests().antMatchers("/api/schooladmins/**", "/api/schools/**").hasAuthority(UserRole.ADMIN_ROLE.getRole());
-        http.authorizeRequests().antMatchers("/api/teachers/**", "/api/schoolyear/**")
+        http.authorizeRequests().antMatchers("/api/teachers/**")
                 .hasAuthority(UserRole.SCHOOL_ROLE.getRole());
+        http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/schoolyear").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(), UserRole.TEACHER_ROLE.getRole());
+        http.authorizeRequests().antMatchers("/api/schoolyear/**").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole());
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/students/profile").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(),
                 UserRole.STUDENT_ROLE.getRole());
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/students").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(), UserRole.TEACHER_ROLE.getRole());

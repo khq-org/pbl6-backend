@@ -52,10 +52,10 @@ public class CalendarDslRepository {
         if (StringUtils.hasText(request.getCalendarEvent())) {
             query.where(calendar.calendarEvent.containsIgnoreCase(request.getCalendarEvent()));
         }
-        if (request.getCalendarType().equalsIgnoreCase(Constants.STUDY)
-                || request.getCalendarType().equalsIgnoreCase(Constants.MEETING)
-                || request.getCalendarType().equalsIgnoreCase(Constants.EXAMINATION)) {
-            query.where(calendar.calendarEventType.equalsIgnoreCase(request.getCalendarType()));
+        if (request.getCalendarEventType().equalsIgnoreCase(Constants.STUDY)
+                || request.getCalendarEventType().equalsIgnoreCase(Constants.MEETING)
+                || request.getCalendarEventType().equalsIgnoreCase(Constants.EXAMINATION)) {
+            query.where(calendar.calendarEventType.equalsIgnoreCase(request.getCalendarEventType()));
         }
 
         query.where(calendar.createdBy.school.schoolId.eq(principal.getSchoolId()));

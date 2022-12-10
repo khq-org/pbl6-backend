@@ -8,7 +8,6 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-@Builder(setterPrefix = "set")
 public class ChangePasswordRequest implements Serializable {
     private String currentPassword;
     private String newPassword;
