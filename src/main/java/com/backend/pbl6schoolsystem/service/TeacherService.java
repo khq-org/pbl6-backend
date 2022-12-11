@@ -19,7 +19,4 @@ public interface TeacherService {
     OnlyIdResponse updateTeacher(Long teacherId, UpdateUserRequest request);
 
     NoContentResponse deleteTeacher(Long teacherId);
-
-
-    // ANH YÊU EM NHIỀU //
 }

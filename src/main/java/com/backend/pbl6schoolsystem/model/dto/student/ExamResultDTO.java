@@ -2,9 +2,11 @@ package com.backend.pbl6schoolsystem.model.dto.student;
 
 import com.backend.pbl6schoolsystem.model.dto.common.SchoolYearDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.SemesterDTO;
+import com.backend.pbl6schoolsystem.model.dto.common.SubjectDTO;
 import lombok.*;
 
 import java.io.Serializable;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -12,9 +14,7 @@ import java.io.Serializable;
 @Builder
 public class ExamResultDTO implements Serializable {
     private Long examResultId;
-    private Long subjectId;
-    private String subjectName;
-    private Long studentId;
+    private SubjectDTO subject;
     private String examType;
     private Double score;
     private SemesterDTO semester;

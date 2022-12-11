@@ -35,4 +35,11 @@ public interface LearningResultRepository extends JpaRepository<LearningResultEn
                                                                       @Param("learningResultId") Long learningResultId,
                                                                       @Param("classId") Long classId,
                                                                       @Param("schoolYearId") Long schoolYearId);
+
+    @Query("SELECT lr FROM LearningResultEntity lr" +
+            " LEFT JOIN lr.schoolYear sy" +
+            " LEFT JOIN lr.profileStudent ps" +
+            " WHERE ps.student.userId IN (:studentIds)" +
+            " AND sy.schoolYearId = :schoolYearId")
+    List<LearningResultEntity> findByStudentIdsAndSchoolYearId(@Param("studentIds") List<Long> studentIds, @Param("schoolYearId") Long schoolYearId);
 }

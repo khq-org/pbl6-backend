@@ -1,6 +1,7 @@
 package com.backend.pbl6schoolsystem.repository.jpa;
 
 import com.backend.pbl6schoolsystem.model.entity.UserEntity;
+import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultClassRequest;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -59,4 +60,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             " WHERE uce.calendarEvent.calendarEventId = :calendarEventId" +
             " AND uce.user.role.roleId = :roleId")
     List<Long> findUsersByCalendar(@Param("calendarEventId") Long calendarEventId, @Param("roleId") Long roleId);
+
+    @Query("SELECT sc.student FROM StudentClazzEntity sc" +
+            " WHERE sc.clazz.classId = :classId" +
+            " AND sc.schoolYear.schoolYearId = :schoolYearId")
+    List<UserEntity> findByClassAndSchoolYear(@Param("classId") Long classId, @Param("schoolYearId") Long schoolYearId);
 }

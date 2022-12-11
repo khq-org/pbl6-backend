@@ -1,9 +1,9 @@
 package com.backend.pbl6schoolsystem.repository.dsl;
 
 import com.backend.pbl6schoolsystem.common.enums.Semester;
-import com.backend.pbl6schoolsystem.model.entity.ExamResultEntity;
-import com.backend.pbl6schoolsystem.model.entity.QExamResultEntity;
-import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultRequest;
+import com.backend.pbl6schoolsystem.model.entity.*;
+import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultClassRequest;
+import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultStudentRequest;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +15,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExamResultDslRepository {
     private final QExamResultEntity result = QExamResultEntity.examResultEntity;
+    private final QUserEntity user = QUserEntity.userEntity;
+    private final QStudentClazzEntity studentClazz = QStudentClazzEntity.studentClazzEntity;
     private final JPAQueryFactory queryFactory;
 
-    public List<ExamResultEntity> listExamResult(LoadExamResultRequest request) {
+    public List<ExamResultEntity> listExamResult(LoadExamResultStudentRequest request) {
         JPAQuery<ExamResultEntity> query = queryFactory.select(result)
                 .from(result)
                 .where(result.subject.subjectId.eq(request.getSubjectId()))
@@ -28,5 +30,4 @@ public class ExamResultDslRepository {
         }
         return query.fetch();
     }
-
 }

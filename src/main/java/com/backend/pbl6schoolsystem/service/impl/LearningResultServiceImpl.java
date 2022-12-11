@@ -4,21 +4,24 @@ import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
 import com.backend.pbl6schoolsystem.common.enums.ExamType;
 import com.backend.pbl6schoolsystem.common.enums.Semester;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
+import com.backend.pbl6schoolsystem.model.dto.clazz.ExamResultClassDTO;
+import com.backend.pbl6schoolsystem.model.dto.common.SchoolYearDTO;
+import com.backend.pbl6schoolsystem.model.dto.common.SemesterDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.SubjectDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.ExamResultDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.LearningResultDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.LearningResultDetailDTO;
-import com.backend.pbl6schoolsystem.model.entity.ExamResultEntity;
-import com.backend.pbl6schoolsystem.model.entity.LearningResultEntity;
-import com.backend.pbl6schoolsystem.model.entity.SubjectEntity;
-import com.backend.pbl6schoolsystem.model.entity.UserEntity;
+import com.backend.pbl6schoolsystem.model.entity.*;
 import com.backend.pbl6schoolsystem.repository.dsl.ExamResultDslRepository;
-import com.backend.pbl6schoolsystem.repository.jpa.ExamResultRepository;
-import com.backend.pbl6schoolsystem.repository.jpa.LearningResultRepository;
-import com.backend.pbl6schoolsystem.repository.jpa.SubjectRepository;
-import com.backend.pbl6schoolsystem.repository.jpa.UserRepository;
-import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultRequest;
+import com.backend.pbl6schoolsystem.repository.jpa.*;
+import com.backend.pbl6schoolsystem.request.leaningresult.InputScoreRequest;
+import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultClassRequest;
+import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultStudentRequest;
+import com.backend.pbl6schoolsystem.request.leaningresult.ModifyScoreRequest;
+import com.backend.pbl6schoolsystem.response.ErrorResponse;
+import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.learningresult.LearningResultDetailResponse;
+import com.backend.pbl6schoolsystem.response.learningresult.LoadExamResultClassResponse;
 import com.backend.pbl6schoolsystem.response.learningresult.LoadExamResultResponse;
 import com.backend.pbl6schoolsystem.security.UserPrincipal;
 import com.backend.pbl6schoolsystem.service.LearningResultService;
@@ -26,7 +29,9 @@ import com.backend.pbl6schoolsystem.util.RequestUtil;
 import com.backend.pbl6schoolsystem.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,8 +40,12 @@ import java.util.stream.Collectors;
 public class LearningResultServiceImpl implements LearningResultService {
     private final UserRepository userRepository;
     private final LearningResultRepository learningResultRepository;
+    private final ClassRepository classRepository;
+    private final SchoolYearRepository schoolYearRepository;
+    private final SemesterRepository semesterRepository;
     private final SubjectRepository subjectRepository;
     private final ExamResultRepository examResultRepository;
+    private final TeacherClassRepository teacherClassRepository;
     private final ExamResultDslRepository examResultDslRepository;
 
     @Override
@@ -96,19 +105,38 @@ public class LearningResultServiceImpl implements LearningResultService {
                 .build();
     }
 
+    // for student
     @Override
-    public LoadExamResultResponse loadExamResult(LoadExamResultRequest request) {
+    public LoadExamResultResponse loadExamResult(LoadExamResultStudentRequest request) {
         UserPrincipal principal = SecurityUtils.getPrincipal();
         Map<String, String> errors = new HashMap<>();
+
+        if (request.getSchoolYearId() == null) {
+            errors.put("schoolYearId", ErrorCode.MISSING_VALUE.name());
+        }
+        if (request.getStudentId() == null) {
+            errors.put("studentId", ErrorCode.MISSING_VALUE.name());
+        }
         if (principal.isSchoolAdmin()) {
             if (request.getSubjectId() == null) {
                 errors.put("subjectId", ErrorCode.MISSING_VALUE.name());
             }
         }
-        else if (principal.isTeacher()) {
+
+        if (!errors.isEmpty()) {
+            return LoadExamResultResponse.builder()
+                    .setSuccess(false)
+                    .setErrorResponse(ErrorResponse.builder()
+                            .setErrors(errors)
+                            .build())
+                    .build();
+        }
+
+        if (principal.isTeacher()) {
             request.setSubjectId(userRepository.findById(principal.getUserId())
                     .get().getSubject().getSubjectId());
         }
+
         List<ExamResultEntity> examResults = examResultDslRepository.listExamResult(request);
         return LoadExamResultResponse.builder()
                 .setSuccess(true)
@@ -117,9 +145,180 @@ public class LearningResultServiceImpl implements LearningResultService {
                                 .examResultId(e.getExamResultId())
                                 .examType(e.getExamType())
                                 .score(e.getScore())
+                                .subject(SubjectDTO.builder()
+                                        .setSubjectId(e.getSubject().getSubjectId())
+                                        .setSubject(e.getSubject().getSubject())
+                                        .build())
+                                .semester(SemesterDTO.builder()
+                                        .semesterId(e.getSemester().getSemesterId())
+                                        .semester(e.getSemester().getSemester())
+                                        .build())
+                                .schoolYear(SchoolYearDTO.builder()
+                                        .schoolYearId(e.getSchoolYear().getSchoolYearId())
+                                        .schoolYear(e.getSchoolYear().getSchoolYear())
+                                        .build())
                                 .build())
                         .collect(Collectors.toList()))
                 .build();
+    }
+
+    // for class
+    @Override
+    public LoadExamResultClassResponse loadExamResultClass(LoadExamResultClassRequest request) {
+        Map<String, String> errors = new HashMap<>();
+
+        if (request.getClassId() == null) {
+            errors.put("classId", ErrorCode.MISSING_VALUE.name());
+        }
+        if (request.getSchoolYearId() == null) {
+            errors.put("schoolYearId", ErrorCode.MISSING_VALUE.name());
+        }
+
+        UserPrincipal principal = SecurityUtils.getPrincipal();
+        if (principal.isSchoolAdmin()) {
+            if (request.getSubjectId() == null) {
+                errors.put("subjectId", ErrorCode.MISSING_VALUE.name());
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            return LoadExamResultClassResponse.builder()
+                    .setSuccess(false)
+                    .setErrorResponse(ErrorResponse.builder()
+                            .setErrors(errors)
+                            .build())
+                    .build();
+        }
+
+        if (principal.isTeacher()) {
+            request.setSubjectId(userRepository.findById(principal.getUserId())
+                    .get().getSubject().getSubjectId());
+        }
+
+        SubjectEntity subject = subjectRepository.findById(request.getSubjectId())
+                .orElseThrow(() -> new NotFoundException("Not found subject"));
+        ClassEntity clazz = classRepository.findById(request.getClassId())
+                .orElseThrow(() -> new NotFoundException("Not found clazz"));
+
+        ExamResultClassDTO.ExamResultClassDTOBuilder builder = ExamResultClassDTO.builder();
+        builder.setSubject(ExamResultClassDTO.Subject.builder()
+                .setSubjectId(subject.getSubjectId())
+                .setSubject(subject.getSubject())
+                .build());
+        builder.setClazz(ExamResultClassDTO.Clazz.builder()
+                .setClassId(clazz.getClassId())
+                .setClassName(clazz.getClazz())
+                .build());
+
+        List<UserEntity> studentsInClass = userRepository.findByClassAndSchoolYear(request.getClassId(), request.getSchoolYearId());
+        List<ExamResultEntity> examResults;
+
+        List<ExamResultClassDTO.ExamResult> examResultsBuilder = new ArrayList<>();
+        for (UserEntity student : studentsInClass) {
+            examResults = examResultDslRepository.listExamResult(LoadExamResultStudentRequest.builder()
+                    .setStudentId(student.getUserId())
+                    .setSchoolYearId(request.getSchoolYearId())
+                    .setSemesterId(RequestUtil.defaultIfNull(request.getSemesterId(), -1L))
+                    .setSubjectId(request.getSubjectId())
+                    .build());
+            examResultsBuilder.add(ExamResultClassDTO.ExamResult.builder()
+                    .setStudent(ExamResultClassDTO.ExamResult.Student.builder()
+                            .setStudentId(student.getUserId())
+                            .setFirstName(student.getFirstName())
+                            .setLastName(student.getLastName())
+                            .build())
+                    .setScores(examResults.stream()
+                            .map(er -> ExamResultClassDTO.ExamResult.Score.builder()
+                                    .setScore(er.getScore())
+                                    .setType(er.getExamType())
+                                    .build())
+                            .collect(Collectors.toList()))
+                    .build());
+        }
+        builder.setExamResults(examResultsBuilder);
+
+        return LoadExamResultClassResponse.builder()
+                .setSuccess(true)
+                .setExamResultClass(builder.build())
+                .build();
+    }
+
+    @Override
+    public NoContentResponse inputScore(InputScoreRequest request) {
+        UserPrincipal principal = SecurityUtils.getPrincipal();
+        Map<String, String> errors = new HashMap<>();
+
+        if (principal.isSchoolAdmin()) {
+            if (request.getTeacherId() == null) {
+                errors.put("teacherId", ErrorCode.MISSING_VALUE.name());
+            }
+            if (request.getSubjectId() == null) {
+                errors.put("subjectId", ErrorCode.MISSING_VALUE.name());
+            }
+        }
+        if (request.getSemesterId() == null) {
+            errors.put("semesterId", ErrorCode.MISSING_VALUE.name());
+        }
+        if (request.getSchoolYearId() == null) {
+            errors.put("schoolYearId", ErrorCode.MISSING_VALUE.name());
+        }
+
+        if (!errors.isEmpty()) {
+            return NoContentResponse.builder()
+                    .setSuccess(false)
+                    .setErrorResponse(ErrorResponse.builder()
+                            .setErrors(errors)
+                            .build())
+                    .build();
+        }
+
+        if (principal.isTeacher()) {
+            request.setTeacherId(principal.getUserId());
+            request.setSubjectId(userRepository.findById(principal.getUserId())
+                    .get().getSubject().getSubjectId());
+        }
+
+        UserEntity user = userRepository.findById(principal.getUserId()).get();
+        SubjectEntity subject = subjectRepository.findById(request.getSubjectId())
+                .orElseThrow(() -> new NotFoundException("Not found subject"));
+        SchoolYearEntity schoolYear = schoolYearRepository.findById(request.getSchoolYearId())
+                .orElseThrow(() -> new NotFoundException("Not found school year"));
+        SemesterEntity semester = semesterRepository.findById(request.getSemesterId())
+                .orElseThrow(() -> new NotFoundException("Not found semester"));
+        List<InputScoreRequest.StudentScore> studentScores = request.getStudentScores();
+
+        if (!CollectionUtils.isEmpty(studentScores)) {
+            List<ExamResultEntity> examResults = new ArrayList<>();
+            ExamResultEntity examResult;
+            List<Long> studentIds = studentScores.stream().map(sc -> sc.getStudentId()).collect(Collectors.toList());
+            List<LearningResultEntity> learningResults = learningResultRepository.findByStudentIdsAndSchoolYearId(studentIds, request.getSchoolYearId());
+            for (int i = 0; i < studentScores.size(); i++) {
+                List<InputScoreRequest.StudentScore.Scores> scores = studentScores.get(i).getScores();
+                for (InputScoreRequest.StudentScore.Scores score : scores) {
+                    examResult = new ExamResultEntity();
+                    examResult.setStudent(learningResults.get(i).getProfileStudent().getStudent());
+                    examResult.setLearningResult(learningResults.get(i));
+                    examResult.setSemester(semester);
+                    examResult.setSchoolYear(schoolYear);
+                    examResult.setSubject(subject);
+                    examResult.setScore(score.getScore());
+                    examResult.setExamType(score.getType());
+                    examResult.setCreatedBy(user);
+                    examResult.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+                    examResults.add(examResult);
+                }
+            }
+            examResultRepository.saveAll(examResults);
+        }
+
+        return NoContentResponse.builder()
+                .setSuccess(true)
+                .build();
+    }
+
+    @Override
+    public NoContentResponse modifyScore(ModifyScoreRequest request) {
+        return null;
     }
 
     // calculate average
