@@ -229,6 +229,7 @@ public class LearningResultServiceImpl implements LearningResultService {
                             .build())
                     .setScores(examResults.stream()
                             .map(er -> ExamResultClassDTO.ExamResult.Score.builder()
+                                    .setId(er.getExamResultId())
                                     .setScore(er.getScore())
                                     .setType(er.getExamType())
                                     .build())

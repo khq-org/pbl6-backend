@@ -51,6 +51,7 @@ public class ExamResultClassDTO implements Serializable {
         @Setter
         @Builder(setterPrefix = "set")
         public static class Score {
+            private Long id;
             private Double score;
             private String type;
         }
