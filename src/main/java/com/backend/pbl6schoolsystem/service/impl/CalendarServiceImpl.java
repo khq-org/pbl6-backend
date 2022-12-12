@@ -301,10 +301,15 @@ public class CalendarServiceImpl implements CalendarService {
                 && users.stream().allMatch(u -> u.getRole().getRoleId().equals(UserRole.TEACHER_ROLE.getRoleId()))) {
             TeacherClassEntity teacherClazz;
             for (int i = 0; i < classes.size(); i++) {
+                if (teacherClassRepository.findByExceptId(users.get(i).getUserId(), classes.get(i).getClassId(),
+                        semester.getSemesterId(), schoolYear.getSchoolYearId()).isPresent()) {
+                    continue;
+                }
                 teacherClazz = new TeacherClassEntity();
                 teacherClazz.setTeacher(users.get(i));
                 teacherClazz.setClazz(classes.get(i));
                 teacherClazz.setIsClassLeader(false);
+                teacherClazz.setSemester(semester);
                 teacherClazz.setSchoolYear(schoolYear);
                 teacherClasses.add(teacherClazz);
             }
