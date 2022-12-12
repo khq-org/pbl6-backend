@@ -99,25 +99,10 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     public OnlyIdResponse createTeacher(CreateTeacherRequest request) {
         Map<String, String> errors = new HashMap<>();
-        if (!StringUtils.hasText(request.getFirstName())) {
-            errors.put("FirstName", ErrorCode.MISSING_VALUE.name());
-        }
-        if (!StringUtils.hasText(request.getLastName())) {
-            errors.put("LastName", ErrorCode.MISSING_VALUE.name());
-        }
-        if (!StringUtils.hasText(request.getEmail())) {
-            errors.put("Email", ErrorCode.MISSING_VALUE.name());
-        }
-
+        validateFieldFormat(errors, request);
         UserPrincipal principal = SecurityUtils.getPrincipal();
         Long schoolId = principal.getSchoolId();
-        if (StringUtils.hasText(request.getEmail())) {
-            Boolean isExistEmailInSchool = userRepository.findByEmailInSchool(request.getEmail(), schoolId).isPresent();
-            if (isExistEmailInSchool) {
-                errors.put("Email", ErrorCode.ALREADY_EXIST.name());
-            }
-        }
-
+        validateExistEmail(errors, schoolId, request.getEmail(), null);
         if (!errors.isEmpty()) {
             return OnlyIdResponse.builder()
                     .setSuccess(false)
@@ -145,10 +130,7 @@ public class TeacherServiceImpl implements TeacherService {
         teacher.setCity(RequestUtil.blankIfNull(request.getCity()));
         teacher.setRole(roleRepository.findById(UserRole.TEACHER_ROLE.getRoleId()).get());
         teacher.setWorkingPosition(RequestUtil.blankIfNull(request.getWorkingPosition()));
-        if (request.getSubjectId() != null && request.getSubjectId() > -1) {
-            teacher.setSubject(subjectRepository.findById(request.getSubjectId())
-                    .orElseThrow(() -> new NotFoundException("Not found subject with id " + request.getSubjectId())));
-        }
+        teacher.setSubject(subjectRepository.findById(request.getSubjectId()).get());
         teacher.setDateOfBirth(LocalDate.parse(request.getDateOfBirth() != null ? request.getDateOfBirth() : Constants.DEFAULT_DATE_OF_BIRTH));
         teacher.setNationality(RequestUtil.blankIfNull(request.getNationality()));
         teacher.setGender(Boolean.TRUE.equals(request.getGender()) ? Boolean.TRUE : Boolean.FALSE);
@@ -166,24 +148,13 @@ public class TeacherServiceImpl implements TeacherService {
         UserEntity teacher = userRepository.findOneById(teacherId, UserRole.TEACHER_ROLE.getRoleId(), principal.getSchoolId())
                 .orElseThrow(() -> new NotFoundException("Not found teacher with id " + teacherId));
         Map<String, String> errors = new HashMap<>();
-
-        if (!StringUtils.hasText(request.getFirstName())) {
-            errors.put("FirstName", ErrorCode.MISSING_VALUE.name());
-        }
-        if (!StringUtils.hasText(request.getLastName())) {
-            errors.put("LastName", ErrorCode.MISSING_VALUE.name());
-        }
-        if (!StringUtils.hasText(request.getEmail())) {
-            errors.put("Email", ErrorCode.MISSING_VALUE.name());
-        }
-        if (StringUtils.hasText(request.getEmail())) {
-            boolean isExistEmail = userRepository.findByEmailInSchool(request.getEmail(), principal.getSchoolId()).isPresent()
-                    && !teacher.getEmail().equals(request.getEmail());
-            if (isExistEmail) {
-                errors.put("Email", ErrorCode.ALREADY_EXIST.name());
-            }
-        }
-
+        validateFieldFormat(errors, CreateTeacherRequest.builder()
+                .setFirstName(request.getFirstName())
+                .setLastName(request.getLastName())
+                .setEmail(request.getEmail())
+                .setSubjectId(RequestUtil.defaultIfNull(request.getSubjectId(), -1L))
+                .build());
+        validateExistEmail(errors, principal.getSchoolId(), request.getEmail(), teacherId);
         if (!errors.isEmpty()) {
             return OnlyIdResponse.builder()
                     .setSuccess(false)
@@ -197,6 +168,7 @@ public class TeacherServiceImpl implements TeacherService {
         teacher.setLastName(request.getLastName());
         teacher.setEmail(request.getEmail());
         teacher.setWorkingPosition(RequestUtil.blankIfNull(request.getWorkingPosition()));
+        teacher.setSubject(subjectRepository.findById(request.getSubjectId()).get());
         teacher.setStreet(RequestUtil.blankIfNull(request.getStreet()));
         teacher.setDistrict(RequestUtil.blankIfNull(request.getDistrict()));
         teacher.setCity(RequestUtil.blankIfNull(request.getCity()));
@@ -205,16 +177,36 @@ public class TeacherServiceImpl implements TeacherService {
         teacher.setDateOfBirth(LocalDate.parse(request.getDateOfBirth() != null ? request.getDateOfBirth() : Constants.DEFAULT_DATE_OF_BIRTH));
         teacher.setNationality(RequestUtil.blankIfNull(request.getNationality()));
         teacher.setGender(Boolean.TRUE.equals(request.getGender()) ? Boolean.TRUE : Boolean.FALSE);
-        if (request.getSubjectId() != null && request.getSubjectId() > -1) {
-            teacher.setSubject(subjectRepository.findById(request.getSubjectId())
-                    .orElseThrow(() -> new NotFoundException("Not found subject with id " + request.getSubjectId())));
-        }
         userRepository.save(teacher);
         return OnlyIdResponse.builder()
                 .setSuccess(true)
                 .setId(teacher.getUserId())
                 .setName(teacher.getLastName() + " " + teacher.getLastName())
                 .build();
+    }
+
+    private void validateFieldFormat(Map<String, String> errors, CreateTeacherRequest request) {
+        if (!StringUtils.hasText(request.getFirstName())) {
+            errors.put("firstName", ErrorCode.MISSING_VALUE.name());
+        }
+        if (!StringUtils.hasText(request.getLastName())) {
+            errors.put("lastName", ErrorCode.MISSING_VALUE.name());
+        }
+        if (!StringUtils.hasText(request.getEmail())) {
+            errors.put("email", ErrorCode.MISSING_VALUE.name());
+        }
+        if (request.getSubjectId() == null || request.getSubjectId() < 0) {
+            errors.put("subjectId", ErrorCode.MISSING_VALUE.name());
+        }
+    }
+
+    private void validateExistEmail(Map<String, String> errors, Long schoolId, String email, Long userId) {
+        if (StringUtils.hasText(email)) {
+            Optional<UserEntity> teacher = userRepository.findByEmailInSchool(email, schoolId);
+            if (teacher.isPresent() && !teacher.get().getUserId().equals(userId)) {
+                errors.put("email", ErrorCode.ALREADY_EXIST.name());
+            }
+        }
     }
 
     @Override
