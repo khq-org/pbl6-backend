@@ -3,6 +3,7 @@ package com.backend.pbl6schoolsystem.service.impl;
 import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
 import com.backend.pbl6schoolsystem.common.enums.ExamType;
 import com.backend.pbl6schoolsystem.common.enums.Semester;
+import com.backend.pbl6schoolsystem.common.enums.Subject;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
 import com.backend.pbl6schoolsystem.model.dto.clazz.ExamResultClassDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.SchoolYearDTO;
@@ -17,7 +18,6 @@ import com.backend.pbl6schoolsystem.repository.jpa.*;
 import com.backend.pbl6schoolsystem.request.leaningresult.InputScoreRequest;
 import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultClassRequest;
 import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultStudentRequest;
-import com.backend.pbl6schoolsystem.request.leaningresult.ModifyScoreRequest;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.learningresult.LearningResultDetailResponse;
@@ -45,7 +45,6 @@ public class LearningResultServiceImpl implements LearningResultService {
     private final SemesterRepository semesterRepository;
     private final SubjectRepository subjectRepository;
     private final ExamResultRepository examResultRepository;
-    private final TeacherClassRepository teacherClassRepository;
     private final ExamResultDslRepository examResultDslRepository;
 
     @Override
@@ -77,14 +76,23 @@ public class LearningResultServiceImpl implements LearningResultService {
                         .setAvgScore(calculateAvg(scores))
                         .build());
             });
+
+            Double avgSubjectAllSemester = 0D;
+            for (LearningResultDetailDTO.StudyScore.SemesterScore semesterScore : semesterScores) {
+                avgSubjectAllSemester += (semesterScore.getSemester().equals(Semester.SEMESTER_I.getName())) ?
+                        semesterScore.getAvgScore() : 2 * semesterScore.getAvgScore();
+            }
+
             studyScores.add(LearningResultDetailDTO.StudyScore.builder()
                     .setSubject(LearningResultDetailDTO.StudyScore.Subject.builder()
                             .setSubjectId(subject.getSubjectId())
                             .setSubjectName(subject.getSubject())
                             .build())
                     .setSemesterScores(semesterScores)
+                    .setAvgScore(avgSubjectAllSemester)
                     .build());
         }
+
         return LearningResultDetailResponse.builder()
                 .setSuccess(true)
                 .setLearningResultDetail(LearningResultDetailDTO.builder()
@@ -97,6 +105,7 @@ public class LearningResultServiceImpl implements LearningResultService {
                                 .setIsPassed(Boolean.TRUE.equals(learningResult.getIsPassed()) ? Boolean.TRUE : Boolean.FALSE)
                                 .build())
                         .setStudyScores(studyScores)
+                        .setAvgScore(calculateSchoolYearAvg(studyScores))
                         .build())
                 .build();
     }
@@ -289,19 +298,29 @@ public class LearningResultServiceImpl implements LearningResultService {
             ExamResultEntity examResult;
             List<Long> studentIds = studentScores.stream().map(sc -> sc.getStudentId()).collect(Collectors.toList());
             List<LearningResultEntity> learningResults = learningResultRepository.findByStudentIdsAndSchoolYearId(studentIds, request.getSchoolYearId());
+            Optional<ExamResultEntity> examResultFromDB;
             for (int i = 0; i < studentScores.size(); i++) {
                 List<InputScoreRequest.StudentScore.Scores> scores = studentScores.get(i).getScores();
                 for (InputScoreRequest.StudentScore.Scores score : scores) {
-                    examResult = new ExamResultEntity();
-                    examResult.setStudent(learningResults.get(i).getProfileStudent().getStudent());
-                    examResult.setLearningResult(learningResults.get(i));
-                    examResult.setSemester(semester);
-                    examResult.setSchoolYear(schoolYear);
-                    examResult.setSubject(subject);
-                    examResult.setScore(score.getScore());
-                    examResult.setExamType(score.getType());
-                    examResult.setCreatedBy(user);
-                    examResult.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+                    examResultFromDB = examResultRepository.findFromDB(subject.getSubjectId(), schoolYear.getSchoolYearId(), semester.getSemesterId(),
+                            learningResults.get(i).getProfileStudent().getStudent().getUserId(), score.getType());
+                    if (examResultFromDB.isPresent()) {
+                        examResult = examResultFromDB.get();
+                        examResult.setScore(score.getScore());
+                        examResult.setModifiedDate(new Timestamp(System.currentTimeMillis()));
+                        examResult.setModifiedBy(user);
+                    } else {
+                        examResult = new ExamResultEntity();
+                        examResult.setStudent(learningResults.get(i).getProfileStudent().getStudent());
+                        examResult.setLearningResult(learningResults.get(i));
+                        examResult.setSemester(semester);
+                        examResult.setSchoolYear(schoolYear);
+                        examResult.setSubject(subject);
+                        examResult.setScore(score.getScore());
+                        examResult.setExamType(score.getType());
+                        examResult.setCreatedBy(user);
+                        examResult.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+                    }
                     examResults.add(examResult);
                 }
             }
@@ -311,11 +330,6 @@ public class LearningResultServiceImpl implements LearningResultService {
         return NoContentResponse.builder()
                 .setSuccess(true)
                 .build();
-    }
-
-    @Override
-    public NoContentResponse modifyScore(ModifyScoreRequest request) {
-        return null;
     }
 
     // calculate average
@@ -338,4 +352,17 @@ public class LearningResultServiceImpl implements LearningResultService {
         }
         return index != 0 ? avg / index : 0.0;
     }
+
+    private double calculateSchoolYearAvg(List<LearningResultDetailDTO.StudyScore> studyScores) {
+        double avg = 0.0;
+        for (LearningResultDetailDTO.StudyScore studyScore : studyScores) {
+            if (List.of(Subject.MATHS, Subject.LITERATURE).contains(studyScore.getSubject().getSubjectName())) {
+                avg += studyScore.getAvgScore() * 2;
+            } else {
+                avg += studyScore.getAvgScore();
+            }
+        }
+        return avg / 15.0;
+    }
+
 }

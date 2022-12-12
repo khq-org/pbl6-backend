@@ -13,6 +13,7 @@ import java.util.List;
 public class LearningResultDetailDTO implements Serializable {
     private LearningResultDTO learningResult;
     private List<StudyScore> studyScores;
+    private Double avgScore;
 
     @Getter
     @Setter
@@ -20,6 +21,7 @@ public class LearningResultDetailDTO implements Serializable {
     public static class StudyScore {
         private Subject subject;
         private List<SemesterScore> semesterScores;
+        private Double avgScore;
 
         @Getter
         @Setter

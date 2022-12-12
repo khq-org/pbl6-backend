@@ -15,7 +15,7 @@ public interface LearningResultService {
 
     NoContentResponse inputScore(InputScoreRequest request);
 
-    NoContentResponse modifyScore(ModifyScoreRequest request);
+//    NoContentResponse modifyScore(ModifyScoreRequest request);
 
     LoadExamResultClassResponse loadExamResultClass(LoadExamResultClassRequest request);
 }

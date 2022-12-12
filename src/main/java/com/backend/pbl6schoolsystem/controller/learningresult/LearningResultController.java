@@ -8,7 +8,6 @@ import com.backend.pbl6schoolsystem.model.dto.student.LearningResultDetailDTO;
 import com.backend.pbl6schoolsystem.request.leaningresult.InputScoreRequest;
 import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultClassRequest;
 import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultStudentRequest;
-import com.backend.pbl6schoolsystem.request.leaningresult.ModifyScoreRequest;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.Response;
 import com.backend.pbl6schoolsystem.response.learningresult.LearningResultDetailResponse;
@@ -68,13 +67,13 @@ public class LearningResultController {
         return learningResultConverter.getError(response.getErrorResponse());
     }
 
-    @Operation(summary = "Modify score")
-    @PutMapping("/modifyscores")
-    public Response<MessageDTO> modifyScore(@RequestBody ModifyScoreRequest request) {
-        NoContentResponse response = learningResultService.modifyScore(request);
-        if (response.getSuccess()) {
-            return learningResultConverter.getResponse(response);
-        }
-        return learningResultConverter.getError(response.getErrorResponse());
-    }
+//    @Operation(summary = "Modify score")
+//    @PutMapping("/modifyscores")
+//    public Response<MessageDTO> modifyScore(@RequestBody ModifyScoreRequest request) {
+//        NoContentResponse response = learningResultService.modifyScore(request);
+//        if (response.getSuccess()) {
+//            return learningResultConverter.getResponse(response);
+//        }
+//        return learningResultConverter.getError(response.getErrorResponse());
+//    }
 }
