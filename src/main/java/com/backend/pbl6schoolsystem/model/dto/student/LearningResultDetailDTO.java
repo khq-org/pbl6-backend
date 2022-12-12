@@ -1,15 +1,14 @@
 package com.backend.pbl6schoolsystem.model.dto.student;
 
-import com.backend.pbl6schoolsystem.model.dto.common.SubjectDTO;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder(setterPrefix = "set")
 public class LearningResultDetailDTO implements Serializable {
     private LearningResultDTO learningResult;
@@ -17,34 +16,35 @@ public class LearningResultDetailDTO implements Serializable {
 
     @Getter
     @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
     @Builder(setterPrefix = "set")
     public static class StudyScore {
-        private SubjectDTO subject;
-        private List<SemesterDetail> semesters;
-        private Double averageScore;
+        private Subject subject;
+        private List<SemesterScore> semesterScores;
 
         @Getter
         @Setter
-        @NoArgsConstructor
-        @AllArgsConstructor
         @Builder(setterPrefix = "set")
-        public static class SemesterDetail {
+        public static class Subject {
+            private Long subjectId;
+            private String subjectName;
+        }
+
+        @Getter
+        @Setter
+        @Builder(setterPrefix = "set")
+        public static class SemesterScore {
             private String semester;
-            private List<Exam> exams;
-            private Double averageScore;
+            private List<Score> scores;
+            private Double avgScore;
 
             @Getter
             @Setter
-            @NoArgsConstructor
-            @AllArgsConstructor
             @Builder(setterPrefix = "set")
-            public static class Exam {
-                private String exam;
-                private List<Double> scores;
+            public static class Score {
+                private Double score;
+                private String type;
             }
         }
     }
-
 }
+
