@@ -21,7 +21,7 @@ public interface TeacherClassRepository extends JpaRepository<TeacherClassEntity
     List<TeacherClassEntity> findByTeacher(@Param("teacherId") Long teacherId);
 
     @Query("SELECT tc FROM TeacherClassEntity tc" +
-            " WHERE tc.teacher.teacherId = :teacherId" +
+            " WHERE tc.teacher.userId = :teacherId" +
             " AND tc.clazz.classId = :classId" +
             " AND tc.schoolYear.schoolYearId = :schoolYearId" +
             " AND tc.semester.semesterId = :semesterId")
