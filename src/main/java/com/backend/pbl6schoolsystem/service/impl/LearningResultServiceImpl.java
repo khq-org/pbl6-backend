@@ -295,6 +295,7 @@ public class LearningResultServiceImpl implements LearningResultService {
 
         if (!CollectionUtils.isEmpty(studentScores)) {
             List<ExamResultEntity> examResults = new ArrayList<>();
+            List<ExamResultEntity> examResultsForRemove = new ArrayList<>();
             ExamResultEntity examResult;
             List<Long> studentIds = studentScores.stream().map(sc -> sc.getStudentId()).collect(Collectors.toList());
             List<LearningResultEntity> learningResults = learningResultRepository.findByStudentIdsAndSchoolYearId(studentIds, request.getSchoolYearId());
@@ -306,9 +307,14 @@ public class LearningResultServiceImpl implements LearningResultService {
                             learningResults.get(i).getProfileStudent().getStudent().getUserId(), score.getType());
                     if (examResultFromDB.isPresent()) {
                         examResult = examResultFromDB.get();
-                        examResult.setScore(score.getScore());
-                        examResult.setModifiedDate(new Timestamp(System.currentTimeMillis()));
-                        examResult.setModifiedBy(user);
+                        if (score.getScore() != null) {
+                            examResult.setScore(score.getScore());
+                            examResult.setModifiedDate(new Timestamp(System.currentTimeMillis()));
+                            examResult.setModifiedBy(user);
+                        } else {
+                            examResultsForRemove.add(examResult);
+                            continue;
+                        }
                     } else {
                         examResult = new ExamResultEntity();
                         examResult.setStudent(learningResults.get(i).getProfileStudent().getStudent());
@@ -325,6 +331,7 @@ public class LearningResultServiceImpl implements LearningResultService {
                 }
             }
             examResultRepository.saveAll(examResults);
+            examResultRepository.deleteAll(examResultsForRemove);
         }
 
         return NoContentResponse.builder()
