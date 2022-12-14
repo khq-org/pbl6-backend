@@ -6,14 +6,14 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: pbl6-schoolsystem
+name: pbl6-backend-ci-cd
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
+    
 jobs:
   build:
 
@@ -27,8 +27,18 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: maven
+        
     - name: Build with Maven
-      run: mvn clean install
+      run: mvn -B package -DskipTests --file pom.xml
+      
+    - name: Upload JAR
+      # We upload so we can re-use same jar in next job.
+      uses: actions/upload-artifact@v2
+      with:
+        #Name of artifact can be anything
+        name: artifact
+        #Relative path to jar file
+        path: target/pbl6-schoolsystem.jar
 
     - name: Build & push Docker image
       uses: mr-smithers-excellent/docker-build-push@v5
@@ -42,3 +52,28 @@ jobs:
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
       uses: advanced-security/maven-dependency-submission-action@2ecce44ccb44fd4b52f43468d3644e2d3e2b3cf2
+      
+  deploy:
+    #Depends on build's job
+    needs: build
+    name: Deploy to Elastic Beanstalk
+   #Will run steps on latest version of ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download JAR
+        #Download the artifact which was uploaded in the Build Archive's job
+        uses: actions/download-artifact@v2
+        with:
+          name: artifact
+    #Deploy the artifact (JAR) into AWS Beanstalk
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v13
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }} #This is referred from Github Secrets
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }} #This is referred from Github Secrets
+          use_existing_version_if_available: true
+          application_name: pbl6 #Application name we created in Elastic BeanStalk
+          environment_name: Pbl6-env #Environment name we created in Elastic BeanStalk
+          version_label: ${{github.SHA}}
+          region: us-east-1 #VERY IMPORTANT: AWS Region where initially Applciation was created in AWS EBS. We created in us-east-1 which is N-Virginia
+          deployment_package: pbl6-schoolsystem.jar #download artifacts from previous job
