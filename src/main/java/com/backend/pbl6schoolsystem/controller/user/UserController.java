@@ -39,7 +39,7 @@ public class UserController {
     @Operation(summary = "Test Github Actions")
     @GetMapping("/github-actions")
     public String testGithubActions() {
-        return new String("Test!");
+        return new String("F*ck github actions!");
     }
 
     @Operation(summary = "Get my information")
