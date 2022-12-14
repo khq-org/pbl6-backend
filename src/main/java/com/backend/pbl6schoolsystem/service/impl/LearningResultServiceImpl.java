@@ -300,11 +300,12 @@ public class LearningResultServiceImpl implements LearningResultService {
             List<Long> studentIds = studentScores.stream().map(sc -> sc.getStudentId()).collect(Collectors.toList());
             List<LearningResultEntity> learningResults = learningResultRepository.findByStudentIdsAndSchoolYearId(studentIds, request.getSchoolYearId());
             Optional<ExamResultEntity> examResultFromDB;
-            for (int i = 0; i < studentScores.size(); i++) {
+            List<UserEntity> students = userRepository.findAllById(studentIds);
+            for (int i = 0; i < students.size(); i++) {
                 List<InputScoreRequest.StudentScore.Scores> scores = studentScores.get(i).getScores();
                 for (InputScoreRequest.StudentScore.Scores score : scores) {
                     examResultFromDB = examResultRepository.findFromDB(subject.getSubjectId(), schoolYear.getSchoolYearId(), semester.getSemesterId(),
-                            learningResults.get(i).getProfileStudent().getStudent().getUserId(), score.getType());
+                            students.get(i).getUserId(), score.getType());
                     if (examResultFromDB.isPresent()) {
                         examResult = examResultFromDB.get();
                         if (score.getScore() != null) {
@@ -317,7 +318,7 @@ public class LearningResultServiceImpl implements LearningResultService {
                         }
                     } else {
                         examResult = new ExamResultEntity();
-                        examResult.setStudent(learningResults.get(i).getProfileStudent().getStudent());
+                        examResult.setStudent(students.get(i));
                         examResult.setLearningResult(learningResults.get(i));
                         examResult.setSemester(semester);
                         examResult.setSchoolYear(schoolYear);
