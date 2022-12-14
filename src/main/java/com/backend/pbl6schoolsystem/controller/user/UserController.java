@@ -36,6 +36,12 @@ public class UserController {
     private final UserService userService;
     private final UserConverter userConverter;
 
+    @Operation(summary = "Test Github Actions")
+    @GetMapping("/github-actions")
+    public String testGithubActions() {
+        return new String("Test!");
+    }
+
     @Operation(summary = "Get my information")
     @GetMapping
     public Response<UserInfoDTO> getMyInfo() {
