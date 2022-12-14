@@ -25,7 +25,7 @@ public interface ExamResultRepository extends JpaRepository<ExamResultEntity, Lo
             " WHERE er.schoolYear.schoolYearId = :schoolYearId" +
             " AND er.semester.semesterId = :semesterId" +
             " AND er.subject.subjectId = :subjectId" +
-            " AND er.learningResult.profileStudent.student.userId = :studentId" +
+            " AND er.student.userId = :studentId" +
             " AND er.examType = :type")
     Optional<ExamResultEntity> findFromDB(@Param("subjectId") Long subjectId, @Param("schoolYearId") Long schoolYearId,
                                                        @Param("semesterId") Long semesterId, @Param("studentId") Long studentId, @Param("type") String type);

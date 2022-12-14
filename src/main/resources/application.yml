@@ -1,6 +1,6 @@
 server:
   port: 5000
-
+version: ci-cd-v1.0
 spring:
   application:
     name: pbl6-schoolsystem
