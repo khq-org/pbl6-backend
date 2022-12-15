@@ -67,7 +67,7 @@ jobs:
           name: artifact
     #Deploy the artifact (JAR) into AWS Beanstalk
       - name: Deploy to EB
-        uses: einaregilsson/beanstalk-deploy@v13
+        uses: einaregilsson/beanstalk-deploy@v21
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }} #This is referred from Github Secrets
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }} #This is referred from Github Secrets
