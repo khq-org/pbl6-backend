@@ -62,7 +62,7 @@ jobs:
     steps:
       - name: Download JAR
         #Download the artifact which was uploaded in the Build Archive's job
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: artifact
     #Deploy the artifact (JAR) into AWS Beanstalk
