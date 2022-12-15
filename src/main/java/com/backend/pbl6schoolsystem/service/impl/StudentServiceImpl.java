@@ -315,7 +315,7 @@ public class StudentServiceImpl implements StudentService {
                                                 .setFirstName(p.getFirstName())
                                                 .setLastName(p.getLastName())
                                                 .setJob(RequestUtil.blankIfNull(p.getJob()))
-                                                .setDayOfBirth(p.getDateOfBirth().toString())
+                                                .setDayOfBirth(p.getDateOfBirth() != null ? p.getDateOfBirth().toString() : "")
                                                 .build())
                                         .collect(Collectors.toList()))
                                 .build())
