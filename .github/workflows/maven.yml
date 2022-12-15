@@ -33,7 +33,7 @@ jobs:
       
     - name: Upload JAR
       # We upload so we can re-use same jar in next job.
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         #Name of artifact can be anything
         name: artifact
