@@ -42,4 +42,9 @@ public class Constants {
     public static final String MIDDLE = "Middle";
     public static final String MEDIUM = "Medium";
     public static final String WEAK = "Weak";
+
+    // Size
+    public static final Integer PASSWORD_MAX_SIZE = 20;
+    public static final Integer PASSWORD_MIN_SIZE = 8;
+    public static final Integer FIRSTNAME_LASTNAME_MAX_SIZE = 50;
 }
