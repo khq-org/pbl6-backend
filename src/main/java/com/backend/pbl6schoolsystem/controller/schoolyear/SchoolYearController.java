@@ -59,6 +59,9 @@ public class SchoolYearController {
     @PostMapping("/startNewSchoolYear")
     public Response<MessageDTO> startNewSchoolYear(@RequestBody NewSchoolYearRequest request) {
         NoContentResponse response = schoolYearService.startNewSchoolYear(request);
-        return schoolYearConverter.getResponse(response);
+        if (response.getSuccess()) {
+            return schoolYearConverter.getResponse(response);
+        }
+        return schoolYearConverter.getError(response.getErrorResponse());
     }
 }
