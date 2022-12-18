@@ -128,8 +128,8 @@ public class NewSchoolYearServiceImpl implements NewSchoolYearService {
                 .collect(Collectors.toList());
 
         for (int i = 0; i < onlyGrade10.size(); i++) {
-            onlyGrade10.get(i).setSubject(""); // FIX ME
-            onlyGrade10.get(i).setIsSpecializedClass(Boolean.FALSE); // FIX ME
+//            onlyGrade10.get(i).setSubject(""); // FIX ME
+//            onlyGrade10.get(i).setIsSpecializedClass(Boolean.FALSE); // FIX ME
             teacherClazz = new TeacherClassEntity();
             teacherClazz.setTeacher(teachers.get(i));
             teacherClazz.setSchoolYear(newSchoolYear);
