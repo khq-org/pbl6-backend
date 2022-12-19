@@ -32,7 +32,7 @@ logging:
     name: D:\kiet.nguyen-dang\project-base-learning-6\logs\elk-stack.log
 
 sentry:
-  dsn: https://9425312b5e734ef78dbf525d0a532259@o4504211653853184.ingest.sentry.io/4504212698562560
+  dsn: https://dc6e336c168a4f549c3f2c385a7d2ed2@o4504355618291712.ingest.sentry.io/4504355624058880
   logging:
     minimum-breadcrumb-level: debug
     minimum-event-level: info
