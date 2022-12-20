@@ -53,6 +53,7 @@ public class StudentServiceImpl implements StudentService {
     private final LearningResultRepository learningResultRepository;
     private final ProfileStudentRepository profileStudentRepository;
     private final SchoolYearRepository schoolYearRepository;
+    private final ExamResultRepository examResultRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -340,6 +341,7 @@ public class StudentServiceImpl implements StudentService {
         List<UserEntity> parents = userRepository.findParentsByStudent(studentId);
         List<StudentClazzEntity> listInStudentClass = studentClazzRepository.findByStudentId(studentId);
         List<UserCalendarEventEntity> listInUserCalendar = userCalendarRepository.findByStudentId(studentId);
+        List<ExamResultEntity> listExamResult = examResultRepository.findByStudentId(studentId);
         Optional<ProfileStudentEntity> profileStudent = profileStudentRepository.findByStudent(studentId);
         if (profileStudent.isPresent()) {
             List<LearningResultEntity> learningResults = learningResultRepository.findByProfileStudent(profileStudent.get().getProfileStudentId());
@@ -353,6 +355,9 @@ public class StudentServiceImpl implements StudentService {
         }
         if (!listInUserCalendar.isEmpty()) {
             userCalendarRepository.deleteAll(listInUserCalendar);
+        }
+        if (!listExamResult.isEmpty()) {
+            examResultRepository.deleteAll(listExamResult);
         }
         if (!parents.isEmpty()) {
             userRepository.deleteAll(parents);

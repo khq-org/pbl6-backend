@@ -29,4 +29,8 @@ public interface ExamResultRepository extends JpaRepository<ExamResultEntity, Lo
             " AND er.examType = :type")
     Optional<ExamResultEntity> findFromDB(@Param("subjectId") Long subjectId, @Param("schoolYearId") Long schoolYearId,
                                                        @Param("semesterId") Long semesterId, @Param("studentId") Long studentId, @Param("type") String type);
+
+    @Query("SELECT er FROM ExamResultEntity er" +
+            " WHERE er.student.userId = :studentId")
+    List<ExamResultEntity> findByStudentId(@Param("studentId") Long studentId);
 }
