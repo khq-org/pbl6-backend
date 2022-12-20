@@ -345,6 +345,9 @@ public class StudentServiceImpl implements StudentService {
         Optional<ProfileStudentEntity> profileStudent = profileStudentRepository.findByStudent(studentId);
         if (profileStudent.isPresent()) {
             List<LearningResultEntity> learningResults = learningResultRepository.findByProfileStudent(profileStudent.get().getProfileStudentId());
+            if (!listExamResult.isEmpty()) {
+                examResultRepository.deleteAll(listExamResult);
+            }
             if (!learningResults.isEmpty()) {
                 learningResultRepository.deleteAll(learningResults);
             }
@@ -356,13 +359,11 @@ public class StudentServiceImpl implements StudentService {
         if (!listInUserCalendar.isEmpty()) {
             userCalendarRepository.deleteAll(listInUserCalendar);
         }
-        if (!listExamResult.isEmpty()) {
-            examResultRepository.deleteAll(listExamResult);
-        }
         if (!parents.isEmpty()) {
             userRepository.deleteAll(parents);
         }
         userRepository.delete(student);
+
         return NoContentResponse.builder()
                 .setSuccess(true)
                 .build();
