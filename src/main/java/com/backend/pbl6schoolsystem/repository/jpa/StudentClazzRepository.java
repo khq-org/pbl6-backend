@@ -42,6 +42,6 @@ public interface StudentClazzRepository extends JpaRepository<StudentClazzEntity
     @Query("SELECT sc FROM StudentClazzEntity sc" +
             " LEFT JOIN FETCH sc.student" +
             " WHERE sc.clazz.classId = :clazzId" +
-            " AND sc.schoolYear.schoolYearId = :schoolYearid")
+            " AND sc.schoolYear.schoolYearId = :schoolYearId")
     List<StudentClazzEntity> findByClazzIdAndSchoolYearId(@Param("clazzId") Long clazzId, @Param("schoolYearId") Long schoolYearId);
 }
