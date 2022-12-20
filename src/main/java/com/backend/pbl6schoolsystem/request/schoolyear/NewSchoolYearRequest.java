@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 @Setter
 public class NewSchoolYearRequest {
+    private Long oldSchoolYearId;
     private Long newSchoolYearId;
     private List<Long> oldClassIds;
     private List<Long> newClassIds;

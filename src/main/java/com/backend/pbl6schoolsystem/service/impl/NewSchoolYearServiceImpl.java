@@ -150,8 +150,9 @@ public class NewSchoolYearServiceImpl implements NewSchoolYearService {
             }
             saveClasses.add(newClazz);
 
-            profileStudents = profileStudentRepository.findByStudentIds(studentClazzRepository.findByClazzId(oldClazz.getClassId())
+            profileStudents = profileStudentRepository.findByStudentIds(studentClazzRepository.findByClazzIdAndSchoolYearId(oldClazz.getClassId(), request.getOldSchoolYearId())
                     .stream().map(s -> s.getStudent().getUserId()).collect(Collectors.toList()));
+
             for (ProfileStudentEntity profileStudent : profileStudents) {
                 learningResult = new LearningResultEntity();
                 learningResult.setProfileStudent(profileStudent);
@@ -163,8 +164,8 @@ public class NewSchoolYearServiceImpl implements NewSchoolYearService {
                 studentClazz.setStudent(profileStudent.getStudent());
                 studentClazz.setSchoolYear(newSchoolYear);
                 studentClasses.add(studentClazz);
-
             }
+
             teacherClazz = new TeacherClassEntity();
             teacherClazz.setTeacher(teachers.get(i));
             teacherClazz.setClazz(newClazz);
