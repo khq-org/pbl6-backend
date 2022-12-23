@@ -65,6 +65,7 @@ public class NewSchoolYearServiceImpl implements NewSchoolYearService {
         schoolYear = schoolYearRepository.save(schoolYear);
 
         return OnlyIdResponse.builder()
+                .setSuccess(true)
                 .setId(schoolYear.getSchoolYearId())
                 .setName(schoolYear.getSchoolYear())
                 .build();
@@ -89,6 +90,7 @@ public class NewSchoolYearServiceImpl implements NewSchoolYearService {
         schoolYear = schoolYearRepository.save(schoolYear);
 
         return OnlyIdResponse.builder()
+                .setSuccess(true)
                 .setId(schoolYear.getSchoolYearId())
                 .setName(schoolYear.getSchoolYear())
                 .build();
