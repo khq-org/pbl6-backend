@@ -44,7 +44,10 @@ public class LearningResultController {
     public Response<ClassLearningResultDTO> getClassLearningResult(@RequestParam("classId") Long classId,
                                                                    @RequestParam("schoolYearId") Long schoolYearId) {
         GetClassLearningResultResponse response = learningResultService.getClassLearningResult(classId, schoolYearId);
-        return learningResultConverter.getResponse(response);
+        if (response.getSuccess()) {
+            return learningResultConverter.getResponse(response);
+        }
+        return learningResultConverter.getError(response.getErrorResponse());
     }
 
     @Operation(summary = "Load ExamResults Student")

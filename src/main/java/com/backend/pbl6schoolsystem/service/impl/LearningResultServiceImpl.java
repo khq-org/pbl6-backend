@@ -1,5 +1,6 @@
 package com.backend.pbl6schoolsystem.service.impl;
 
+import com.backend.pbl6schoolsystem.common.CommonUtils;
 import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
 import com.backend.pbl6schoolsystem.common.enums.ExamType;
 import com.backend.pbl6schoolsystem.common.enums.Semester;
@@ -154,7 +155,7 @@ public class LearningResultServiceImpl implements LearningResultService {
                         .map(e -> ExamResultDTO.builder()
                                 .examResultId(e.getExamResultId())
                                 .examType(e.getExamType())
-                                .score(e.getScore())
+                                .score(CommonUtils.roundScore(e.getScore()))
                                 .subject(SubjectDTO.builder()
                                         .setSubjectId(e.getSubject().getSubjectId())
                                         .setSubject(e.getSubject().getSubject())
@@ -240,7 +241,7 @@ public class LearningResultServiceImpl implements LearningResultService {
                     .setScores(examResults.stream()
                             .map(er -> ExamResultClassDTO.ExamResult.Score.builder()
                                     .setId(er.getExamResultId())
-                                    .setScore(er.getScore())
+                                    .setScore(CommonUtils.roundScore(er.getScore()))
                                     .setType(er.getExamType())
                                     .build())
                             .collect(Collectors.toList()))
@@ -311,7 +312,7 @@ public class LearningResultServiceImpl implements LearningResultService {
                         .collect(Collectors.toList()));
                 double avgSubjectSemesterII = calculateAvg(ers.stream().filter(er -> er.getSemester().getSemesterId().equals(Semester.SEMESTER_II.getId()))
                         .collect(Collectors.toList()));
-                avgSubjectScore.add((avgSubjectSemesterI + avgSubjectSemesterII * 2) / 3);
+                avgSubjectScore.add(CommonUtils.roundScore((avgSubjectSemesterI + avgSubjectSemesterII * 2) / 3));
                 avgSemesterI += avgScoreBySubject(subject.getSubjectId(), avgSubjectSemesterI);
                 avgSemesterII += avgScoreBySubject(subject.getSubjectId(), avgSubjectSemesterII);
             }
@@ -320,9 +321,9 @@ public class LearningResultServiceImpl implements LearningResultService {
                     .setDisplayName(String.format("%s %s", student.getFirstName(), student.getLastName()))
                     .setLearningGrade(RequestUtil.blankIfNull(learningResult.getLearningGrading()))
                     .setArrAvgSubjectScore(avgSubjectScore)
-                    .setAvgSemesterI(avgSemesterI / 15.0)
-                    .setAvgSemesterII(avgSemesterII / 15.0)
-                    .setAvgSchoolYear(((avgSemesterI / 15.0) + (avgSemesterII / 15.0) * 2) / 3)
+                    .setAvgSemesterI(CommonUtils.roundScore(avgSemesterI / 15.0))
+                    .setAvgSemesterII(CommonUtils.roundScore(avgSemesterII / 15.0))
+                    .setAvgSchoolYear(CommonUtils.roundScore(((avgSemesterI / 15.0) + (avgSemesterII / 15.0) * 2) / 3))
                     .setConduct(RequestUtil.blankIfNull(learningResult.getConduct()))
                     .build());
         });
@@ -338,7 +339,7 @@ public class LearningResultServiceImpl implements LearningResultService {
         if (List.of(Subject.LITERATURE.getId(), Subject.MATHS.getId()).contains(subjectId)) {
             return avgScore * 2;
         }
-        return avgScore;
+        return CommonUtils.roundScore(avgScore);
     }
 
 
@@ -451,7 +452,7 @@ public class LearningResultServiceImpl implements LearningResultService {
                 index += 3;
             }
         }
-        return index != 0 ? avg / index : 0.0;
+        return index != 0 ? CommonUtils.roundScore(avg / index) : 0.0;
     }
 
     private double calculateSchoolYearAvg(List<LearningResultDetailDTO.StudyScore> studyScores) {
@@ -463,7 +464,7 @@ public class LearningResultServiceImpl implements LearningResultService {
                 avg += studyScore.getAvgScore();
             }
         }
-        return avg / 15.0;
+        return CommonUtils.roundScore(avg / 15.0);
     }
 
 }
