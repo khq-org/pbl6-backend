@@ -37,6 +37,9 @@ public class ProfileStudentDTO {
             private String lastName;
             private String dayOfBirth;
             private String job;
+            private String street;
+            private String district;
+            private String city;
         }
 
     }
