@@ -53,7 +53,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/classes").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(), UserRole.TEACHER_ROLE.getRole());
         http.authorizeRequests().antMatchers("/api/classes/**").hasAuthority(UserRole.SCHOOL_ROLE.getRole());
         http.authorizeRequests().antMatchers("/api/learningresults/**").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(), UserRole.STUDENT_ROLE.getRole());
-        http.authorizeRequests().antMatchers("/api/examresults/**", "/api/inputscores/**", "/api/calendars/**").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(), UserRole.TEACHER_ROLE.getRole());
+        http.authorizeRequests().antMatchers("/api/examresults/**", "/api/inputscores/**", "/api/calendars/**"
+                , "/api/class/learning-result/**").hasAnyAuthority(UserRole.SCHOOL_ROLE.getRole(), UserRole.TEACHER_ROLE.getRole());
         http.authorizeRequests().antMatchers("/api/rooms/**").hasAuthority(UserRole.SCHOOL_ROLE.getRole());
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(filter);

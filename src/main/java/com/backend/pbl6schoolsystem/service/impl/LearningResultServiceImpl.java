@@ -36,6 +36,7 @@ import org.springframework.util.CollectionUtils;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -292,23 +293,37 @@ public class LearningResultServiceImpl implements LearningResultService {
         // get all student by class, schoolYear
         List<UserEntity> students = studentClazzRepository.findByClazzIdAndSchoolYearId(classId, schoolYearId)
                 .stream().map(StudentClazzEntity::getStudent).collect(Collectors.toList());
-        List<ExamResultEntity> examResults = examResultRepository.listExamResultByLearningResults(
-                learningResultRepository.findByStudentIdsAndSchoolYearId(students.stream()
-                                .map(s -> s.getUserId()).collect(Collectors.toList()), schoolYearId).stream()
-                        .map(er -> er.getLearningResultId()).collect(Collectors.toList()));
-        students.forEach(student -> {
-            List<Long> avgSubjectScore = new ArrayList<>();
-            subjects.forEach(subject -> {
-                // filter examResult by student and subject
-                List<ExamResultEntity> ers = examResults.stream().filter(er -> er.getStudent().getStudentId().equals(student.getUserId())
+        List<LearningResultEntity> learningResults = learningResultRepository.findByStudentIdsAndSchoolYearId(students.stream()
+                .map(s -> s.getUserId()).collect(Collectors.toList()), schoolYearId);
+        List<ExamResultEntity> examResults = examResultRepository.listExamResultByLearningResults(learningResults.stream()
+                .map(er -> er.getLearningResultId()).collect(Collectors.toList()));
+        Map<UserEntity, LearningResultEntity> mapStudentLearningResult = IntStream.range(0, students.size())
+                .boxed()
+                .collect(Collectors.toMap(i -> students.get(i), i -> learningResults.get(i)));
+
+        mapStudentLearningResult.forEach((student, learningResult) -> {
+            List<Double> avgSubjectScore = new ArrayList<>();
+            double avgSemesterI = 0D, avgSemesterII = 0D;
+            for (SubjectEntity subject : subjects) {
+                List<ExamResultEntity> ers = examResults.stream().filter(er -> er.getStudent().getUserId().equals(student.getUserId())
                         && er.getSubject().getSubjectId().equals(subject.getSubjectId())).collect(Collectors.toList());
-            });
+                double avgSubjectSemesterI = calculateAvg(ers.stream().filter(er -> er.getSemester().getSemesterId().equals(Semester.SEMESTER_I.getId()))
+                        .collect(Collectors.toList()));
+                double avgSubjectSemesterII = calculateAvg(ers.stream().filter(er -> er.getSemester().getSemesterId().equals(Semester.SEMESTER_II.getId()))
+                        .collect(Collectors.toList()));
+                avgSubjectScore.add((avgSubjectSemesterI + avgSubjectSemesterII * 2) / 3);
+                avgSemesterI += avgScoreBySubject(subject.getSubjectId(), avgSubjectSemesterI);
+                avgSemesterII += avgScoreBySubject(subject.getSubjectId(), avgSubjectSemesterII);
+            }
             studentLearningResults.add(ClassLearningResultDTO.StudentLearningResult.builder()
                     .setStudentId(student.getUserId())
-                    .setLearningGrade(null)
+                    .setDisplayName(String.format("%s %s", student.getFirstName(), student.getLastName()))
+                    .setLearningGrade(RequestUtil.blankIfNull(learningResult.getLearningGrading()))
                     .setArrAvgSubjectScore(avgSubjectScore)
-                    .setAvgSemesterI(null)
-                    .setAvgSemesterII(null)
+                    .setAvgSemesterI(avgSemesterI / 15.0)
+                    .setAvgSemesterII(avgSemesterII / 15.0)
+                    .setAvgSchoolYear(((avgSemesterI / 15.0) + (avgSemesterII / 15.0) * 2) / 3)
+                    .setConduct(RequestUtil.blankIfNull(learningResult.getConduct()))
                     .build());
         });
 
@@ -318,6 +333,14 @@ public class LearningResultServiceImpl implements LearningResultService {
                         .build())
                 .build();
     }
+
+    private Double avgScoreBySubject(Long subjectId, double avgScore) {
+        if (List.of(Subject.LITERATURE.getId(), Subject.MATHS.getId()).contains(subjectId)) {
+            return avgScore * 2;
+        }
+        return avgScore;
+    }
+
 
     @Override
     public NoContentResponse inputScore(InputScoreRequest request) {
