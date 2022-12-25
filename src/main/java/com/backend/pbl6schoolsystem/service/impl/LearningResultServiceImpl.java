@@ -20,6 +20,7 @@ import com.backend.pbl6schoolsystem.repository.jpa.*;
 import com.backend.pbl6schoolsystem.request.leaningresult.InputScoreRequest;
 import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultClassRequest;
 import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultStudentRequest;
+import com.backend.pbl6schoolsystem.request.leaningresult.UpdateClassLearningResult;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.learningresult.GetClassLearningResultResponse;
@@ -317,6 +318,7 @@ public class LearningResultServiceImpl implements LearningResultService {
                 avgSemesterII += avgScoreBySubject(subject.getSubjectId(), avgSubjectSemesterII);
             }
             studentLearningResults.add(ClassLearningResultDTO.StudentLearningResult.builder()
+                    .setLearningResultId(learningResult.getLearningResultId())
                     .setStudentId(student.getUserId())
                     .setDisplayName(String.format("%s %s", student.getFirstName(), student.getLastName()))
                     .setLearningGrade(RequestUtil.blankIfNull(learningResult.getLearningGrading()))
@@ -332,6 +334,24 @@ public class LearningResultServiceImpl implements LearningResultService {
                 .setClassLearningResult(classLearningResultDTOBuilder
                         .setStudentLearningResults(studentLearningResults)
                         .build())
+                .build();
+    }
+
+    @Override
+    public NoContentResponse updateClassLearningResult(UpdateClassLearningResult request) {
+        List<UpdateClassLearningResult.StudentLearningResult> studentLearningResults = request.getStudentLearningResults();
+        List<LearningResultEntity> learningResults = new ArrayList<>();
+        studentLearningResults.forEach(slr -> {
+            LearningResultEntity learningResult = learningResultRepository.findById(slr.getLearningResultId()).get();
+            learningResult.setConduct(RequestUtil.blankIfNull(slr.getConduct()));
+            learningResult.setLearningGrading(RequestUtil.blankIfNull(slr.getLearningGrade()));
+            learningResult.setAverageScore(RequestUtil.defaultIfNull(CommonUtils.roundScore(slr.getAvgScore()), 0D));
+            learningResult.setIsPassed(Boolean.TRUE.equals(slr.getIsPassed()));
+            learningResults.add(learningResult);
+        });
+        learningResultRepository.saveAll(learningResults);
+        return NoContentResponse.builder()
+                .setSuccess(true)
                 .build();
     }
 

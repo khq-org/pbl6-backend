@@ -9,6 +9,7 @@ import com.backend.pbl6schoolsystem.model.dto.student.LearningResultDetailDTO;
 import com.backend.pbl6schoolsystem.request.leaningresult.InputScoreRequest;
 import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultClassRequest;
 import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultStudentRequest;
+import com.backend.pbl6schoolsystem.request.leaningresult.UpdateClassLearningResult;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.Response;
 import com.backend.pbl6schoolsystem.response.learningresult.GetClassLearningResultResponse;
@@ -48,6 +49,13 @@ public class LearningResultController {
             return learningResultConverter.getResponse(response);
         }
         return learningResultConverter.getError(response.getErrorResponse());
+    }
+
+    @Operation(summary = "Update class learning result")
+    @PutMapping("/class/learning-result")
+    public Response<MessageDTO> updateClassLearningResult(@RequestBody UpdateClassLearningResult request) {
+        NoContentResponse response = learningResultService.updateClassLearningResult(request);
+        return learningResultConverter.getResponse(response);
     }
 
     @Operation(summary = "Load ExamResults Student")

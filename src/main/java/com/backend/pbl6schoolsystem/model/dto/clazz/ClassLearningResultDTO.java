@@ -21,6 +21,7 @@ public class ClassLearningResultDTO implements Serializable {
     @Setter
     @Builder(setterPrefix = "set")
     public static class StudentLearningResult implements Serializable {
+        private Long learningResultId;
         private Long studentId;
         private String displayName;
         private List<Double> arrAvgSubjectScore;
