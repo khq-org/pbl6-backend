@@ -331,6 +331,7 @@ public class LearningResultServiceImpl implements LearningResultService {
         });
 
         return builder
+                .setSuccess(true)
                 .setClassLearningResult(classLearningResultDTOBuilder
                         .setStudentLearningResults(studentLearningResults)
                         .build())
