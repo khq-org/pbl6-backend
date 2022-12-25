@@ -28,6 +28,12 @@ public interface TeacherClassRepository extends JpaRepository<TeacherClassEntity
             " AND tc.semester.semesterId = :semesterId")
     Optional<TeacherClassEntity> findByExceptId(@Param("teacherId") Long teacherId, @Param("classId") Long classId, @Param("semesterId") Long semesterId,
                                                 @Param("schoolYearId") Long schoolYearId);
+    @Query("SELECT tc FROM TeacherClassEntity tc" +
+            " WHERE tc.teacher.userId = :teacherId" +
+            " AND tc.isClassLeader = true" +
+            " AND tc.clazz.classId = :clazzId" +
+            " AND tc.schoolYear.schoolYearId = :schoolYearId")
+    Optional<TeacherClassEntity> findByTeacherIfLeaderAndClassIdAndSchoolYearId(@Param("teacherId") Long teacherId, @Param("clazzId") Long clazzId, @Param("schoolYearId") Long schoolYearId);
 
 //    @Query("SELECT tc FROM TeacherClassEntity tc" +
 //            " LEFT JOIN FETCH tc.schoolYear" +

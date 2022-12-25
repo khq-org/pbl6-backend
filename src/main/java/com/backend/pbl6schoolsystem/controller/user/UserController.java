@@ -16,7 +16,9 @@ import com.backend.pbl6schoolsystem.response.Response;
 import com.backend.pbl6schoolsystem.response.UserInfoResponse;
 import com.backend.pbl6schoolsystem.response.calendar.ListCalendarResponse;
 import com.backend.pbl6schoolsystem.response.clazz.ListClassResponse;
+import com.backend.pbl6schoolsystem.response.learningresult.GetClassLearningResultResponse;
 import com.backend.pbl6schoolsystem.security.UserPrincipal;
+import com.backend.pbl6schoolsystem.service.LearningResultService;
 import com.backend.pbl6schoolsystem.service.UserService;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
 import com.backend.pbl6schoolsystem.util.SecurityUtils;
@@ -35,6 +37,7 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final UserConverter userConverter;
+    private final LearningResultService learningResultService;
 
     @Operation(summary = "Test Github Actions")
     @GetMapping("/github-actions")
@@ -55,6 +58,14 @@ public class UserController {
     public Response<List<ClazzDTO>> getMyClasses() {
         ListClassResponse response = userService.getListMyClass();
         return userConverter.getResponse(response);
+    }
+
+    @Operation(summary = "Get learning result of my class (for leader teacher)")
+    @GetMapping("/class/learning-result")
+    public Response<?> getClassLearningResult(@RequestParam("classId") Long classId,
+                                              @RequestParam("schoolYearId") Long schoolYearId) {
+        GetClassLearningResultResponse response = learningResultService.getClassLearningResult(classId, schoolYearId);
+        return null;
     }
 
     @Operation(summary = "List calendar event")

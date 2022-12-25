@@ -20,6 +20,7 @@ import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultClassReq
 import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultStudentRequest;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
+import com.backend.pbl6schoolsystem.response.learningresult.GetClassLearningResultResponse;
 import com.backend.pbl6schoolsystem.response.learningresult.LearningResultDetailResponse;
 import com.backend.pbl6schoolsystem.response.learningresult.LoadExamResultClassResponse;
 import com.backend.pbl6schoolsystem.response.learningresult.LoadExamResultResponse;
@@ -46,6 +47,8 @@ public class LearningResultServiceImpl implements LearningResultService {
     private final SubjectRepository subjectRepository;
     private final ExamResultRepository examResultRepository;
     private final ExamResultDslRepository examResultDslRepository;
+    private final StudentClazzRepository studentClazzRepository;
+    private final TeacherClassRepository teacherClassRepository;
 
     @Override
     public LearningResultDetailResponse getLearningResultDetail(Long learningResultId) {
@@ -247,6 +250,59 @@ public class LearningResultServiceImpl implements LearningResultService {
                 .setSuccess(true)
                 .setExamResultClass(builder.build())
                 .build();
+    }
+
+    @Override
+    public GetClassLearningResultResponse getClassLearningResult(Long classId, Long schoolYearId) {
+        GetClassLearningResultResponse.GetClassLearningResultResponseBuilder builder = GetClassLearningResultResponse.builder();
+        Map<String, String> errors = new HashMap<>();
+        if (classId == null) {
+            errors.put("classId", ErrorCode.MISSING_VALUE.name());
+        }
+        if (schoolYearId == null) {
+            errors.put("schoolYearId", ErrorCode.MISSING_VALUE.name());
+        }
+
+        UserPrincipal principal = SecurityUtils.getPrincipal();
+        if (principal.isTeacher()) {
+            Optional<TeacherClassEntity> teacherClass = teacherClassRepository.findByTeacherIfLeaderAndClassIdAndSchoolYearId(principal.getUserId(), classId, schoolYearId);
+            if (teacherClass.isEmpty()) {
+                errors.put("classId or schoolYearId", ErrorCode.INVALID_VALUE.name());
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            return builder.setSuccess(false)
+                    .setErrorResponse(ErrorResponse.builder()
+                            .setErrors(errors)
+                            .build())
+                    .build();
+        }
+
+        ClassEntity clazz = classRepository.findById(classId).orElseThrow(() -> new NotFoundException("Not found class"));
+        SchoolYearEntity schoolYear = schoolYearRepository.findById(schoolYearId).orElseThrow(() -> new NotFoundException("Not found schoolYear"));
+        builder.setClassId(classId)
+                .setClassName(clazz.getClazz())
+                .setSchoolYear(schoolYear.getSchoolYear());
+        // get all subject
+        List<SubjectEntity> subjects = subjectRepository.findAll();
+        // get all student by class, schoolYear
+        List<UserEntity> students = studentClazzRepository.findByClazzIdAndSchoolYearId(classId, schoolYearId)
+                .stream().map(StudentClazzEntity::getStudent).collect(Collectors.toList());
+        List<ExamResultEntity> examResults = examResultRepository.listExamResultByLearningResults(
+                learningResultRepository.findByStudentIdsAndSchoolYearId(students.stream()
+                                .map(s -> s.getUserId()).collect(Collectors.toList()), schoolYearId).stream()
+                        .map(er -> er.getLearningResultId()).collect(Collectors.toList()));
+        List<GetClassLearningResultResponse.StudentLearningResult> studentLearningResults;
+        students.forEach(student -> {
+            subjects.forEach(subject -> {
+                // filter examResult by student and subject
+                List<ExamResultEntity> ers = examResults.stream().filter(er -> er.getStudent().getStudentId().equals(student.getUserId())
+                        && er.getSubject().getSubjectId().equals(subject.getSubjectId())).collect(Collectors.toList());
+            });
+        });
+
+        return builder.build();
     }
 
     @Override

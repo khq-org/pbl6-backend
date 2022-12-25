@@ -2,6 +2,7 @@ package com.backend.pbl6schoolsystem.repository.jpa;
 
 import com.backend.pbl6schoolsystem.model.dto.clazz.ExamResultClassDTO;
 import com.backend.pbl6schoolsystem.model.entity.ExamResultEntity;
+import com.backend.pbl6schoolsystem.model.entity.LearningResultEntity;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,9 +29,16 @@ public interface ExamResultRepository extends JpaRepository<ExamResultEntity, Lo
             " AND er.student.userId = :studentId" +
             " AND er.examType = :type")
     Optional<ExamResultEntity> findFromDB(@Param("subjectId") Long subjectId, @Param("schoolYearId") Long schoolYearId,
-                                                       @Param("semesterId") Long semesterId, @Param("studentId") Long studentId, @Param("type") String type);
+                                          @Param("semesterId") Long semesterId, @Param("studentId") Long studentId, @Param("type") String type);
 
     @Query("SELECT er FROM ExamResultEntity er" +
             " WHERE er.student.userId = :studentId")
     List<ExamResultEntity> findByStudentId(@Param("studentId") Long studentId);
+
+    @Query("SELECT er FROM ExamResultEntity er" +
+            " LEFT JOIN FETCH er.student" +
+            " LEFT JOIN FETCH er.subject" +
+            " LEFT JOIN FETCH er.semester" +
+            " WHERE er.learningResult.learningResultId IN (:learningResultIds)")
+    List<ExamResultEntity> listExamResultByLearningResults(List<Long> learningResultIds);
 }

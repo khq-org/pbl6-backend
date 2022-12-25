@@ -5,6 +5,7 @@ import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultClassReq
 import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultStudentRequest;
 import com.backend.pbl6schoolsystem.request.leaningresult.ModifyScoreRequest;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
+import com.backend.pbl6schoolsystem.response.learningresult.GetClassLearningResultResponse;
 import com.backend.pbl6schoolsystem.response.learningresult.LearningResultDetailResponse;
 import com.backend.pbl6schoolsystem.response.learningresult.LoadExamResultClassResponse;
 import com.backend.pbl6schoolsystem.response.learningresult.LoadExamResultResponse;
@@ -18,4 +19,6 @@ public interface LearningResultService {
 //    NoContentResponse modifyScore(ModifyScoreRequest request);
 
     LoadExamResultClassResponse loadExamResultClass(LoadExamResultClassRequest request);
+
+    GetClassLearningResultResponse getClassLearningResult(Long classId, Long schoolYearId);
 }
