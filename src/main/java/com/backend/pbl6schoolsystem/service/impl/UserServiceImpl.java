@@ -257,7 +257,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public ListClassResponse getListMyClass() {
         UserPrincipal principal = SecurityUtils.getPrincipal();
-        List<ClassEntity> classes = new ArrayList<>();
         ListClassResponse.ListClassResponseBuilder builder = ListClassResponse.builder();
         builder.setSuccess(true);
         if (principal.isStudent()) {

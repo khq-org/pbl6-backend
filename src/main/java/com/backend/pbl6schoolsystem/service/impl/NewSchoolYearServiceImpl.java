@@ -1,5 +1,6 @@
 package com.backend.pbl6schoolsystem.service.impl;
 
+import com.backend.pbl6schoolsystem.common.CommonUtils;
 import com.backend.pbl6schoolsystem.common.constant.ErrorCode;
 import com.backend.pbl6schoolsystem.common.enums.Grade;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -197,9 +199,19 @@ public class NewSchoolYearServiceImpl implements NewSchoolYearService {
         if (!StringUtils.hasText(request.getSchoolYearName())) {
             errors.put("schoolYear", ErrorCode.MISSING_VALUE.name());
         } else {
-            List<SchoolYearEntity> schoolYears = schoolYearRepository.findBySchoolYear(schoolYearId, request.getSchoolYearName());
-            if (!schoolYears.isEmpty()) {
-                errors.put("schoolYear", ErrorCode.ALREADY_EXIST.name());
+            String[] arr = request.getSchoolYearName().split("-");
+            int currentYear = LocalDateTime.now().getYear();
+            if (!CommonUtils.isNumeric(arr[0]) || !CommonUtils.isNumeric(arr[1])) {
+                errors.put("schoolYear", ErrorCode.INVALID_VALUE.name());
+            } else {
+                if (Integer.parseInt(arr[0]) != currentYear || Integer.parseInt(arr[1]) - Integer.parseInt(arr[0]) != 1) {
+                    errors.put("schoolYear", ErrorCode.INVALID_VALUE.name());
+                } else {
+                    List<SchoolYearEntity> schoolYears = schoolYearRepository.findBySchoolYear(schoolYearId, request.getSchoolYearName());
+                    if (!schoolYears.isEmpty()) {
+                        errors.put("schoolYear", ErrorCode.ALREADY_EXIST.name());
+                    }
+                }
             }
         }
     }
