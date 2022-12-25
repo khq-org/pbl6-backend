@@ -6,12 +6,12 @@ import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
 import com.backend.pbl6schoolsystem.mapper.UserMapper;
 import com.backend.pbl6schoolsystem.model.dto.calendar.CalendarEventDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.ClazzDTO;
+import com.backend.pbl6schoolsystem.model.dto.common.GradeDTO;
 import com.backend.pbl6schoolsystem.model.entity.*;
 import com.backend.pbl6schoolsystem.repository.dsl.ClassCalendarDslRepository;
 import com.backend.pbl6schoolsystem.repository.dsl.UserCalendarDslRepository;
 import com.backend.pbl6schoolsystem.repository.jpa.*;
 import com.backend.pbl6schoolsystem.request.calendar.ListCalendarRequest;
-import com.backend.pbl6schoolsystem.request.clazz.ListClassRequest;
 import com.backend.pbl6schoolsystem.request.user.ChangePasswordRequest;
 import com.backend.pbl6schoolsystem.request.user.UpdateUserRequest;
 import com.backend.pbl6schoolsystem.response.ErrorResponse;
@@ -258,24 +258,41 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public ListClassResponse getListMyClass() {
         UserPrincipal principal = SecurityUtils.getPrincipal();
         List<ClassEntity> classes = new ArrayList<>();
+        ListClassResponse.ListClassResponseBuilder builder = ListClassResponse.builder();
+        builder.setSuccess(true);
         if (principal.isStudent()) {
             List<StudentClazzEntity> studentClasses = studentClazzRepository.findByStudentId(principal.getUserId());
-            classes = studentClasses.stream().map(StudentClazzEntity::getClazz).collect(Collectors.toList());
+            builder.setItems(studentClasses.stream()
+                    .map(sc -> ClazzDTO.builder()
+                            .setClassId(sc.getClazz().getClassId())
+                            .setClazz(sc.getClazz().getClazz())
+                            .setSpecializedClass(Boolean.TRUE.equals(sc.getClazz().getIsSpecializedClass()))
+                            .setGrade(GradeDTO.builder()
+                                    .setGradeId(sc.getClazz().getGrade().getGradeId())
+                                    .setGrade(sc.getClazz().getGrade().getGrade())
+                                    .build())
+                            .setSubject(RequestUtil.blankIfNull(sc.getClazz().getSubject()))
+                            .setSchoolYear(sc.getSchoolYear().getSchoolYear())
+                            .build())
+                    .collect(Collectors.toList()));
         } else if (principal.isTeacher()) {
             List<TeacherClassEntity> teacherClasses = teacherClassRepository.findByTeacher(principal.getUserId());
-            classes = teacherClasses.stream()
-                    .filter(t -> Boolean.TRUE.equals(t.getIsClassLeader()))
-                    .map(TeacherClassEntity::getClazz).collect(Collectors.toList());
+            builder.setItems(teacherClasses.stream()
+                    .filter(tc -> Boolean.TRUE.equals(tc.getIsClassLeader()))
+                    .map(tc -> ClazzDTO.builder()
+                            .setClassId(tc.getClazz().getClassId())
+                            .setClazz(tc.getClazz().getClazz())
+                            .setSpecializedClass(Boolean.TRUE.equals(tc.getClazz().getIsSpecializedClass()))
+                            .setGrade(GradeDTO.builder()
+                                    .setGradeId(tc.getClazz().getGrade().getGradeId())
+                                    .setGrade(tc.getClazz().getGrade().getGrade())
+                                    .build())
+                            .setSubject(RequestUtil.blankIfNull(tc.getClazz().getSubject()))
+                            .setSchoolYear(tc.getSchoolYear().getSchoolYear())
+                            .build())
+                    .collect(Collectors.toList()));
         }
-        return ListClassResponse.builder()
-                .setSuccess(true)
-                .setItems(classes.stream()
-                        .map(c -> ClazzDTO.builder()
-                                .setClassId(c.getClassId())
-                                .setClazz(c.getClazz())
-                                .build())
-                        .collect(Collectors.toList()))
-                .build();
+        return builder.build();
     }
 
     public CalendarEventDTO getCalendarEvent(CalendarEventEntity entity) {

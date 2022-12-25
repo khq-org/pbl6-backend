@@ -15,6 +15,7 @@ import java.util.Optional;
 public interface TeacherClassRepository extends JpaRepository<TeacherClassEntity, Long> {
     @Query("SELECT tc FROM TeacherClassEntity tc" +
             " LEFT JOIN FETCH tc.clazz c" +
+            " LEFT JOIN FETCH c.grade" +
             " LEFT JOIN FETCH tc.schoolYear sy" +
             " LEFT JOIN FETCH tc.semester s" +
             " WHERE tc.teacher.userId = :teacherId")

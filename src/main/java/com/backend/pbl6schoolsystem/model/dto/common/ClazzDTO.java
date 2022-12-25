@@ -16,6 +16,7 @@ public class ClazzDTO implements Serializable {
     private Teacher teacher;
     private Boolean specializedClass;
     private String subject;
+    private String schoolYear;
 
     @Getter
     @Setter
