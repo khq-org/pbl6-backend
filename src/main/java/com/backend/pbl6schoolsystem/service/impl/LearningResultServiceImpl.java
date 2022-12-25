@@ -5,6 +5,7 @@ import com.backend.pbl6schoolsystem.common.enums.ExamType;
 import com.backend.pbl6schoolsystem.common.enums.Semester;
 import com.backend.pbl6schoolsystem.common.enums.Subject;
 import com.backend.pbl6schoolsystem.common.exception.NotFoundException;
+import com.backend.pbl6schoolsystem.model.dto.clazz.ClassLearningResultDTO;
 import com.backend.pbl6schoolsystem.model.dto.clazz.ExamResultClassDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.SchoolYearDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.SemesterDTO;
@@ -281,9 +282,11 @@ public class LearningResultServiceImpl implements LearningResultService {
 
         ClassEntity clazz = classRepository.findById(classId).orElseThrow(() -> new NotFoundException("Not found class"));
         SchoolYearEntity schoolYear = schoolYearRepository.findById(schoolYearId).orElseThrow(() -> new NotFoundException("Not found schoolYear"));
-        builder.setClassId(classId)
+        ClassLearningResultDTO.ClassLearningResultDTOBuilder classLearningResultDTOBuilder = ClassLearningResultDTO.builder();
+        classLearningResultDTOBuilder.setClassId(classId)
                 .setClassName(clazz.getClazz())
                 .setSchoolYear(schoolYear.getSchoolYear());
+        List<ClassLearningResultDTO.StudentLearningResult> studentLearningResults = new ArrayList<>();
         // get all subject
         List<SubjectEntity> subjects = subjectRepository.findAll();
         // get all student by class, schoolYear
@@ -293,16 +296,27 @@ public class LearningResultServiceImpl implements LearningResultService {
                 learningResultRepository.findByStudentIdsAndSchoolYearId(students.stream()
                                 .map(s -> s.getUserId()).collect(Collectors.toList()), schoolYearId).stream()
                         .map(er -> er.getLearningResultId()).collect(Collectors.toList()));
-        List<GetClassLearningResultResponse.StudentLearningResult> studentLearningResults;
         students.forEach(student -> {
+            List<Long> avgSubjectScore = new ArrayList<>();
             subjects.forEach(subject -> {
                 // filter examResult by student and subject
                 List<ExamResultEntity> ers = examResults.stream().filter(er -> er.getStudent().getStudentId().equals(student.getUserId())
                         && er.getSubject().getSubjectId().equals(subject.getSubjectId())).collect(Collectors.toList());
             });
+            studentLearningResults.add(ClassLearningResultDTO.StudentLearningResult.builder()
+                    .setStudentId(student.getUserId())
+                    .setLearningGrade(null)
+                    .setArrAvgSubjectScore(avgSubjectScore)
+                    .setAvgSemesterI(null)
+                    .setAvgSemesterII(null)
+                    .build());
         });
 
-        return builder.build();
+        return builder
+                .setClassLearningResult(classLearningResultDTOBuilder
+                        .setStudentLearningResults(studentLearningResults)
+                        .build())
+                .build();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.backend.pbl6schoolsystem.controller.learningresult;
 
 import com.backend.pbl6schoolsystem.converter.LearningResultConverter;
+import com.backend.pbl6schoolsystem.model.dto.clazz.ClassLearningResultDTO;
 import com.backend.pbl6schoolsystem.model.dto.clazz.ExamResultClassDTO;
 import com.backend.pbl6schoolsystem.model.dto.common.MessageDTO;
 import com.backend.pbl6schoolsystem.model.dto.student.ExamResultDTO;
@@ -10,6 +11,7 @@ import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultClassReq
 import com.backend.pbl6schoolsystem.request.leaningresult.LoadExamResultStudentRequest;
 import com.backend.pbl6schoolsystem.response.NoContentResponse;
 import com.backend.pbl6schoolsystem.response.Response;
+import com.backend.pbl6schoolsystem.response.learningresult.GetClassLearningResultResponse;
 import com.backend.pbl6schoolsystem.response.learningresult.LearningResultDetailResponse;
 import com.backend.pbl6schoolsystem.response.learningresult.LoadExamResultClassResponse;
 import com.backend.pbl6schoolsystem.response.learningresult.LoadExamResultResponse;
@@ -34,6 +36,14 @@ public class LearningResultController {
     @GetMapping("/learningresults/{id}")
     public Response<LearningResultDetailDTO> getLearningResultDetail(@PathVariable("id") Long learningResultId) {
         LearningResultDetailResponse response = learningResultService.getLearningResultDetail(learningResultId);
+        return learningResultConverter.getResponse(response);
+    }
+
+    @Operation(summary = "Get class learning result")
+    @GetMapping("/class/learning-result")
+    public Response<ClassLearningResultDTO> getClassLearningResult(@RequestParam("classId") Long classId,
+                                                                   @RequestParam("schoolYearId") Long schoolYearId) {
+        GetClassLearningResultResponse response = learningResultService.getClassLearningResult(classId, schoolYearId);
         return learningResultConverter.getResponse(response);
     }
 

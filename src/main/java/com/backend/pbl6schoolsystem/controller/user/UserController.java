@@ -37,7 +37,6 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final UserConverter userConverter;
-    private final LearningResultService learningResultService;
 
     @Operation(summary = "Test Github Actions")
     @GetMapping("/github-actions")
@@ -58,14 +57,6 @@ public class UserController {
     public Response<List<ClazzDTO>> getMyClasses() {
         ListClassResponse response = userService.getListMyClass();
         return userConverter.getResponse(response);
-    }
-
-    @Operation(summary = "Get learning result of my class (for leader teacher)")
-    @GetMapping("/class/learning-result")
-    public Response<?> getClassLearningResult(@RequestParam("classId") Long classId,
-                                              @RequestParam("schoolYearId") Long schoolYearId) {
-        GetClassLearningResultResponse response = learningResultService.getClassLearningResult(classId, schoolYearId);
-        return null;
     }
 
     @Operation(summary = "List calendar event")
