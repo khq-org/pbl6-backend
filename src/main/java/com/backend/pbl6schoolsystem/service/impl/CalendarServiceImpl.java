@@ -20,6 +20,7 @@ import com.backend.pbl6schoolsystem.response.calendar.GetCalendarEventResponse;
 import com.backend.pbl6schoolsystem.response.calendar.ListCalendarResponse;
 import com.backend.pbl6schoolsystem.security.UserPrincipal;
 import com.backend.pbl6schoolsystem.service.CalendarService;
+import com.backend.pbl6schoolsystem.util.DateUtils;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
 import com.backend.pbl6schoolsystem.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.swing.*;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -194,6 +196,23 @@ public class CalendarServiceImpl implements CalendarService {
         } else if (List.of(Constants.STUDY, Constants.EXAMINATION).contains(request.getCalendarEventType())
                 && request.getSubjectId() == null) {
             errors.put("subjectId", ErrorCode.MISSING_VALUE.name());
+        } else if (List.of(Constants.EXAMINATION, Constants.MEETING).contains(request.getCalendarEventType())) {
+            if (DateUtils.convertString2LocalDate(request.getDate()).isBefore(LocalDate.now())) {
+                errors.put("date", ErrorCode.INVALID_VALUE.name());
+            }
+            if (DateUtils.convertString2LocalTime(request.getTimeStart()).isAfter(DateUtils.convertString2LocalTime(request.getTimeFinish())) ||
+                    DateUtils.convertString2LocalTime(request.getTimeStart()).isBefore(LocalTime.now())) {
+                errors.put("time", ErrorCode.INVALID_VALUE.name());
+            }
+            if (request.getRoomId() == null) {
+                errors.put("roomId", ErrorCode.MISSING_VALUE.name());
+            } else {
+                CalendarEventEntity calendarEvent = calendarDslRepository.findByTimeAndRoom(request);
+                if (calendarEvent != null) {
+                    errors.put("roomId", ErrorCode.INVALID_VALUE.name());
+                }
+            }
+
         }
         if (!CollectionUtils.isEmpty(request.getClassIds())) {
             List<ClassCalendarEventEntity> classCalendarEvents = classCalendarDslRepository.findClassCalendar(request);
@@ -206,7 +225,6 @@ public class CalendarServiceImpl implements CalendarService {
             }
         }
 
-        // FIX ME
         if (!CollectionUtils.isEmpty(request.getUserIds())) {
             List<UserCalendarEventEntity> userCalendarEvents = userCalendarDslRepository.findUserCalendar(request);
             if (!userCalendarEvents.isEmpty()) {
@@ -340,6 +358,7 @@ public class CalendarServiceImpl implements CalendarService {
                 .orElseThrow(() -> new NotFoundException("Not found calendar event with id " + calendarEventId));
         Map<String, String> errors = new HashMap<>();
         checkValidRequest(request, errors, calendarEventId);
+
         if (!errors.isEmpty()) {
             return OnlyIdResponse.builder()
                     .setSuccess(false)
@@ -347,6 +366,13 @@ public class CalendarServiceImpl implements CalendarService {
                             .setErrors(errors)
                             .build())
                     .build();
+        }
+
+        if (List.of(Constants.EXAMINATION, Constants.STUDY).contains(request.getCalendarEventType())) {
+            calendarEvent.setSubject(subjectRepository.findById(request.getSubjectId()).get());
+        }
+        if (List.of(Constants.EXAMINATION, Constants.MEETING).contains(request.getCalendarEventType())) {
+            calendarEvent.setRoom(roomRepository.findById(request.getRoomId()).get());
         }
 
         UserPrincipal principal = SecurityUtils.getPrincipal();
@@ -390,12 +416,12 @@ public class CalendarServiceImpl implements CalendarService {
                 }
             }
             if (!isExistClass) {
-                ClassCalendarEventEntity calendarEventEntity = new ClassCalendarEventEntity();
-                calendarEventEntity.setCalendarEvent(calendarEvent);
-                calendarEventEntity.setClazz(clazzFromRequest);
-                calendarEventEntity.setSchoolYear(schoolYear);
-                calendarEventEntity.setSemester(semester);
-                newListClazzForCalendar.add(calendarEventEntity);
+                ClassCalendarEventEntity classCalendarEvent = new ClassCalendarEventEntity();
+                classCalendarEvent.setCalendarEvent(calendarEvent);
+                classCalendarEvent.setClazz(clazzFromRequest);
+                classCalendarEvent.setSchoolYear(schoolYear);
+                classCalendarEvent.setSemester(semester);
+                newListClazzForCalendar.add(classCalendarEvent);
             }
         }
 

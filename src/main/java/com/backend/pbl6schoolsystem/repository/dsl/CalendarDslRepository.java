@@ -5,17 +5,21 @@ import com.backend.pbl6schoolsystem.model.entity.CalendarEventEntity;
 import com.backend.pbl6schoolsystem.model.entity.QCalendarEventEntity;
 import com.backend.pbl6schoolsystem.model.entity.QClassCalendarEventEntity;
 import com.backend.pbl6schoolsystem.model.entity.QUserCalendarEventEntity;
+import com.backend.pbl6schoolsystem.request.calendar.CreateUpdateCalendarRequest;
 import com.backend.pbl6schoolsystem.request.calendar.ListCalendarRequest;
 import com.backend.pbl6schoolsystem.security.UserPrincipal;
+import com.backend.pbl6schoolsystem.util.DateUtils;
 import com.backend.pbl6schoolsystem.util.RequestUtil;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
@@ -78,4 +82,14 @@ public class CalendarDslRepository {
         return query.fetch();
     }
 
+    public CalendarEventEntity findByTimeAndRoom(CreateUpdateCalendarRequest request) {
+        JPAQuery<CalendarEventEntity> query = queryFactory.select(calendar)
+                .from(calendar)
+                .where(calendar.calendarDate.eq(DateUtils.convertString2LocalDate(request.getDate())))
+                .where(calendar.room.roomId.eq(request.getRoomId()));
+        BooleanExpression conditionDateTime = calendar.timeStart.between(LocalTime.parse(request.getTimeStart()), LocalTime.parse(request.getTimeFinish()))
+                .or(calendar.timeFinish.between(LocalTime.parse(request.getTimeStart()), LocalTime.parse(request.getTimeFinish())));
+        query.where(conditionDateTime);
+        return query.fetchFirst();
+    }
 }
