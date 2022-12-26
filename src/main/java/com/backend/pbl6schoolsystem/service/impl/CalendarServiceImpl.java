@@ -198,17 +198,19 @@ public class CalendarServiceImpl implements CalendarService {
             errors.put("subjectId", ErrorCode.MISSING_VALUE.name());
         } else if (List.of(Constants.EXAMINATION, Constants.MEETING).contains(request.getCalendarEventType())) {
             CalendarEventEntity ce = calendarEventId != null ? calendarRepository.findById(calendarEventId).orElse(null) : null;
-            if (DateUtils.convertString2LocalDate(request.getDate()).equals(LocalDate.now())) {
-                if (DateUtils.convertString2LocalTime(request.getTimeStart()).isAfter(DateUtils.convertString2LocalTime(request.getTimeFinish())) ||
-                        DateUtils.convertString2LocalTime(request.getTimeStart()).isBefore(LocalTime.now())) {
-                    if (ce == null || (ce != null && (!ce.getTimeStart().equals(DateUtils.convertString2LocalTime(request.getTimeStart()))
-                            || !ce.getTimeFinish().equals(DateUtils.convertString2LocalTime(request.getTimeFinish()))))) {
-                        errors.put("time", ErrorCode.INVALID_VALUE.name());
-                    }
-                }
-            } else if (DateUtils.convertString2LocalDate(request.getDate()).isBefore(LocalDate.now())) {
-                if (ce == null || (ce != null && !ce.getCalendarDate().equals(DateUtils.convertString2LocalDate(request.getDate())))) {
+            LocalDate dateNow = LocalDate.now();
+            LocalDate dateRequest = DateUtils.convertString2LocalDate(request.getDate());
+            LocalTime timeNow = LocalTime.now();
+            LocalTime timeStart = DateUtils.convertString2LocalTime(request.getTimeStart());
+            LocalTime timeFinish = DateUtils.convertString2LocalTime(request.getTimeFinish());
+            if (dateRequest.isBefore(dateNow)) {
+                if (ce == null || (ce != null && !ce.getCalendarDate().equals(dateNow))) {
                     errors.put("date", ErrorCode.INVALID_VALUE.name());
+                }
+            } else {
+                boolean checkTime = dateRequest.equals(dateNow) ? (timeStart.isBefore(timeFinish) && timeStart.isAfter(timeNow)) : timeStart.isBefore(timeFinish);
+                if (!checkTime && (ce == null || (ce != null && (!ce.getTimeStart().equals(timeStart) || !ce.getTimeFinish().equals(timeFinish))))) {
+                    errors.put("time", ErrorCode.INVALID_VALUE.name());
                 }
             }
             if (request.getRoomId() == null) {
