@@ -109,10 +109,10 @@ public class LearningResultServiceImpl implements LearningResultService {
                                 .setClassName(learningResult.getClazz().getClazz())
                                 .setAverageScore(RequestUtil.defaultIfNull(learningResult.getAverageScore(), 0D))
                                 .setConduct(RequestUtil.blankIfNull(learningResult.getConduct()))
-                                .setIsPassed(Boolean.TRUE.equals(learningResult.getIsPassed()) ? Boolean.TRUE : Boolean.FALSE)
+                                .setLearningGrade(RequestUtil.blankIfNull(learningResult.getLearningGrading()))
+                                .setIsPassed(Boolean.TRUE.equals(learningResult.getIsPassed()))
                                 .build())
                         .setStudyScores(studyScores)
-                        .setAvgScore(calculateSchoolYearAvg(studyScores))
                         .build())
                 .build();
     }
