@@ -205,7 +205,8 @@ public class CalendarServiceImpl implements CalendarService {
             }
             if (DateUtils.convertString2LocalTime(request.getTimeStart()).isAfter(DateUtils.convertString2LocalTime(request.getTimeFinish())) ||
                     DateUtils.convertString2LocalTime(request.getTimeStart()).isBefore(LocalTime.now())) {
-                if (ce == null || (ce != null && !ce.getCalendarDate().equals(DateUtils.convertString2LocalDate(request.getDate())))) {
+                if (ce == null || (ce != null && (!ce.getTimeStart().equals(DateUtils.convertString2LocalTime(request.getTimeStart()))
+                || !ce.getTimeFinish().equals(DateUtils.convertString2LocalTime(request.getTimeFinish()))))) {
                     errors.put("time", ErrorCode.INVALID_VALUE.name());
                 }
             }
