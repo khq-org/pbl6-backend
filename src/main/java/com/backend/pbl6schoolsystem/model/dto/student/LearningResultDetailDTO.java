@@ -14,6 +14,8 @@ public class LearningResultDetailDTO implements Serializable {
     private LearningResultDTO learningResult;
     private List<StudyScore> studyScores;
     private Double avgScore;
+    private String conduct;
+    private String learningGrade;
 
     @Getter
     @Setter

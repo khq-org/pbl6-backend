@@ -197,18 +197,23 @@ public class CalendarServiceImpl implements CalendarService {
                 && request.getSubjectId() == null) {
             errors.put("subjectId", ErrorCode.MISSING_VALUE.name());
         } else if (List.of(Constants.EXAMINATION, Constants.MEETING).contains(request.getCalendarEventType())) {
+            CalendarEventEntity ce = calendarRepository.findById(calendarEventId).orElse(null);
             if (DateUtils.convertString2LocalDate(request.getDate()).isBefore(LocalDate.now())) {
-                errors.put("date", ErrorCode.INVALID_VALUE.name());
+                if (ce == null || (ce != null && !ce.getCalendarDate().equals(DateUtils.convertString2LocalDate(request.getDate())))) {
+                    errors.put("date", ErrorCode.INVALID_VALUE.name());
+                }
             }
             if (DateUtils.convertString2LocalTime(request.getTimeStart()).isAfter(DateUtils.convertString2LocalTime(request.getTimeFinish())) ||
                     DateUtils.convertString2LocalTime(request.getTimeStart()).isBefore(LocalTime.now())) {
-                errors.put("time", ErrorCode.INVALID_VALUE.name());
+                if (ce == null || (ce != null && !ce.getCalendarDate().equals(DateUtils.convertString2LocalDate(request.getDate())))) {
+                    errors.put("time", ErrorCode.INVALID_VALUE.name());
+                }
             }
             if (request.getRoomId() == null) {
                 errors.put("roomId", ErrorCode.MISSING_VALUE.name());
             } else {
                 CalendarEventEntity calendarEvent = calendarDslRepository.findByTimeAndRoom(request);
-                if (calendarEvent != null) {
+                if (calendarEvent != null && !calendarEvent.getCalendarEventId().equals(calendarEventId)) {
                     errors.put("roomId", ErrorCode.INVALID_VALUE.name());
                 }
             }
