@@ -260,8 +260,11 @@ public class CalendarServiceImpl implements CalendarService {
         }
 
         UserPrincipal principal = SecurityUtils.getPrincipal();
-        SchoolYearEntity schoolYear = schoolYearRepository.findById(request.getSchoolYearId()).get();
-        SemesterEntity semester = semesterRepository.findById(request.getSemesterId()).get();
+        SchoolYearEntity schoolYear = schoolYearRepository.findById(request.getSchoolYearId())
+                .orElseThrow(() -> new NotFoundException("Not found schoolYear"));
+        SemesterEntity semester = semesterRepository.findById(request.getSemesterId())
+                .orElseThrow(() -> new NotFoundException("Not found semester"));
+
         // calendar event
         CalendarEventEntity calendarEvent = new CalendarEventEntity();
         calendarEvent.setCalendarEvent(request.getCalendarEventName());
