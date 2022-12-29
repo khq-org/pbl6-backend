@@ -96,7 +96,7 @@ public class LearningResultServiceImpl implements LearningResultService {
                             .setSubjectName(subject.getSubject())
                             .build())
                     .setSemesterScores(semesterScores)
-                    .setAvgScore(avgSubjectAllSemester)
+                    .setAvgScore(avgSubjectAllSemester / 3.0)
                     .build());
         }
 
