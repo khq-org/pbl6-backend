@@ -117,7 +117,7 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-jdbc</artifactId>
-            <version>6.8.0</version>
+            <version>6.14.0</version>
         </dependency>
     </dependencies>
 
