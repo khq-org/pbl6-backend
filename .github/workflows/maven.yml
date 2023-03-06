@@ -41,7 +41,7 @@ jobs:
         path: target/pbl6-schoolsystem.jar
 
     - name: Build & push Docker image
-      uses: mr-smithers-excellent/docker-build-push@v5
+      uses: mr-smithers-excellent/docker-build-push@v6
       with:
         image: 01092002/pbl6-schoolsystem
         tags: latest
